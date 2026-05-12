@@ -1,0 +1,815 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Truck,
+  CheckCircle,
+  Clock,
+  XCircle,
+  MapPin,
+  Plus,
+  RotateCcw,
+  Loader2,
+  Milk,
+} from 'lucide-react'
+import { toast } from 'sonner'
+
+// --- Types ---
+interface Customer {
+  id: string
+  name: string
+  area: string
+  phone: string
+  dailyQty: number
+  milkType: string
+  route?: string
+}
+
+interface Delivery {
+  id: string
+  customerId: string
+  date: string
+  quantity: number
+  status: string
+  notes: string
+  route: string
+  createdAt: string
+  updatedAt: string
+  customer: {
+    name: string
+    area: string
+    phone: string
+    milkType?: string
+  }
+}
+
+interface TodaySummary {
+  date: string
+  total: number
+  delivered: number
+  pending: number
+  missed: number
+  deliveries: Delivery[]
+}
+
+// --- Constants ---
+const ROUTES = [
+  { value: 'Route A', label: 'Route A - Gulshan' },
+  { value: 'Route B', label: 'Route B - DHA' },
+  { value: 'Route C', label: 'Route C - Clifton' },
+  { value: 'Route D', label: 'Route D - PECHS' },
+  { value: 'Route E', label: 'Route E - North Nazimabad' },
+]
+
+const STATUSES = ['All', 'Pending', 'Delivered', 'Missed', 'Cancelled']
+
+function getTodayStr(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function formatQuantity(qty: number): string {
+  return qty % 1 === 0 ? `${qty}L` : `${qty}L`
+}
+
+function getRouteLabel(route: string): string {
+  const found = ROUTES.find((r) => r.value === route)
+  return found ? found.label : route
+}
+
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'Pending':
+      return (
+        <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">
+          <Clock className="size-3 mr-1" />
+          Pending
+        </Badge>
+      )
+    case 'Delivered':
+      return (
+        <Badge className="bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
+          <CheckCircle className="size-3 mr-1" />
+          Delivered
+        </Badge>
+      )
+    case 'Missed':
+      return (
+        <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-50">
+          <XCircle className="size-3 mr-1" />
+          Missed
+        </Badge>
+      )
+    case 'Cancelled':
+      return (
+        <Badge className="bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50">
+          Cancelled
+        </Badge>
+      )
+    default:
+      return <Badge variant="outline">{status}</Badge>
+  }
+}
+
+// --- Main Component ---
+export default function DeliveriesPage() {
+  const [selectedDate, setSelectedDate] = useState(getTodayStr)
+  const [routeFilter, setRouteFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [deliveries, setDeliveries] = useState<Delivery[]>([])
+  const [loading, setLoading] = useState(true)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [customers, setCustomers] = useState<Customer[]>([])
+
+  // Add delivery dialog
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [newDelivery, setNewDelivery] = useState({
+    customerId: '',
+    date: getTodayStr(),
+    quantity: 1,
+    route: 'Route A',
+    notes: '',
+  })
+  const [addingDelivery, setAddingDelivery] = useState(false)
+
+  // Editing notes
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null)
+  const [notesValue, setNotesValue] = useState('')
+
+  // Fetch deliveries for the selected date
+  const fetchDeliveries = useCallback(async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      params.set('date', selectedDate)
+      if (statusFilter !== 'All') params.set('status', statusFilter)
+      if (routeFilter !== 'all') params.set('route', routeFilter)
+
+      const res = await fetch(`/api/deliveries?${params.toString()}`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data: Delivery[] = await res.json()
+      setDeliveries(data)
+    } catch {
+      toast.error('Failed to load deliveries')
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedDate, statusFilter, routeFilter])
+
+  // Fetch customers for the add delivery dialog
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/customers?status=Active')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setCustomers(data)
+    } catch {
+      // silently fail
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDeliveries()
+  }, [fetchDeliveries])
+
+  useEffect(() => {
+    if (addDialogOpen) {
+      fetchCustomers()
+    }
+  }, [addDialogOpen, fetchCustomers])
+
+  // Summary stats derived from current deliveries (unfiltered by route/status for counts)
+  const [allDateDeliveries, setAllDateDeliveries] = useState<Delivery[]>([])
+
+  useEffect(() => {
+    async function fetchAll() {
+      try {
+        const res = await fetch(`/api/deliveries?date=${selectedDate}`)
+        if (res.ok) {
+          const data: Delivery[] = await res.json()
+          setAllDateDeliveries(data)
+        }
+      } catch {
+        // silent
+      }
+    }
+    fetchAll()
+  }, [selectedDate, deliveries]) // re-derive when deliveries change
+
+  const summary = useMemo(() => {
+    const total = allDateDeliveries.length
+    const delivered = allDateDeliveries.filter((d) => d.status === 'Delivered').length
+    const pending = allDateDeliveries.filter((d) => d.status === 'Pending').length
+    const missed = allDateDeliveries.filter((d) => d.status === 'Missed').length
+    const totalMilk = allDateDeliveries.reduce((sum, d) => sum + d.quantity, 0)
+    return { total, delivered, pending, missed, totalMilk }
+  }, [allDateDeliveries])
+
+  // Group deliveries by route
+  const groupedDeliveries = useMemo(() => {
+    const groups: Record<string, Delivery[]> = {}
+    for (const d of deliveries) {
+      if (!groups[d.route]) groups[d.route] = []
+      groups[d.route].push(d)
+    }
+    // Sort routes in the defined order
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const idxA = ROUTES.findIndex((r) => r.value === a)
+      const idxB = ROUTES.findIndex((r) => r.value === b)
+      return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB)
+    })
+    return sortedKeys.map((key) => ({
+      route: key,
+      label: getRouteLabel(key),
+      deliveries: groups[key],
+    }))
+  }, [deliveries])
+
+  // Update delivery status
+  const updateStatus = async (id: string, status: string) => {
+    setUpdatingId(id)
+    // Optimistic update
+    setDeliveries((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status } : d))
+    )
+    setAllDateDeliveries((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status } : d))
+    )
+    try {
+      const res = await fetch(`/api/deliveries/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+      const updated = await res.json()
+      toast.success(
+        status === 'Delivered'
+          ? `Marked as delivered`
+          : status === 'Missed'
+            ? `Marked as missed`
+            : `Status updated`
+      )
+      // Update with server response
+      setDeliveries((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, ...updated } : d))
+      )
+      setAllDateDeliveries((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, ...updated } : d))
+      )
+    } catch {
+      // Revert optimistic update
+      toast.error('Failed to update delivery status')
+      fetchDeliveries()
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  // Mark all pending as delivered
+  const markAllDelivered = async () => {
+    const pendingDeliveries = allDateDeliveries.filter((d) => d.status === 'Pending')
+    if (pendingDeliveries.length === 0) return
+
+    toast.loading(`Marking ${pendingDeliveries.length} deliveries as delivered...`, { id: 'mark-all' })
+
+    // Optimistic
+    setDeliveries((prev) =>
+      prev.map((d) => (d.status === 'Pending' ? { ...d, status: 'Delivered' } : d))
+    )
+    setAllDateDeliveries((prev) =>
+      prev.map((d) => (d.status === 'Pending' ? { ...d, status: 'Delivered' } : d))
+    )
+
+    try {
+      await Promise.all(
+        pendingDeliveries.map((d) =>
+          fetch(`/api/deliveries/${d.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Delivered' }),
+          })
+        )
+      )
+      toast.success(`All ${pendingDeliveries.length} deliveries marked as delivered`, { id: 'mark-all' })
+      fetchDeliveries()
+    } catch {
+      toast.error('Failed to mark all as delivered', { id: 'mark-all' })
+      fetchDeliveries()
+    }
+  }
+
+  // Save notes
+  const saveNotes = async (id: string, notes: string) => {
+    try {
+      const res = await fetch(`/api/deliveries/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      setDeliveries((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, notes } : d))
+      )
+      setAllDateDeliveries((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, notes } : d))
+      )
+      toast.success('Notes saved')
+    } catch {
+      toast.error('Failed to save notes')
+    }
+    setEditingNotesId(null)
+  }
+
+  // Add new delivery
+  const handleAddDelivery = async () => {
+    if (!newDelivery.customerId) {
+      toast.error('Please select a customer')
+      return
+    }
+    setAddingDelivery(true)
+    try {
+      const res = await fetch('/api/deliveries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: newDelivery.customerId,
+          date: newDelivery.date,
+          quantity: newDelivery.quantity,
+          status: 'Pending',
+          route: newDelivery.route,
+          notes: newDelivery.notes,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      toast.success('Delivery added successfully')
+      setAddDialogOpen(false)
+      setNewDelivery({
+        customerId: '',
+        date: getTodayStr(),
+        quantity: 1,
+        route: 'Route A',
+        notes: '',
+      })
+      fetchDeliveries()
+    } catch {
+      toast.error('Failed to add delivery')
+    } finally {
+      setAddingDelivery(false)
+    }
+  }
+
+  // Auto-fill quantity & route when customer selected
+  const handleCustomerSelect = (customerId: string) => {
+    setNewDelivery((prev) => ({ ...prev, customerId }))
+    const customer = customers.find((c) => c.id === customerId)
+    if (customer) {
+      setNewDelivery((prev) => ({
+        ...prev,
+        customerId,
+        quantity: customer.dailyQty || 1,
+        route: customer.area
+          ? ROUTES.find((r) => r.label.toLowerCase().includes(customer.area.toLowerCase()))?.value || 'Route A'
+          : prev.route,
+      }))
+    }
+  }
+
+  const pendingCount = summary.pending
+
+  return (
+    <div className="space-y-6">
+      {/* 1. Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-100">
+            <Truck className="h-6 w-6 text-green-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Deliveries</h1>
+            <p className="text-sm text-gray-500">Track daily milk deliveries</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-44 h-9 text-sm"
+          />
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Add Delivery</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Delivery</DialogTitle>
+                <DialogDescription>
+                  Create a new delivery entry for a customer
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-2">
+                <div className="space-y-2">
+                  <Label>Customer</Label>
+                  <Select
+                    value={newDelivery.customerId}
+                    onValueChange={handleCustomerSelect}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name} - {c.area}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Date</Label>
+                    <Input
+                      type="date"
+                      value={newDelivery.date}
+                      onChange={(e) =>
+                        setNewDelivery((prev) => ({ ...prev, date: e.target.value }))
+                      }
+                      className="h-9"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Quantity (L)</Label>
+                    <Input
+                      type="number"
+                      step="0.5"
+                      min="0.5"
+                      value={newDelivery.quantity}
+                      onChange={(e) =>
+                        setNewDelivery((prev) => ({
+                          ...prev,
+                          quantity: parseFloat(e.target.value) || 0,
+                        }))
+                      }
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Route</Label>
+                  <Select
+                    value={newDelivery.route}
+                    onValueChange={(v) =>
+                      setNewDelivery((prev) => ({ ...prev, route: v }))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROUTES.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Textarea
+                    placeholder="Optional notes..."
+                    value={newDelivery.notes}
+                    onChange={(e) =>
+                      setNewDelivery((prev) => ({ ...prev, notes: e.target.value }))
+                    }
+                    rows={2}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setAddDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={handleAddDelivery}
+                  disabled={addingDelivery}
+                >
+                  {addingDelivery ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Delivery'
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* 2. Summary Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="rounded-xl border-gray-200 border-l-4 border-l-gray-400 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+              <Truck className="h-5 w-5 text-gray-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{summary.total}</p>
+              <p className="text-xs text-gray-500">Total Deliveries</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-gray-200 border-l-4 border-l-green-500 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">{summary.delivered}</p>
+              <p className="text-xs text-gray-500">Delivered</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-gray-200 border-l-4 border-l-amber-500 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+              <Clock className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-600">{summary.pending}</p>
+              <p className="text-xs text-gray-500">Pending</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-gray-200 border-l-4 border-l-red-500 shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50">
+              <XCircle className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-red-600">{summary.missed}</p>
+              <p className="text-xs text-gray-500">Missed</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Total milk banner */}
+      <div className="flex items-center gap-2 px-1">
+        <Milk className="h-4 w-4 text-green-600" />
+        <span className="text-sm text-gray-600">
+          Total milk for <span className="font-semibold">{selectedDate}</span>:{' '}
+          <span className="font-bold text-green-700">{formatQuantity(summary.totalMilk)}</span>
+        </span>
+      </div>
+
+      {/* 3. Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <Select value={routeFilter} onValueChange={setRouteFilter}>
+          <SelectTrigger className="w-full sm:w-52 h-9 text-sm">
+            <SelectValue placeholder="All Routes" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Routes</SelectItem>
+            {ROUTES.map((r) => (
+              <SelectItem key={r.value} value={r.value}>
+                {r.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-40 h-9 text-sm">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {pendingCount > 0 && (
+          <Button
+            className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2 ml-auto"
+            onClick={markAllDelivered}
+          >
+            <CheckCircle className="h-4 w-4" />
+            Mark All Delivered ({pendingCount})
+          </Button>
+        )}
+      </div>
+
+      {/* 4. Route-Grouped Delivery List */}
+      {loading ? (
+        <Card className="rounded-xl border-gray-200 shadow-sm">
+          <CardContent className="flex h-48 items-center justify-center p-6">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+              <p className="text-sm text-gray-500">Loading deliveries...</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : deliveries.length === 0 ? (
+        <Card className="rounded-xl border-gray-200 shadow-sm">
+          <CardContent className="flex h-48 items-center justify-center p-6">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <Truck className="h-10 w-10 text-gray-300" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">No deliveries found</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {selectedDate === getTodayStr()
+                    ? 'No deliveries scheduled for today. Add one to get started.'
+                    : 'No deliveries found for the selected date and filters.'}
+                </p>
+              </div>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2 mt-1"
+                onClick={() => setAddDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Add Delivery
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {groupedDeliveries.map((group) => (
+            <Card key={group.route} className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+              {/* Route header */}
+              <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="font-semibold text-gray-800">{group.label}</span>
+                </div>
+                <Badge variant="outline" className="text-xs font-medium">
+                  {group.deliveries.length} delivery{group.deliveries.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+              {/* Delivery items */}
+              <div className="divide-y divide-gray-100">
+                {group.deliveries.map((delivery) => (
+                  <div
+                    key={delivery.id}
+                    className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-gray-50/50 transition-colors"
+                  >
+                    {/* Left: Customer info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {delivery.customer.name}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-green-700 bg-green-50 rounded-md px-2 py-0.5">
+                          {formatQuantity(delivery.quantity)}
+                        </span>
+                        {getStatusBadge(delivery.status)}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-400">
+                          {delivery.customer.milkType || 'Full Cream'}
+                        </span>
+                        {delivery.customer.area && (
+                          <>
+                            <span className="text-xs text-gray-300">·</span>
+                            <span className="text-xs text-gray-400">{delivery.customer.area}</span>
+                          </>
+                        )}
+                      </div>
+                      {/* Notes */}
+                      {editingNotesId === delivery.id ? (
+                        <div className="flex items-center gap-2 mt-2">
+                          <Input
+                            value={notesValue}
+                            onChange={(e) => setNotesValue(e.target.value)}
+                            placeholder="Add notes..."
+                            className="h-7 text-xs"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveNotes(delivery.id, notesValue)
+                              if (e.key === 'Escape') setEditingNotesId(null)
+                            }}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs px-2"
+                            onClick={() => saveNotes(delivery.id, notesValue)}
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          className="text-xs text-gray-400 hover:text-gray-600 mt-1 cursor-pointer"
+                          onClick={() => {
+                            setEditingNotesId(delivery.id)
+                            setNotesValue(delivery.notes || '')
+                          }}
+                        >
+                          {delivery.notes || '+ Add notes'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {delivery.status === 'Pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 min-w-[110px] gap-1.5 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 font-medium"
+                            onClick={() => updateStatus(delivery.id, 'Delivered')}
+                            disabled={updatingId === delivery.id}
+                          >
+                            {updatingId === delivery.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <CheckCircle className="h-4 w-4" />
+                            )}
+                            Mark Delivered
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
+                            onClick={() => updateStatus(delivery.id, 'Missed')}
+                            disabled={updatingId === delivery.id}
+                          >
+                            <XCircle className="h-4 w-4" />
+                            Missed
+                          </Button>
+                        </>
+                      )}
+                      {delivery.status === 'Delivered' && (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        </div>
+                      )}
+                      {delivery.status === 'Missed' && (
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
+                            <XCircle className="h-5 w-5 text-red-500" />
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50 font-medium"
+                            onClick={() => updateStatus(delivery.id, 'Pending')}
+                            disabled={updatingId === delivery.id}
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            Retry
+                          </Button>
+                        </div>
+                      )}
+                      {delivery.status === 'Cancelled' && (
+                        <span className="text-xs text-gray-400">Cancelled</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

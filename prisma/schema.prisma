@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Lead {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  area          String
+  address       String   @default("")
+  expectedQty   Float    @default(0)
+  status        String   @default("New") // New, Contacted, Trial, Converted, Lost
+  notes         String   @default("")
+  source        String   @default("Walk-in") // Walk-in, Phone, Referral, Online, Ad
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  convertedToId String?  @unique
+  customer      Customer? @relation(fields: [convertedToId], references: [id])
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  name          String
+  phone         String
+  area          String
+  address       String   @default("")
+  dailyQty      Float    @default(1)
+  milkType      String   @default("Full Cream") // Full Cream, Toned, Double Toned, Skimmed, Buffalo
+  pricePerLiter Float    @default(60)
+  status        String   @default("Active") // Active, Paused
+  deliveryTime  String   @default("Morning") // Morning, Evening, Both
+  monthlyBill   Float    @default(0)
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deliveries    Delivery[]
+  payments      Payment[]
+  lead          Lead?
+}
+
+model Delivery {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  date        String   // YYYY-MM-DD
+  quantity     Float
+  status      String   @default("Pending") // Pending, Delivered, Missed, Cancelled
+  notes       String   @default("")
+  route       String   @default("Route A")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  amount        Float
+  date          String   // YYYY-MM-DD
+  status        String   @default("Completed") // Completed, Pending, Failed
+  method        String   @default("Cash") // Cash, UPI, Bank Transfer, Cheque
+  invoiceNumber String   @default("")
+  period        String   @default("") // e.g. "2025-01" for monthly
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model InventoryItem {
+  id             String   @id @default(cuid())
+  name           String
+  category       String   @default("Milk") // Milk, Yogurt, Butter, Cream, Eggs, Paneer, Other
+  unit           String   @default("liters") // liters, kg, dozen, pieces
+  openingStock   Float    @default(0)
+  purchasedStock Float    @default(0)
+  soldStock      Float    @default(0)
+  currentStock   Float    @default(0)
+  minStock       Float    @default(5)
+  pricePerUnit   Float    @default(0)
+  expiryDate     String?  // YYYY-MM-DD
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ShopSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @default("")
+}
+
+model DailySummary {
+  id              String   @id @default(cuid())
+  date            String   @unique // YYYY-MM-DD
+  totalDeliveries Int      @default(0)
+  totalMilkSold   Float    @default(0)
+  totalRevenue    Float    @default(0)
+  newCustomers    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
