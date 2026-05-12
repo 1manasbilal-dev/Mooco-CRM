@@ -1,28 +1,28 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import {
   Select,
@@ -32,135 +32,87 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
 import {
   Package,
   Plus,
-  Pencil,
+  ShoppingCart,
+  Edit,
   Trash2,
   Loader2,
-  AlertTriangle,
-  PackageX,
-  TrendingDown,
-  Clock,
+  Search,
+  TrendingUp,
   IndianRupee,
-  ShoppingCart,
-  Minus,
-  ArrowUpCircle,
-  ArrowDownCircle,
+  Milk,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-// ── Types ───────────────────────────────────────────────────────────────
 interface InventoryItem {
   id: string
   name: string
   category: string
   unit: string
-  openingStock: number
-  purchasedStock: number
-  soldStock: number
-  currentStock: number
-  minStock: number
   pricePerUnit: number
-  expiryDate: string | null
+  todaySold: number
+  todayRevenue: number
+  salesCount: number
+}
+
+interface SaleRecord {
+  id: string
+  itemId: string
+  quantity: number
+  date: string
+  notes: string
+  item: { name: string; category: string; unit: string; pricePerUnit: number }
   createdAt: string
-  updatedAt: string
-  stockStatus?: string
 }
 
-// ── Constants ───────────────────────────────────────────────────────────
-const CATEGORIES = ['Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
-const UNITS = ['liters', 'kg', 'dozen', 'pieces']
+const formatPKR = (amount: number) => `₨${amount.toLocaleString()}`
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  Milk: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
-  Yogurt: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  Butter: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  Cream: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  Eggs: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-  Paneer: { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' },
-  Other: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
+const categoryConfig: Record<string, { color: string; bg: string }> = {
+  Milk: { color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
+  Yogurt: { color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200' },
+  Butter: { color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
+  Cream: { color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200' },
+  Eggs: { color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' },
+  Paneer: { color: 'text-pink-700', bg: 'bg-pink-50 border-pink-200' },
+  Other: { color: 'text-gray-700', bg: 'bg-gray-50 border-gray-200' },
 }
 
-const EMPTY_FORM = {
-  name: '',
-  category: 'Milk',
-  unit: 'liters',
-  openingStock: 0,
-  purchasedStock: 0,
-  soldStock: 0,
-  currentStock: 0,
-  minStock: 5,
-  pricePerUnit: 0,
-  expiryDate: '',
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────
-function formatPKR(amount: number): string {
-  return '₨' + amount.toLocaleString('en-PK')
-}
-
-function daysUntilExpiry(dateStr: string | null): number | null {
-  if (!dateStr) return null
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const expiry = new Date(dateStr)
-  expiry.setHours(0, 0, 0, 0)
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function getStockBarColor(current: number, min: number): string {
-  if (current < min) return 'bg-red-500'
-  if (current < min * 2) return 'bg-amber-500'
-  return 'bg-green-500'
-}
-
-function getStockBarValue(current: number, min: number): number {
-  const maxDisplay = Math.max(min * 3, current, 1)
-  return Math.min(Math.round((current / maxDisplay) * 100), 100)
-}
-
-function getExpiryInfo(dateStr: string | null): { label: string; color: string } | null {
-  const days = daysUntilExpiry(dateStr)
-  if (days === null) return null
-  if (days < 0) return { label: 'Expired', color: 'text-red-600' }
-  if (days === 0) return { label: 'Expires today', color: 'text-red-600' }
-  if (days === 1) return { label: '1 day left', color: 'text-amber-600' }
-  if (days <= 3) return { label: `${days} days left`, color: 'text-amber-600' }
-  return { label: `${days} days left`, color: 'text-gray-500' }
-}
-
-// ── Component ───────────────────────────────────────────────────────────
 export default function InventoryPage() {
-  // State
   const [items, setItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [categoryFilter, setCategoryFilter] = useState('All')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showAddItemDialog, setShowAddItemDialog] = useState(false)
+  const [showEditItemDialog, setShowEditItemDialog] = useState(false)
+  const [showRecordSaleDialog, setShowRecordSaleDialog] = useState(false)
+  const [showSalesHistoryDialog, setShowSalesHistoryDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
+  const [salesHistory, setSalesHistory] = useState<SaleRecord[]>([])
 
-  // Form dialog
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
-  const [formLoading, setFormLoading] = useState(false)
-  const [form, setForm] = useState({ ...EMPTY_FORM })
+  // Add item form
+  const [itemName, setItemName] = useState('')
+  const [itemCategory, setItemCategory] = useState('Milk')
+  const [itemUnit, setItemUnit] = useState('liters')
+  const [itemPrice, setItemPrice] = useState('')
 
-  // Quick stock
-  const [addStockQty, setAddStockQty] = useState(0)
-  const [sellStockQty, setSellStockQty] = useState(0)
-  const [quickLoading, setQuickLoading] = useState(false)
+  // Record sale form
+  const [saleQty, setSaleQty] = useState('')
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
+  const [saleNotes, setSaleNotes] = useState('')
 
-  // Delete dialog
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [deletingItem, setDeletingItem] = useState<InventoryItem | null>(null)
-
-  // ── Fetch inventory ─────────────────────────────────────────────────
   const fetchItems = useCallback(async () => {
-    setLoading(true)
     try {
+      setLoading(true)
       const res = await fetch('/api/inventory')
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      setItems(data)
+      if (res.ok) {
+        const data = await res.json()
+        setItems(data)
+      }
     } catch {
       toast.error('Failed to load inventory')
     } finally {
@@ -172,522 +124,397 @@ export default function InventoryPage() {
     fetchItems()
   }, [fetchItems])
 
-  // ── Computed values ─────────────────────────────────────────────────
-  const filteredItems =
-    categoryFilter === 'All'
-      ? items
-      : items.filter((i) => i.category === categoryFilter)
-
-  const lowStockItems = items.filter((i) => i.currentStock < i.minStock)
-
-  const expiringSoonItems = items.filter((i) => {
-    const days = daysUntilExpiry(i.expiryDate)
-    return days !== null && days >= 0 && days <= 3
-  })
-
-  const expiredItems = items.filter((i) => {
-    const days = daysUntilExpiry(i.expiryDate)
-    return days !== null && days < 0
-  })
-
-  const totalStockValue = items.reduce(
-    (sum, i) => sum + i.currentStock * i.pricePerUnit,
-    0
-  )
-
-  const categoryCounts: Record<string, number> = { All: items.length }
-  CATEGORIES.forEach((cat) => {
-    categoryCounts[cat] = items.filter((i) => i.category === cat).length
-  })
-
-  // ── Form helpers ────────────────────────────────────────────────────
-  const resetForm = () => {
-    setForm({ ...EMPTY_FORM })
-    setEditingItem(null)
-    setAddStockQty(0)
-    setSellStockQty(0)
-  }
-
-  const openAddForm = () => {
-    resetForm()
-    setFormOpen(true)
-  }
-
-  const openEditForm = (item: InventoryItem) => {
-    setEditingItem(item)
-    setForm({
-      name: item.name,
-      category: item.category,
-      unit: item.unit,
-      openingStock: item.openingStock,
-      purchasedStock: item.purchasedStock,
-      soldStock: item.soldStock,
-      currentStock: item.currentStock,
-      minStock: item.minStock,
-      pricePerUnit: item.pricePerUnit,
-      expiryDate: item.expiryDate || '',
-    })
-    setAddStockQty(0)
-    setSellStockQty(0)
-    setFormOpen(true)
-  }
-
-  const handleSubmit = async () => {
-    if (!form.name.trim()) {
-      toast.error('Product name is required')
+  const handleAddItem = async () => {
+    if (!itemName || !itemPrice) {
+      toast.error('Name and price are required')
       return
     }
-    setFormLoading(true)
     try {
-      const body = {
-        name: form.name.trim(),
-        category: form.category,
-        unit: form.unit,
-        openingStock: Number(form.openingStock) || 0,
-        purchasedStock: Number(form.purchasedStock) || 0,
-        soldStock: Number(form.soldStock) || 0,
-        currentStock: Number(form.currentStock) || 0,
-        minStock: Number(form.minStock) || 0,
-        pricePerUnit: Number(form.pricePerUnit) || 0,
-        expiryDate: form.expiryDate || null,
-      }
-
-      if (editingItem) {
-        const res = await fetch(`/api/inventory/${editingItem.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) throw new Error()
-        toast.success('Product updated successfully')
+      setSaving(true)
+      const res = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: itemName,
+          category: itemCategory,
+          unit: itemUnit,
+          pricePerUnit: parseFloat(itemPrice),
+        }),
+      })
+      if (res.ok) {
+        toast.success(`${itemName} added successfully`)
+        setShowAddItemDialog(false)
+        resetItemForm()
+        fetchItems()
       } else {
-        const res = await fetch('/api/inventory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!res.ok) throw new Error()
-        toast.success('Product added successfully')
+        toast.error('Failed to add item')
       }
-      setFormOpen(false)
-      resetForm()
-      fetchItems()
     } catch {
-      toast.error(editingItem ? 'Failed to update product' : 'Failed to add product')
+      toast.error('Something went wrong')
     } finally {
-      setFormLoading(false)
+      setSaving(false)
     }
   }
 
-  // ── Quick stock actions ─────────────────────────────────────────────
-  const handleAddStock = async () => {
-    if (!editingItem || addStockQty <= 0) return
-    setQuickLoading(true)
+  const handleEditItem = async () => {
+    if (!selectedItem || !itemName || !itemPrice) return
     try {
-      const newPurchased = editingItem.purchasedStock + addStockQty
-      const newCurrent = editingItem.currentStock + addStockQty
-      const res = await fetch(`/api/inventory/${editingItem.id}`, {
+      setSaving(true)
+      const res = await fetch(`/api/inventory/${selectedItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          purchasedStock: newPurchased,
-          currentStock: newCurrent,
+          name: itemName,
+          category: itemCategory,
+          unit: itemUnit,
+          pricePerUnit: parseFloat(itemPrice),
         }),
       })
-      if (!res.ok) throw new Error()
-      toast.success(`Added ${addStockQty} ${editingItem.unit} of ${editingItem.name}`)
-      setEditingItem({ ...editingItem, purchasedStock: newPurchased, currentStock: newCurrent })
-      setForm((prev) => ({
-        ...prev,
-        purchasedStock: newPurchased,
-        currentStock: newCurrent,
-      }))
-      setAddStockQty(0)
-      fetchItems()
+      if (res.ok) {
+        toast.success('Item updated')
+        setShowEditItemDialog(false)
+        resetItemForm()
+        fetchItems()
+      }
     } catch {
-      toast.error('Failed to add stock')
+      toast.error('Failed to update item')
     } finally {
-      setQuickLoading(false)
+      setSaving(false)
+    }
+  }
+
+  const handleDeleteItem = async () => {
+    if (!selectedItem) return
+    try {
+      setSaving(true)
+      const res = await fetch(`/api/inventory/${selectedItem.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('Item deleted')
+        setShowDeleteDialog(false)
+        setSelectedItem(null)
+        fetchItems()
+      }
+    } catch {
+      toast.error('Failed to delete item')
+    } finally {
+      setSaving(false)
     }
   }
 
   const handleRecordSale = async () => {
-    if (!editingItem || sellStockQty <= 0) return
-    setQuickLoading(true)
+    if (!selectedItem || !saleQty || !saleDate) {
+      toast.error('Quantity and date are required')
+      return
+    }
     try {
-      const newSold = editingItem.soldStock + sellStockQty
-      const newCurrent = editingItem.currentStock - sellStockQty
-      const res = await fetch(`/api/inventory/${editingItem.id}`, {
-        method: 'PUT',
+      setSaving(true)
+      const res = await fetch('/api/sales', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          soldStock: newSold,
-          currentStock: newCurrent,
+          itemId: selectedItem.id,
+          quantity: parseFloat(saleQty),
+          date: saleDate,
+          notes: saleNotes,
         }),
       })
-      if (!res.ok) throw new Error()
-      toast.success(`Recorded sale of ${sellStockQty} ${editingItem.unit} of ${editingItem.name}`)
-      setEditingItem({ ...editingItem, soldStock: newSold, currentStock: newCurrent })
-      setForm((prev) => ({
-        ...prev,
-        soldStock: newSold,
-        currentStock: newCurrent,
-      }))
-      setSellStockQty(0)
-      fetchItems()
+      if (res.ok) {
+        toast.success(`Sale recorded: ${saleQty} ${selectedItem.unit} of ${selectedItem.name}`)
+        setShowRecordSaleDialog(false)
+        resetSaleForm()
+        fetchItems()
+      } else {
+        toast.error('Failed to record sale')
+      }
     } catch {
-      toast.error('Failed to record sale')
+      toast.error('Something went wrong')
     } finally {
-      setQuickLoading(false)
+      setSaving(false)
     }
   }
 
-  // ── Delete ──────────────────────────────────────────────────────────
-  const handleDelete = async () => {
-    if (!deletingItem) return
+  const fetchSalesHistory = async (itemId: string) => {
     try {
-      const res = await fetch(`/api/inventory/${deletingItem.id}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error()
-      toast.success('Product deleted')
-      setDeleteOpen(false)
-      setDeletingItem(null)
-      fetchItems()
+      const res = await fetch(`/api/sales?itemId=${itemId}&startDate=${getDateStr(7)}&endDate=${new Date().toISOString().split('T')[0]}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSalesHistory(data)
+      }
     } catch {
-      toast.error('Failed to delete product')
+      toast.error('Failed to load sales history')
     }
   }
 
-  // ── Render ──────────────────────────────────────────────────────────
+  const resetItemForm = () => {
+    setItemName('')
+    setItemCategory('Milk')
+    setItemUnit('liters')
+    setItemPrice('')
+  }
+
+  const resetSaleForm = () => {
+    setSaleQty('')
+    setSaleDate(new Date().toISOString().split('T')[0])
+    setSaleNotes('')
+  }
+
+  const openEditItem = (item: InventoryItem) => {
+    setSelectedItem(item)
+    setItemName(item.name)
+    setItemCategory(item.category)
+    setItemUnit(item.unit)
+    setItemPrice(item.pricePerUnit.toString())
+    setShowEditItemDialog(true)
+  }
+
+  const openRecordSale = (item: InventoryItem) => {
+    setSelectedItem(item)
+    resetSaleForm()
+    setShowRecordSaleDialog(true)
+  }
+
+  const openSalesHistory = (item: InventoryItem) => {
+    setSelectedItem(item)
+    fetchSalesHistory(item.id)
+    setShowSalesHistoryDialog(true)
+  }
+
+  const getDateStr = (daysAgo: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() - daysAgo)
+    return d.toISOString().split('T')[0]
+  }
+
+  // Summary calculations
+  const totalItems = items.length
+  const totalSoldToday = items.reduce((sum, i) => sum + i.todaySold, 0)
+  const totalRevenueToday = items.reduce((sum, i) => sum + i.todayRevenue, 0)
+  const categoriesSold = new Set(items.filter(i => i.todaySold > 0).map(i => i.category)).size
+
+  // Filter items
+  const filteredItems = items.filter((item) => {
+    const matchCategory = categoryFilter === 'all' || item.category === categoryFilter
+    const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchCategory && matchSearch
+  })
+
+  // Category counts
+  const categoryCounts: Record<string, number> = {}
+  items.forEach((item) => {
+    categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1
+  })
+
+  const categories = ['all', 'Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
+
   return (
     <div className="space-y-6">
-      {/* ── Page Header ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
             <Package className="h-5 w-5 text-green-600" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
-            <p className="text-sm text-gray-500">Manage dairy product stock levels</p>
+            <p className="text-sm text-gray-500">Manage dairy products & daily sales</p>
           </div>
         </div>
         <Button
-          onClick={openAddForm}
-          className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
+          onClick={() => { resetItemForm(); setShowAddItemDialog(true) }}
+          className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
         >
-          <Plus className="size-4" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
       </div>
 
-      {/* ── Low Stock Alert ──────────────────────────────────────────── */}
-      {lowStockItems.length > 0 && (
-        <Card className="rounded-xl border-red-200 bg-red-50/50 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 shrink-0">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-red-800">Low Stock Alert</h3>
-                  <Badge className="bg-red-100 text-red-700 border-red-200 text-[11px] px-2 py-0.5 rounded-md">
-                    {lowStockItems.length} item{lowStockItems.length !== 1 ? 's' : ''}
-                  </Badge>
-                </div>
-                <p className="text-sm text-red-600 mb-2">
-                  Restock needed — the following items are below minimum stock levels:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {lowStockItems.map((item) => (
-                    <Badge
-                      key={item.id}
-                      variant="outline"
-                      className="bg-white text-red-700 border-red-200 text-xs px-2.5 py-1 rounded-md"
-                    >
-                      <PackageX className="h-3 w-3 mr-1" />
-                      {item.name}: {item.currentStock} / {item.minStock} {item.unit}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Summary Stats ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                <Package className="h-4 w-4 text-gray-600" />
+              <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
+                <Package className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Total Products</p>
-                <p className="text-xl font-bold text-gray-900">{items.length}</p>
+                <p className="text-sm text-gray-500">Total Products</p>
+                <p className="text-xl font-bold text-gray-900">{loading ? '—' : totalItems}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50">
-                <TrendingDown className="h-4 w-4 text-red-600" />
+              <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Low Stock</p>
-                <p className={`text-xl font-bold ${lowStockItems.length > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                  {lowStockItems.length}
-                </p>
+                <p className="text-sm text-gray-500">Sold Today</p>
+                <p className="text-xl font-bold text-gray-900">{loading ? '—' : totalSoldToday.toFixed(1)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
-                <Clock className="h-4 w-4 text-amber-600" />
+              <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                <IndianRupee className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Expiring Soon</p>
-                <p className={`text-xl font-bold ${(expiringSoonItems.length + expiredItems.length) > 0 ? 'text-amber-600' : 'text-gray-900'}`}>
-                  {expiringSoonItems.length + expiredItems.length}
-                </p>
+                <p className="text-sm text-gray-500">Today&apos;s Revenue</p>
+                <p className="text-xl font-bold text-gray-900">{loading ? '—' : formatPKR(totalRevenueToday)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
+          <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
-                <IndianRupee className="h-4 w-4 text-emerald-600" />
+              <div className="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Stock Value</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  {formatPKR(totalStockValue)}
-                </p>
+                <p className="text-sm text-gray-500">Categories Active</p>
+                <p className="text-xl font-bold text-gray-900">{loading ? '—' : categoriesSold}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Category Filter Tabs ─────────────────────────────────────── */}
-      <div className="w-full overflow-x-auto">
-        <Tabs
-          value={categoryFilter}
-          onValueChange={setCategoryFilter}
-          className="w-full"
-        >
-          <TabsList className="h-10 bg-gray-100 p-1 rounded-lg">
-            <TabsTrigger
-              value="All"
-              className="text-xs px-3 h-8 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              All
-              <span className="ml-1.5 text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
-                {categoryCounts['All']}
-              </span>
-            </TabsTrigger>
-            {CATEGORIES.map((cat) => (
-              <TabsTrigger
-                key={cat}
-                value={cat}
-                className="text-xs px-3 h-8 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
-              >
-                {cat}
-                {categoryCounts[cat] > 0 && (
-                  <span className="ml-1.5 text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
-                    {categoryCounts[cat]}
-                  </span>
-                )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+      {/* Filter & Search */}
+      <Card className="rounded-xl border-gray-200 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search products..."
+                className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <span className="text-sm text-gray-500 whitespace-nowrap">
+              {filteredItems.length} products
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Category Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setCategoryFilter(cat)}
+            className={`
+              shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all
+              ${categoryFilter === cat
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }
+            `}
+          >
+            {cat === 'all' ? 'All' : cat}
+            {cat !== 'all' && categoryCounts[cat] ? (
+              <span className="ml-1.5 text-xs opacity-70">({categoryCounts[cat]})</span>
+            ) : null}
+          </button>
+        ))}
       </div>
 
-      {/* ── Inventory Cards Grid ─────────────────────────────────────── */}
+      {/* Items Grid */}
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
         </div>
       ) : filteredItems.length === 0 ? (
         <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="flex h-64 flex-col items-center justify-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-              <Package className="h-7 w-7 text-gray-400" />
-            </div>
-            <p className="text-gray-500 font-medium">No products found</p>
-            <p className="text-sm text-gray-400">
-              {categoryFilter !== 'All'
-                ? 'No items in this category'
-                : 'Add your first product to get started'}
-            </p>
-            {categoryFilter === 'All' && (
-              <Button
-                onClick={openAddForm}
-                variant="outline"
-                className="mt-2 border-green-200 text-green-600 hover:bg-green-50"
-              >
-                <Plus className="size-4" />
-                Add Product
-              </Button>
-            )}
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Milk className="h-12 w-12 text-gray-300 mb-4" />
+            <p className="text-gray-500 text-lg font-medium">No products found</p>
+            <p className="text-gray-400 text-sm mt-1">Add your first dairy product to get started</p>
+            <Button
+              onClick={() => setShowAddItemDialog(true)}
+              className="mt-4 bg-green-500 hover:bg-green-600 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => {
-            const catColor = CATEGORY_COLORS[item.category] || CATEGORY_COLORS['Other']
-            const expiryInfo = getExpiryInfo(item.expiryDate)
-            const isLowStock = item.currentStock < item.minStock
-            const isExpired = daysUntilExpiry(item.expiryDate) !== null && (daysUntilExpiry(item.expiryDate) as number) < 0
-            const isExpiringSoon = !isExpired && expiryInfo !== null && (daysUntilExpiry(item.expiryDate) as number) <= 3
-
+            const catStyle = categoryConfig[item.category] || categoryConfig.Other
             return (
-              <Card
-                key={item.id}
-                className="rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-shadow py-0"
-              >
+              <Card key={item.id} className="rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  {/* Header: Name + Category badge */}
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-gray-900 text-base truncate">
-                        {item.name}
-                      </h3>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${catColor.bg} ${catColor.text} ${catColor.border}`}
-                    >
-                      {item.category}
-                    </Badge>
-                  </div>
-
-                  {/* Low stock warning badge */}
-                  {isLowStock && (
-                    <div className="mb-3">
-                      <Badge
-                        variant="outline"
-                        className="bg-red-50 text-red-700 border-red-200 text-[11px] px-2 py-0.5 rounded-md"
-                      >
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Low Stock
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Current stock (large number with unit) */}
-                  <div className="mb-3">
-                    <p className="text-2xl font-bold text-gray-900">
-                      {item.currentStock}
-                      <span className="text-sm font-normal text-gray-500 ml-1.5">
-                        {item.unit}
-                      </span>
-                    </p>
-                  </div>
-
-                  {/* Stock level bar */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] text-gray-400">Stock level</span>
-                      <span className="text-[11px] text-gray-400">
-                        Min: {item.minStock} {item.unit}
-                      </span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${getStockBarColor(item.currentStock, item.minStock)}`}
-                        style={{ width: `${getStockBarValue(item.currentStock, item.minStock)}%` }}
-                      />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
+                        <Badge variant="outline" className={`shrink-0 text-[10px] px-2 py-0 ${catStyle.bg} ${catStyle.color}`}>
+                          {item.category}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        ₨{item.pricePerUnit} / {item.unit}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Price & Min Stock */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <IndianRupee className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-700">
-                        {formatPKR(item.pricePerUnit)}
+                  {/* Today's Sales */}
+                  <div className="rounded-lg bg-gray-50 p-3 mb-4">
+                    <p className="text-xs text-gray-500 mb-1">Today&apos;s Sale</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold text-gray-900">
+                        {item.todaySold.toFixed(1)} <span className="text-sm font-normal text-gray-500">{item.unit}</span>
                       </span>
-                      <span className="text-[11px] text-gray-400">/ {item.unit}</span>
+                      <span className="text-sm font-semibold text-green-700">
+                        {formatPKR(item.todayRevenue)}
+                      </span>
                     </div>
-                    <span className="text-[11px] text-gray-400">
-                      Min: {item.minStock} {item.unit}
-                    </span>
                   </div>
 
-                  {/* Expiry date */}
-                  {expiryInfo && (
-                    <div
-                      className={`flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded-md ${
-                        isExpired
-                          ? 'bg-red-50'
-                          : isExpiringSoon
-                            ? 'bg-amber-50'
-                            : 'bg-gray-50'
-                      }`}
-                    >
-                      <Clock
-                        className={`h-3 w-3 shrink-0 ${
-                          isExpired
-                            ? 'text-red-500'
-                            : isExpiringSoon
-                              ? 'text-amber-500'
-                              : 'text-gray-400'
-                        }`}
-                      />
-                      <span
-                        className={`text-[11px] font-medium ${
-                          isExpired
-                            ? 'text-red-700'
-                            : isExpiringSoon
-                              ? 'text-amber-700'
-                              : 'text-gray-600'
-                        }`}
-                      >
-                        {expiryInfo.label}
-                      </span>
-                      {item.expiryDate && (
-                        <span className="text-[10px] text-gray-400 ml-auto">
-                          {item.expiryDate}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2">
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditForm(item)}
-                      className="flex-1 h-8 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      onClick={() => openRecordSale(item)}
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white h-9 rounded-lg text-sm"
                     >
-                      <Pencil className="h-3 w-3 mr-1" />
-                      Edit
+                      <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                      Record Sale
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setDeletingItem(item)
-                        setDeleteOpen(true)
-                      }}
-                      className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => openSalesHistory(item)}
+                      className="h-9 w-9 rounded-lg shrink-0"
+                      title="Sales History"
                     >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Delete
+                      <TrendingUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => openEditItem(item)}
+                      className="h-9 w-9 rounded-lg shrink-0"
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => { setSelectedItem(item); setShowDeleteDialog(true) }}
+                      className="h-9 w-9 rounded-lg shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
@@ -697,287 +524,269 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* ── Add/Edit Product Dialog ──────────────────────────────────── */}
-      <Dialog open={formOpen} onOpenChange={(open) => { if (!open) resetForm(); setFormOpen(open) }}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+      {/* Add Item Dialog */}
+      <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>
+        <DialogContent className="sm:max-w-md rounded-xl">
           <DialogHeader>
-            <DialogTitle>
-              {editingItem ? 'Edit Product' : 'Add New Product'}
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-green-600" />
+              Add New Product
             </DialogTitle>
-            <DialogDescription>
-              {editingItem
-                ? 'Update product details and stock levels'
-                : 'Fill in the details to add a new inventory item'}
-            </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4 overflow-y-auto flex-1 pr-1 -mr-1">
-            {/* Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="inv-name" className="text-sm font-medium">
-                Name <span className="text-red-500">*</span>
-              </Label>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Product Name *</Label>
               <Input
-                id="inv-name"
-                placeholder="Product name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="rounded-lg border-gray-200"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="e.g., Full Cream Milk"
+                className="rounded-lg"
               />
             </div>
-
-            {/* Category + Unit */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Category</Label>
-                <Select
-                  value={form.category}
-                  onValueChange={(v) => setForm({ ...form, category: v })}
-                >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue placeholder="Select category" />
+              <div>
+                <Label>Category</Label>
+                <Select value={itemCategory} onValueChange={setItemCategory}>
+                  <SelectTrigger className="rounded-lg">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="Milk">Milk</SelectItem>
+                    <SelectItem value="Yogurt">Yogurt</SelectItem>
+                    <SelectItem value="Butter">Butter</SelectItem>
+                    <SelectItem value="Cream">Cream</SelectItem>
+                    <SelectItem value="Eggs">Eggs</SelectItem>
+                    <SelectItem value="Paneer">Paneer</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Unit</Label>
-                <Select
-                  value={form.unit}
-                  onValueChange={(v) => setForm({ ...form, unit: v })}
-                >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue placeholder="Select unit" />
+              <div>
+                <Label>Unit</Label>
+                <Select value={itemUnit} onValueChange={setItemUnit}>
+                  <SelectTrigger className="rounded-lg">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {UNITS.map((u) => (
-                      <SelectItem key={u} value={u}>
-                        {u}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="liters">Liters</SelectItem>
+                    <SelectItem value="kg">Kg</SelectItem>
+                    <SelectItem value="dozen">Dozen</SelectItem>
+                    <SelectItem value="pieces">Pieces</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            {/* Stock Fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Opening Stock</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.openingStock || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, openingStock: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Purchased Stock</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.purchasedStock || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, purchasedStock: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Sold Stock</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.soldStock || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, soldStock: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Current Stock</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.currentStock || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, currentStock: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-            </div>
-
-            {/* Min Stock + Price */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Min Stock Level</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.minStock || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, minStock: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Price per Unit (PKR)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={form.pricePerUnit || ''}
-                  onChange={(e) =>
-                    setForm({ ...form, pricePerUnit: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
-              </div>
-            </div>
-
-            {/* Expiry Date */}
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Expiry Date</Label>
+            <div>
+              <Label>Price per Unit (PKR) *</Label>
               <Input
-                type="date"
-                value={form.expiryDate}
-                onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
-                className="rounded-lg border-gray-200"
+                type="number"
+                value={itemPrice}
+                onChange={(e) => setItemPrice(e.target.value)}
+                placeholder="0"
+                className="rounded-lg"
               />
             </div>
-
-            {/* Quick Stock Update (only in edit mode) */}
-            {editingItem && (
-              <>
-                <Separator />
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <ShoppingCart className="h-4 w-4 text-gray-500" />
-                    Quick Stock Update
-                  </h4>
-
-                  {/* Add Stock */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 shrink-0">
-                      <ArrowUpCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      placeholder="Qty to add"
-                      value={addStockQty || ''}
-                      onChange={(e) =>
-                        setAddStockQty(parseFloat(e.target.value) || 0)
-                      }
-                      className="rounded-lg border-gray-200 h-9 flex-1"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleAddStock}
-                      disabled={addStockQty <= 0 || quickLoading}
-                      className="bg-green-600 hover:bg-green-700 text-white h-9"
-                    >
-                      {quickLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Plus className="h-3.5 w-3.5" />
-                      )}
-                      Add
-                    </Button>
-                  </div>
-
-                  {/* Record Sale */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 shrink-0">
-                      <ArrowDownCircle className="h-4 w-4 text-amber-600" />
-                    </div>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      placeholder="Qty sold"
-                      value={sellStockQty || ''}
-                      onChange={(e) =>
-                        setSellStockQty(parseFloat(e.target.value) || 0)
-                      }
-                      className="rounded-lg border-gray-200 h-9 flex-1"
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleRecordSale}
-                      disabled={sellStockQty <= 0 || quickLoading}
-                      className="bg-amber-600 hover:bg-amber-700 text-white h-9"
-                    >
-                      {quickLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Minus className="h-3.5 w-3.5" />
-                      )}
-                      Record
-                    </Button>
-                  </div>
-                </div>
-              </>
-            )}
           </div>
-
-          {/* Submit */}
-          <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
-            <Button
-              variant="outline"
-              onClick={() => { setFormOpen(false); resetForm() }}
-              className="rounded-lg"
-            >
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddItemDialog(false)} className="rounded-lg">
               Cancel
             </Button>
             <Button
-              onClick={handleSubmit}
-              disabled={formLoading}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-lg"
+              onClick={handleAddItem}
+              disabled={saving}
+              className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
             >
-              {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-              {editingItem ? 'Save Changes' : 'Add Product'}
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Add Product
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Item Dialog */}
+      <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-green-600" />
+              Edit Product
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Product Name *</Label>
+              <Input value={itemName} onChange={(e) => setItemName(e.target.value)} className="rounded-lg" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Category</Label>
+                <Select value={itemCategory} onValueChange={setItemCategory}>
+                  <SelectTrigger className="rounded-lg"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Milk">Milk</SelectItem>
+                    <SelectItem value="Yogurt">Yogurt</SelectItem>
+                    <SelectItem value="Butter">Butter</SelectItem>
+                    <SelectItem value="Cream">Cream</SelectItem>
+                    <SelectItem value="Eggs">Eggs</SelectItem>
+                    <SelectItem value="Paneer">Paneer</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Unit</Label>
+                <Select value={itemUnit} onValueChange={setItemUnit}>
+                  <SelectTrigger className="rounded-lg"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="liters">Liters</SelectItem>
+                    <SelectItem value="kg">Kg</SelectItem>
+                    <SelectItem value="dozen">Dozen</SelectItem>
+                    <SelectItem value="pieces">Pieces</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Price per Unit (PKR) *</Label>
+              <Input type="number" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="rounded-lg" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditItemDialog(false)} className="rounded-lg">Cancel</Button>
+            <Button onClick={handleEditItem} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg">
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Sale Dialog */}
+      <Dialog open={showRecordSaleDialog} onOpenChange={setShowRecordSaleDialog}>
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-green-600" />
+              Record Sale — {selectedItem?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg bg-gray-50 p-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Product</span>
+                <span className="font-medium">{selectedItem?.name}</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">Price</span>
+                <span className="font-medium">₨{selectedItem?.pricePerUnit} / {selectedItem?.unit}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Quantity ({selectedItem?.unit}) *</Label>
+                <Input
+                  type="number"
+                  step="0.5"
+                  value={saleQty}
+                  onChange={(e) => setSaleQty(e.target.value)}
+                  placeholder="0"
+                  className="rounded-lg"
+                />
+              </div>
+              <div>
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={saleDate}
+                  onChange={(e) => setSaleDate(e.target.value)}
+                  className="rounded-lg"
+                />
+              </div>
+            </div>
+            {saleQty && selectedItem && (
+              <div className="rounded-lg bg-green-50 p-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Total Amount</span>
+                  <span className="font-bold text-green-700 text-lg">
+                    {formatPKR(parseFloat(saleQty) * selectedItem.pricePerUnit)}
+                  </span>
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>Notes</Label>
+              <Textarea
+                value={saleNotes}
+                onChange={(e) => setSaleNotes(e.target.value)}
+                placeholder="Optional notes..."
+                className="rounded-lg"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecordSaleDialog(false)} className="rounded-lg">Cancel</Button>
+            <Button onClick={handleRecordSale} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg">
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Record Sale
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sales History Dialog */}
+      <Dialog open={showSalesHistoryDialog} onOpenChange={setShowSalesHistoryDialog}>
+        <DialogContent className="sm:max-w-lg rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+              Sales History — {selectedItem?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            {salesHistory.length === 0 ? (
+              <p className="text-center text-gray-400 py-8">No sales recorded yet</p>
+            ) : (
+              <div className="space-y-2">
+                {salesHistory.map((sale) => (
+                  <div
+                    key={sale.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 p-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        {sale.quantity} {sale.item?.unit}
+                      </p>
+                      <p className="text-xs text-gray-400">{sale.date}</p>
+                      {sale.notes && <p className="text-xs text-gray-500 mt-0.5">{sale.notes}</p>}
+                    </div>
+                    <span className="text-sm font-semibold text-green-700">
+                      {formatPKR(sale.quantity * (sale.item?.pricePerUnit ?? 0))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirmation Dialog ───────────────────────────────── */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
+      {/* Delete Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Product</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{' '}
-              <span className="font-semibold text-gray-900">{deletingItem?.name}</span>?
-              This action cannot be undone.
+              Are you sure you want to delete &quot;{selectedItem?.name}&quot;? All its sales history will also be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleDeleteItem}
+              className="bg-red-500 hover:bg-red-600 text-white"
             >
-              Delete
+              {saving ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

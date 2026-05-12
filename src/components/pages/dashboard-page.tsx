@@ -15,7 +15,7 @@ import {
   TrendingDown,
   Truck,
   CreditCard,
-  PackageX,
+  Package,
   CalendarDays,
 } from 'lucide-react'
 import {
@@ -66,14 +66,16 @@ interface DashboardData {
     period: string
     customer: { name: string }
   }[]
-  lowStockItems: {
+  todaySales: {
     id: string
-    name: string
-    category: string
-    unit: string
-    currentStock: number
-    minStock: number
+    itemId: string
+    quantity: number
+    date: string
+    notes: string
+    item: { name: string; category: string; unit: string; pricePerUnit: number }
   }[]
+  todayTotalSold: number
+  todaySalesRevenue: number
 }
 
 // ── Helpers ────────────────────────────────────────────
@@ -624,45 +626,48 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── Low Stock Alerts ───────────────────────────── */}
-      {!loading && !error && data?.lowStockItems && data.lowStockItems.length > 0 && (
-        <Card className="rounded-xl border-amber-200 bg-gradient-to-br from-white to-amber-50/30 shadow-sm">
+      {/* ── Today's Product Sales ───────────────────────────── */}
+      {!loading && !error && data?.todaySales && data.todaySales.length > 0 && (
+        <Card className="rounded-xl border-green-200 bg-gradient-to-br from-white to-green-50/20 shadow-sm">
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-100">
-                <PackageX className="h-3.5 w-3.5 text-amber-600" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
+                  <Package className="h-3.5 w-3.5 text-green-600" />
+                </div>
+                <CardTitle className="text-base font-semibold text-gray-800">
+                  Today's Product Sales
+                </CardTitle>
               </div>
-              <CardTitle className="text-base font-semibold text-amber-800">
-                Low Stock Alerts
-              </CardTitle>
-              <Badge className="bg-amber-100 text-amber-700 border-amber-200 ml-2">
-                {data.lowStockItems.length} item{data.lowStockItems.length > 1 ? 's' : ''}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge className="bg-green-50 text-green-700 border-green-200">
+                  {data.todayTotalSold.toFixed(1)} sold
+                </Badge>
+                <Badge className="bg-amber-50 text-amber-700 border-amber-200">
+                  {formatPKR(data.todaySalesRevenue)} revenue
+                </Badge>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <div className="space-y-2.5">
-              {data.lowStockItems.map((item) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {data.todaySales.map((sale) => (
                 <div
-                  key={item.id}
-                  className="flex items-center justify-between rounded-lg border border-amber-100 bg-amber-50/40 px-4 py-3"
+                  key={sale.id}
+                  className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-3 py-2.5"
                 >
-                  <div className="flex items-center gap-3">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-500" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                      <p className="text-xs text-gray-400">
-                        {item.category} · {item.unit}
-                      </p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{sale.item?.name}</p>
+                    <p className="text-xs text-gray-400">
+                      {sale.item?.category} · ₨{sale.item?.pricePerUnit}/{sale.item?.unit}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-red-600">
-                      {item.currentStock}{' '}
-                      <span className="text-xs font-normal text-gray-400">left</span>
+                    <p className="text-sm font-semibold text-green-700">
+                      {sale.quantity} {sale.item?.unit}
                     </p>
-                    <p className="text-xs text-gray-400">
-                      Min: {item.minStock} {item.unit}
+                    <p className="text-xs text-gray-500">
+                      {formatPKR(sale.quantity * (sale.item?.pricePerUnit ?? 0))}
                     </p>
                   </div>
                 </div>

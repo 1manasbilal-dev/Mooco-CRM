@@ -1,19 +1,12 @@
 import { db } from '../src/lib/db'
 
 const AREAS = ['Gulshan-e-Iqbal', 'DHA Phase 5', 'Clifton Block 2', 'Bahadurabad', 'PECHS', 'North Nazimabad', 'Saddar', 'Defence View', 'Kharadar', 'Liaquatabad']
-const MILK_TYPES = ['Full Cream', 'Toned', 'Double Toned', 'Skimmed', 'Buffalo']
 const ROUTES = ['Route A - Gulshan', 'Route B - DHA', 'Route C - Clifton', 'Route D - PECHS', 'Route E - North Nazimabad']
-const STATUSES = ['New', 'Contacted', 'Trial', 'Converted', 'Lost']
 const SOURCES = ['Walk-in', 'Phone', 'Referral', 'Online', 'Ad']
 const PAYMENT_METHODS = ['Cash', 'UPI', 'Bank Transfer', 'Cheque']
-const CATEGORIES = ['Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
 
 function randomItem<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
-}
-
-function randomBetween(min: number, max: number): number {
-  return Math.round((Math.random() * (max - min) + min) * 10) / 10
 }
 
 function getDateStr(daysAgo: number): string {
@@ -26,6 +19,7 @@ async function seed() {
   console.log('🌱 Seeding database...')
 
   // Clear existing data
+  await db.sale.deleteMany()
   await db.payment.deleteMany()
   await db.delivery.deleteMany()
   await db.customer.deleteMany()
@@ -51,24 +45,62 @@ async function seed() {
     await db.shopSetting.create({ data: s })
   }
 
-  // Inventory items
-  const inventoryItems = [
-    { name: 'Full Cream Milk', category: 'Milk', unit: 'liters', openingStock: 500, purchasedStock: 200, soldStock: 450, currentStock: 250, minStock: 50, pricePerUnit: 60, expiryDate: getDateStr(2) },
-    { name: 'Toned Milk', category: 'Milk', unit: 'liters', openingStock: 300, purchasedStock: 100, soldStock: 280, currentStock: 120, minStock: 40, pricePerUnit: 55, expiryDate: getDateStr(2) },
-    { name: 'Buffalo Milk', category: 'Milk', unit: 'liters', openingStock: 200, purchasedStock: 80, soldStock: 190, currentStock: 90, minStock: 30, pricePerUnit: 80, expiryDate: getDateStr(2) },
-    { name: 'Skimmed Milk', category: 'Milk', unit: 'liters', openingStock: 150, purchasedStock: 50, soldStock: 120, currentStock: 80, minStock: 25, pricePerUnit: 50, expiryDate: getDateStr(2) },
-    { name: 'Plain Yogurt', category: 'Yogurt', unit: 'kg', openingStock: 100, purchasedStock: 40, soldStock: 95, currentStock: 45, minStock: 20, pricePerUnit: 120, expiryDate: getDateStr(3) },
-    { name: 'Fruit Yogurt', category: 'Yogurt', unit: 'kg', openingStock: 50, purchasedStock: 20, soldStock: 45, currentStock: 25, minStock: 10, pricePerUnit: 180, expiryDate: getDateStr(3) },
-    { name: 'Butter (Salted)', category: 'Butter', unit: 'kg', openingStock: 40, purchasedStock: 15, soldStock: 30, currentStock: 25, minStock: 8, pricePerUnit: 450, expiryDate: getDateStr(7) },
-    { name: 'Butter (Unsalted)', category: 'Butter', unit: 'kg', openingStock: 30, purchasedStock: 10, soldStock: 25, currentStock: 15, minStock: 5, pricePerUnit: 480, expiryDate: getDateStr(7) },
-    { name: 'Fresh Cream', category: 'Cream', unit: 'liters', openingStock: 50, purchasedStock: 20, soldStock: 40, currentStock: 30, minStock: 10, pricePerUnit: 250, expiryDate: getDateStr(4) },
-    { name: 'Farm Eggs', category: 'Eggs', unit: 'dozen', openingStock: 200, purchasedStock: 80, soldStock: 180, currentStock: 100, minStock: 30, pricePerUnit: 280, expiryDate: getDateStr(10) },
-    { name: 'Paneer', category: 'Paneer', unit: 'kg', openingStock: 30, purchasedStock: 10, soldStock: 28, currentStock: 12, minStock: 5, pricePerUnit: 550, expiryDate: getDateStr(3) },
-    { name: 'Khoya', category: 'Other', unit: 'kg', openingStock: 20, purchasedStock: 8, soldStock: 18, currentStock: 10, minStock: 3, pricePerUnit: 700, expiryDate: getDateStr(2) },
-    { name: 'Lassi', category: 'Other', unit: 'liters', openingStock: 60, purchasedStock: 25, soldStock: 55, currentStock: 30, minStock: 10, pricePerUnit: 100, expiryDate: getDateStr(1) },
+  // Inventory items (simple catalog - just name, category, unit, price)
+  const inventoryItemsData = [
+    { name: 'Full Cream Milk', category: 'Milk', unit: 'liters', pricePerUnit: 60 },
+    { name: 'Toned Milk', category: 'Milk', unit: 'liters', pricePerUnit: 55 },
+    { name: 'Buffalo Milk', category: 'Milk', unit: 'liters', pricePerUnit: 80 },
+    { name: 'Skimmed Milk', category: 'Milk', unit: 'liters', pricePerUnit: 50 },
+    { name: 'Double Toned Milk', category: 'Milk', unit: 'liters', pricePerUnit: 45 },
+    { name: 'Plain Yogurt', category: 'Yogurt', unit: 'kg', pricePerUnit: 120 },
+    { name: 'Fruit Yogurt', category: 'Yogurt', unit: 'kg', pricePerUnit: 180 },
+    { name: 'Butter (Salted)', category: 'Butter', unit: 'kg', pricePerUnit: 450 },
+    { name: 'Butter (Unsalted)', category: 'Butter', unit: 'kg', pricePerUnit: 480 },
+    { name: 'Fresh Cream', category: 'Cream', unit: 'liters', pricePerUnit: 250 },
+    { name: 'Farm Eggs', category: 'Eggs', unit: 'dozen', pricePerUnit: 280 },
+    { name: 'Paneer', category: 'Paneer', unit: 'kg', pricePerUnit: 550 },
+    { name: 'Khoya', category: 'Other', unit: 'kg', pricePerUnit: 700 },
+    { name: 'Lassi', category: 'Other', unit: 'liters', pricePerUnit: 100 },
   ]
-  for (const item of inventoryItems) {
-    await db.inventoryItem.create({ data: item })
+  const createdItems: any[] = []
+  for (const item of inventoryItemsData) {
+    const created = await db.inventoryItem.create({ data: item })
+    createdItems.push(created)
+  }
+
+  // Create sales for last 30 days
+  // Daily typical quantities for each product
+  const dailyQtyMap: Record<string, [number, number]> = {
+    'Full Cream Milk': [120, 180],
+    'Toned Milk': [60, 100],
+    'Buffalo Milk': [50, 90],
+    'Skimmed Milk': [25, 50],
+    'Double Toned Milk': [15, 35],
+    'Plain Yogurt': [20, 45],
+    'Fruit Yogurt': [8, 20],
+    'Butter (Salted)': [3, 8],
+    'Butter (Unsalted)': [2, 6],
+    'Fresh Cream': [5, 15],
+    'Farm Eggs': [15, 40],
+    'Paneer': [3, 8],
+    'Khoya': [2, 5],
+    'Lassi': [10, 30],
+  }
+
+  for (let daysAgo = 0; daysAgo < 30; daysAgo++) {
+    const date = getDateStr(daysAgo)
+    for (const item of createdItems) {
+      const range = dailyQtyMap[item.name] || [5, 15]
+      const qty = Math.round((range[0] + Math.random() * (range[1] - range[0])) * 10) / 10
+      await db.sale.create({
+        data: {
+          itemId: item.id,
+          quantity: qty,
+          date,
+          notes: '',
+        }
+      })
+    }
   }
 
   // Leads
@@ -86,10 +118,8 @@ async function seed() {
     { name: 'Omer Farooq', phone: '03023456789', area: 'Gulshan-e-Iqbal', address: 'Block 14, Flat 3', expectedQty: 2, status: 'New', notes: '', source: 'Walk-in' },
     { name: 'Samina Beg', phone: '03133456789', area: 'DHA Phase 5', address: 'Street 8, House 33', expectedQty: 1, status: 'Contacted', notes: 'Wants skimmed milk', source: 'Phone' },
   ]
-  const createdLeads: any[] = []
   for (const l of leadsData) {
-    const lead = await db.lead.create({ data: l })
-    createdLeads.push(lead)
+    await db.lead.create({ data: l })
   }
 
   // Customers
@@ -122,23 +152,19 @@ async function seed() {
     createdCustomers.push(customer)
   }
 
-  // Deliveries - create for last 30 days
-  const today = new Date().toISOString().split('T')[0]
+  // Deliveries
   for (let daysAgo = 0; daysAgo < 30; daysAgo++) {
     const date = getDateStr(daysAgo)
     for (const customer of createdCustomers) {
       if (customer.status === 'Paused' && daysAgo < 15) continue
       if (customer.status === 'Paused' && Math.random() > 0.3) continue
-      
       const isDelivered = daysAgo > 0 ? Math.random() > 0.08 : Math.random() > 0.3
       const isMissed = !isDelivered && Math.random() > 0.5
-      const status = daysAgo === 0 
+      const status = daysAgo === 0
         ? (Math.random() > 0.4 ? 'Delivered' : 'Pending')
         : isDelivered ? 'Delivered' : isMissed ? 'Missed' : 'Cancelled'
-      
       const routeIndex = AREAS.indexOf(customer.area)
       const route = routeIndex >= 0 && routeIndex < ROUTES.length ? ROUTES[routeIndex] : ROUTES[0]
-      
       await db.delivery.create({
         data: {
           customerId: customer.id,
@@ -152,7 +178,7 @@ async function seed() {
     }
   }
 
-  // Payments - create for last 3 months
+  // Payments
   for (const customer of createdCustomers) {
     const monthlyBill = customer.monthlyBill
     for (let monthAgo = 0; monthAgo < 3; monthAgo++) {
@@ -162,10 +188,8 @@ async function seed() {
         d.setMonth(d.getMonth() - monthAgo)
         return d.toISOString().slice(0, 7)
       })()
-      
       const isPaid = monthAgo > 0 ? Math.random() > 0.15 : Math.random() > 0.5
       const amount = Math.round(monthlyBill * (0.8 + Math.random() * 0.4))
-      
       await db.payment.create({
         data: {
           customerId: customer.id,
@@ -181,25 +205,25 @@ async function seed() {
     }
   }
 
-  // Daily summaries for last 30 days
+  // Daily summaries
   for (let daysAgo = 0; daysAgo < 30; daysAgo++) {
     const date = getDateStr(daysAgo)
     const totalDeliveries = Math.floor(12 + Math.random() * 8)
     const totalMilkSold = Math.round((40 + Math.random() * 30) * 10) / 10
     const totalRevenue = Math.round(totalMilkSold * 60 * (0.9 + Math.random() * 0.2))
     const newCustomers = Math.floor(Math.random() * 3)
-    
     await db.dailySummary.create({
       data: { date, totalDeliveries, totalMilkSold, totalRevenue, newCustomers }
     })
   }
 
   console.log('✅ Database seeded successfully!')
-  console.log(`  - ${createdLeads.length} leads`)
+  console.log(`  - 12 leads`)
   console.log(`  - ${createdCustomers.length} customers`)
   console.log(`  - Deliveries for 30 days`)
   console.log(`  - Payments for 3 months`)
-  console.log(`  - ${inventoryItems.length} inventory items`)
+  console.log(`  - ${createdItems.length} inventory items`)
+  console.log(`  - Sales for 30 days`)
   console.log(`  - ${settings.length} shop settings`)
   console.log(`  - 30 daily summaries`)
 }

@@ -68,9 +68,13 @@ export async function GET() {
       include: { customer: { select: { name: true } } },
     })
 
-    // Low stock items (Prisma doesn't support field comparison, filter in JS)
-    const allInventory = await db.inventoryItem.findMany()
-    const lowStock = allInventory.filter((item) => item.currentStock < item.minStock)
+    // Today's sales summary
+    const todaySales = await db.sale.findMany({
+      where: { date: today },
+      include: { item: { select: { name: true, category: true, unit: true, pricePerUnit: true } } },
+    })
+    const todayTotalSold = todaySales.reduce((sum, s) => sum + s.quantity, 0)
+    const todaySalesRevenue = todaySales.reduce((sum, s) => sum + (s.quantity * (s.item?.pricePerUnit ?? 0)), 0)
 
     return NextResponse.json({
       totalActiveCustomers,
@@ -82,7 +86,9 @@ export async function GET() {
       customerGrowth: Object.entries(customerGrowth).map(([month, count]) => ({ month, count })),
       recentDeliveries,
       recentPayments,
-      lowStockItems: lowStock,
+      todaySales,
+      todayTotalSold,
+      todaySalesRevenue,
     })
   } catch (error) {
     console.error('Dashboard API error:', error)

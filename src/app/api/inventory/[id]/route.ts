@@ -8,10 +8,16 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
+    const { name, category, unit, pricePerUnit } = body
 
     const item = await db.inventoryItem.update({
       where: { id },
-      data: body,
+      data: {
+        ...(name !== undefined && { name }),
+        ...(category !== undefined && { category }),
+        ...(unit !== undefined && { unit }),
+        ...(pricePerUnit !== undefined && { pricePerUnit }),
+      },
     })
 
     return NextResponse.json(item)
@@ -27,6 +33,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    // Delete related sales first
+    await db.sale.deleteMany({ where: { itemId: id } })
     await db.inventoryItem.delete({ where: { id } })
     return NextResponse.json({ success: true })
   } catch (error) {
