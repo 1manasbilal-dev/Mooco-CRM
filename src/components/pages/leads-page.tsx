@@ -1,7 +1,26 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   UserPlus,
   Plus,
@@ -13,6 +32,16 @@ import {
   Trash2,
   Loader2,
   Users,
+  Phone,
+  MapPin,
+  Droplets,
+  Calendar,
+  TrendingUp,
+  Filter,
+  GripVertical,
+  ChevronDown,
+  ChevronUp,
+  Layers,
 } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,6 +50,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
   DialogContent,
@@ -46,14 +76,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,22 +113,15 @@ interface LeadFormData {
 
 // ── Constants ──────────────────────────────────────────
 
-const STATUSES = ['New', 'Contacted', 'Trial', 'Converted', 'Lost'] as const
+const PIPELINE_STAGES = [
+  { id: 'New', label: 'New', color: 'blue', bgClass: 'bg-blue-500', lightBg: 'bg-blue-50', textClass: 'text-blue-700', borderClass: 'border-l-blue-500', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700', hoverBorder: 'hover:border-blue-300', overRing: 'ring-blue-200' },
+  { id: 'Contacted', label: 'Contacted', color: 'amber', bgClass: 'bg-amber-500', lightBg: 'bg-amber-50', textClass: 'text-amber-700', borderClass: 'border-l-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-700', hoverBorder: 'hover:border-amber-300', overRing: 'ring-amber-200' },
+  { id: 'Trial', label: 'Trial', color: 'purple', bgClass: 'bg-purple-500', lightBg: 'bg-purple-50', textClass: 'text-purple-700', borderClass: 'border-l-purple-500', badgeBg: 'bg-purple-100', badgeText: 'text-purple-700', hoverBorder: 'hover:border-purple-300', overRing: 'ring-purple-200' },
+  { id: 'Converted', label: 'Converted', color: 'green', bgClass: 'bg-green-500', lightBg: 'bg-green-50', textClass: 'text-green-700', borderClass: 'border-l-green-500', badgeBg: 'bg-green-100', badgeText: 'text-green-700', hoverBorder: 'hover:border-green-300', overRing: 'ring-green-200' },
+  { id: 'Lost', label: 'Lost', color: 'red', bgClass: 'bg-red-500', lightBg: 'bg-red-50', textClass: 'text-red-700', borderClass: 'border-l-red-500', badgeBg: 'bg-red-100', badgeText: 'text-red-700', hoverBorder: 'hover:border-red-300', overRing: 'ring-red-200' },
+] as const
 
 const SOURCES = ['Walk-in', 'Phone', 'Referral', 'Online', 'Ad'] as const
-
-const AREAS = [
-  'Gulshan-e-Iqbal',
-  'DHA Phase 5',
-  'Clifton Block 2',
-  'Bahadurabad',
-  'PECHS',
-  'North Nazimabad',
-  'Saddar',
-  'Defence View',
-  'Kharadar',
-  'Liaquatabad',
-] as const
 
 const EMPTY_FORM: LeadFormData = {
   name: '',
@@ -120,40 +135,365 @@ const EMPTY_FORM: LeadFormData = {
 
 // ── Helpers ────────────────────────────────────────────
 
-function statusBadgeClasses(status: string): string {
-  switch (status) {
-    case 'New':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
-    case 'Contacted':
-      return 'bg-amber-50 text-amber-700 border-amber-200'
-    case 'Trial':
-      return 'bg-purple-50 text-purple-700 border-purple-200'
-    case 'Converted':
-      return 'bg-green-50 text-green-700 border-green-200'
-    case 'Lost':
-      return 'bg-red-50 text-red-700 border-red-200'
-    default:
-      return 'bg-gray-50 text-gray-700 border-gray-200'
-  }
+function getStageConfig(status: string) {
+  return PIPELINE_STAGES.find((s) => s.id === status) ?? PIPELINE_STAGES[0]
 }
 
 function sourceBadgeClasses(source: string): string {
-  return 'bg-gray-50 text-gray-600 border-gray-200'
+  const map: Record<string, string> = {
+    'Walk-in': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    'Phone': 'bg-sky-50 text-sky-700 border-sky-200',
+    'Referral': 'bg-violet-50 text-violet-700 border-violet-200',
+    'Online': 'bg-orange-50 text-orange-700 border-orange-200',
+    'Ad': 'bg-pink-50 text-pink-700 border-pink-200',
+  }
+  return map[source] ?? 'bg-gray-50 text-gray-600 border-gray-200'
 }
 
 function formatQty(qty: number): string {
   return `${qty}L/day`
 }
 
-// ── Component ──────────────────────────────────────────
+function formatDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
+  } catch {
+    return ''
+  }
+}
+
+// ── Sortable Lead Card ─────────────────────────────────
+
+function SortableLeadCard({
+  lead,
+  onEdit,
+  onConvert,
+  onMarkLost,
+  onDelete,
+}: {
+  lead: Lead
+  onEdit: (lead: Lead) => void
+  onConvert: (lead: Lead) => void
+  onMarkLost: (lead: Lead) => void
+  onDelete: (lead: Lead) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const stage = getStageConfig(lead.status)
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: lead.id,
+    data: {
+      type: 'lead',
+      lead,
+    },
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card
+        className={`group border border-l-4 ${stage.borderClass} bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${stage.hoverBorder} cursor-default`}
+      >
+        <CardContent className="p-3">
+          {/* Top row: Drag handle + Name + Menu */}
+          <div className="flex items-start gap-1.5">
+            <button
+              className="mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-semibold text-sm text-gray-900 truncate">
+                  {lead.name}
+                </h4>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => onEdit(lead)}>
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    {lead.status !== 'Converted' && (
+                      <DropdownMenuItem onClick={() => onConvert(lead)}>
+                        <ArrowRightLeft className="h-4 w-4" />
+                        Convert to Customer
+                      </DropdownMenuItem>
+                    )}
+                    {lead.status !== 'Lost' && lead.status !== 'Converted' && (
+                      <DropdownMenuItem onClick={() => onMarkLost(lead)}>
+                        <XCircle className="h-4 w-4" />
+                        Mark Lost
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => onDelete(lead)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+                <Phone className="h-3 w-3 shrink-0" />
+                <span className="truncate">{lead.phone}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Info row */}
+          <div className="mt-2.5 ml-[22px] flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-gray-400" />
+              <span>{lead.area}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Droplets className="h-3 w-3 text-gray-400" />
+              <span className="font-medium">{formatQty(lead.expectedQty)}</span>
+            </div>
+          </div>
+
+          {/* Source badge + date */}
+          <div className="mt-2 ml-[22px] flex items-center justify-between gap-2">
+            <Badge
+              variant="outline"
+              className={`text-[10px] px-1.5 py-0 h-5 ${sourceBadgeClasses(lead.source)}`}
+            >
+              {lead.source}
+            </Badge>
+            <span className="text-[10px] text-gray-400 flex items-center gap-1">
+              <Calendar className="h-2.5 w-2.5" />
+              {formatDate(lead.createdAt)}
+            </span>
+          </div>
+
+          {/* Expandable details */}
+          {expanded && (lead.address || lead.notes) && (
+            <div className="mt-2.5 ml-[22px] pt-2.5 border-t border-gray-100">
+              {lead.address && (
+                <p className="text-xs text-gray-500 mb-1">
+                  <span className="font-medium text-gray-600">Address:</span>{' '}
+                  {lead.address}
+                </p>
+              )}
+              {lead.notes && (
+                <p className="text-xs text-gray-500">
+                  <span className="font-medium text-gray-600">Notes:</span>{' '}
+                  {lead.notes}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Expand toggle */}
+          {(lead.address || lead.notes) && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="mt-1.5 ml-[22px] flex items-center gap-0.5 text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {expanded ? (
+                <>
+                  <ChevronUp className="h-3 w-3" /> Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3" /> More
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Quick action buttons (for non-Converted on hover) */}
+          {lead.status !== 'Converted' && lead.status !== 'Lost' && (
+            <div className="mt-2 ml-[22px] flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-[10px] px-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
+                onClick={() => onConvert(lead)}
+              >
+                <ArrowRightLeft className="h-3 w-3 mr-1" />
+                Convert
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-[10px] px-2 bg-red-50 border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"
+                onClick={() => onMarkLost(lead)}
+              >
+                <XCircle className="h-3 w-3 mr-1" />
+                Lost
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// ── Drag Overlay Card ──────────────────────────────────
+
+function DragOverlayCard({ lead }: { lead: Lead }) {
+  const stage = getStageConfig(lead.status)
+  return (
+    <Card
+      className={`border border-l-4 ${stage.borderClass} bg-white rounded-lg shadow-xl rotate-2 scale-105 w-[280px]`}
+    >
+      <CardContent className="p-3">
+        <div className="flex items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-sm text-gray-900 truncate">
+              {lead.name}
+            </h4>
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+              <Phone className="h-3 w-3 shrink-0" />
+              <span className="truncate">{lead.phone}</span>
+            </div>
+            <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-600">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-gray-400" />
+                <span>{lead.area}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Droplets className="h-3 w-3 text-gray-400" />
+                <span className="font-medium">{formatQty(lead.expectedQty)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ── Kanban Column ──────────────────────────────────────
+
+function DroppableKanbanColumn({
+  stage,
+  leads,
+  onEdit,
+  onConvert,
+  onMarkLost,
+  onDelete,
+}: {
+  stage: typeof PIPELINE_STAGES[number]
+  leads: Lead[]
+  onEdit: (lead: Lead) => void
+  onConvert: (lead: Lead) => void
+  onMarkLost: (lead: Lead) => void
+  onDelete: (lead: Lead) => void
+}) {
+  const leadIds = leads.map((l) => l.id)
+  const totalQty = leads.reduce((sum, l) => sum + l.expectedQty, 0)
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: stage.id,
+    data: {
+      type: 'column',
+      status: stage.id,
+    },
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col min-w-[280px] w-[280px] lg:min-w-[300px] lg:w-[300px] shrink-0 rounded-lg transition-colors duration-200 ${
+        isOver ? `${stage.lightBg} ring-1 ring-inset ${stage.overRing}` : ''
+      }`}
+    >
+      {/* Column header */}
+      <div className="mb-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <div className={`h-2.5 w-2.5 rounded-full ${stage.bgClass}`} />
+            <h3 className="font-semibold text-sm text-gray-800">{stage.label}</h3>
+            <Badge
+              variant="secondary"
+              className={`h-5 min-w-[20px] px-1.5 text-[10px] ${stage.badgeBg} ${stage.badgeText} border-0`}
+            >
+              {leads.length}
+            </Badge>
+          </div>
+          {totalQty > 0 && (
+            <span className="text-[10px] text-gray-400 font-medium">
+              {totalQty}L/day
+            </span>
+          )}
+        </div>
+        <div className={`h-0.5 rounded-full ${stage.bgClass} opacity-30`} />
+      </div>
+
+      {/* Cards */}
+      <SortableContext items={leadIds} strategy={verticalListSortingStrategy}>
+        <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[calc(100vh-380px)] pr-0.5 custom-scrollbar">
+          {leads.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-8 px-4 rounded-lg border border-dashed border-gray-200 bg-gray-50/50">
+              <p className="text-xs text-gray-400 text-center">No leads here</p>
+              {isOver && (
+                <p className="text-[10px] mt-1 text-gray-400">Drop here</p>
+              )}
+            </div>
+          )}
+          {leads.map((lead) => (
+            <SortableLeadCard
+              key={lead.id}
+              lead={lead}
+              onEdit={onEdit}
+              onConvert={onConvert}
+              onMarkLost={onMarkLost}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </div>
+  )
+}
+
+// ── Main Component ─────────────────────────────────────
 
 export default function LeadsPage() {
   // State
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [areaFilter, setAreaFilter] = useState<string>('all')
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [areas, setAreas] = useState<{ id: string; name: string }[]>([])
+
+  // Drag state
+  const [activeLead, setActiveLead] = useState<Lead | null>(null)
 
   // Dialog state
   const [formOpen, setFormOpen] = useState(false)
@@ -169,13 +509,23 @@ export default function LeadsPage() {
   const [deleteLead, setDeleteLead] = useState<Lead | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  // ── DnD sensors ────────────────────────────────────
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  )
+
   // ── Fetch leads ──────────────────────────────────────
 
   const fetchLeads = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter)
       if (areaFilter && areaFilter !== 'all') params.set('area', areaFilter)
 
       const res = await fetch(`/api/leads?${params.toString()}`)
@@ -187,22 +537,142 @@ export default function LeadsPage() {
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, areaFilter])
+  }, [areaFilter])
 
   useEffect(() => {
     fetchLeads()
   }, [fetchLeads])
 
-  // ── Filtered leads (client-side search) ──────────────
+  // Fetch areas dynamically
+  useEffect(() => {
+    async function fetchAreas() {
+      try {
+        const res = await fetch('/api/areas')
+        if (res.ok) {
+          const data = await res.json()
+          setAreas(Array.isArray(data) ? data : [])
+        }
+      } catch { /* ignore */ }
+    }
+    fetchAreas()
+  }, [])
 
-  const filteredLeads = leads.filter((lead) => {
-    if (!searchQuery) return true
-    const q = searchQuery.toLowerCase()
-    return (
-      lead.name.toLowerCase().includes(q) ||
-      lead.phone.toLowerCase().includes(q)
+  // ── Filtered leads (client-side search + source filter) ──
+
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      if (sourceFilter && sourceFilter !== 'all' && lead.source !== sourceFilter) return false
+      if (!searchQuery) return true
+      const q = searchQuery.toLowerCase()
+      return (
+        lead.name.toLowerCase().includes(q) ||
+        lead.phone.toLowerCase().includes(q)
+      )
+    })
+  }, [leads, searchQuery, sourceFilter])
+
+  // ── Group leads by status ──────────────────────────
+
+  const leadsByStatus = useMemo(() => {
+    const grouped: Record<string, Lead[]> = {}
+    for (const stage of PIPELINE_STAGES) {
+      grouped[stage.id] = []
+    }
+    for (const lead of filteredLeads) {
+      if (!grouped[lead.status]) {
+        grouped[lead.status] = []
+      }
+      grouped[lead.status].push(lead)
+    }
+    return grouped
+  }, [filteredLeads])
+
+  // ── Pipeline stats ─────────────────────────────────
+
+  const stats = useMemo(() => {
+    const total = filteredLeads.length
+    const converted = filteredLeads.filter((l) => l.status === 'Converted').length
+    const conversionRate = total > 0 ? ((converted / total) * 100).toFixed(1) : '0.0'
+    const totalQty = filteredLeads.reduce((sum, l) => sum + l.expectedQty, 0)
+    const activeLeads = filteredLeads.filter(
+      (l) => l.status !== 'Converted' && l.status !== 'Lost'
+    ).length
+    return { total, converted, conversionRate, totalQty, activeLeads }
+  }, [filteredLeads])
+
+  // ── DnD handlers ───────────────────────────────────
+
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event
+    const lead = leads.find((l) => l.id === active.id)
+    if (lead) {
+      setActiveLead(lead)
+    }
+  }
+
+  function handleDragOver(_event: DragOverEvent) {
+    // We handle the actual move on drag end
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveLead(null)
+
+    if (!over) return
+
+    const leadId = active.id as string
+    const currentLead = leads.find((l) => l.id === leadId)
+    if (!currentLead) return
+
+    // Determine the target column
+    // The "over" can be either a column droppable or another lead card
+    let targetStatus: string | null = null
+
+    // Check if dropped on a column directly
+    const overId = over.id as string
+    if (PIPELINE_STAGES.some((s) => s.id === overId)) {
+      targetStatus = overId
+    } else {
+      // Dropped on another lead card — find which column that lead is in
+      const overLead = leads.find((l) => l.id === overId)
+      if (overLead) {
+        targetStatus = overLead.status
+      }
+    }
+
+    if (!targetStatus || targetStatus === currentLead.status) return
+
+    // If dropped on "Converted", trigger convert dialog
+    if (targetStatus === 'Converted') {
+      setConvertLead(currentLead)
+      return
+    }
+
+    // Optimistically update
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, status: targetStatus! } : l))
     )
-  })
+
+    try {
+      const res = await fetch(`/api/leads/${leadId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success(`${currentLead.name} moved to ${targetStatus}`)
+    } catch {
+      // Revert on failure
+      setLeads((prev) =>
+        prev.map((l) => (l.id === leadId ? { ...l, status: currentLead.status } : l))
+      )
+      toast.error('Failed to update lead status')
+    }
+  }
+
+  function handleDragCancel() {
+    setActiveLead(null)
+  }
 
   // ── Form handlers ────────────────────────────────────
 
@@ -241,7 +711,6 @@ export default function LeadsPage() {
     setSubmitting(true)
     try {
       if (editingLead) {
-        // Update
         const res = await fetch(`/api/leads/${editingLead.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -250,7 +719,6 @@ export default function LeadsPage() {
         if (!res.ok) throw new Error()
         toast.success('Lead updated successfully')
       } else {
-        // Create
         const res = await fetch('/api/leads', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -314,6 +782,10 @@ export default function LeadsPage() {
   // ── Mark Lost handler ────────────────────────────────
 
   async function handleMarkLost(lead: Lead) {
+    // Optimistic update
+    setLeads((prev) =>
+      prev.map((l) => (l.id === lead.id ? { ...l, status: 'Lost' } : l))
+    )
     try {
       const res = await fetch(`/api/leads/${lead.id}`, {
         method: 'PUT',
@@ -322,8 +794,11 @@ export default function LeadsPage() {
       })
       if (!res.ok) throw new Error()
       toast.success(`${lead.name} marked as Lost`)
-      fetchLeads()
     } catch {
+      // Revert
+      setLeads((prev) =>
+        prev.map((l) => (l.id === lead.id ? { ...l, status: lead.status } : l))
+      )
       toast.error('Failed to update lead status')
     }
   }
@@ -331,7 +806,7 @@ export default function LeadsPage() {
   // ── Render ───────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* ── Page Header ──────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -339,8 +814,8 @@ export default function LeadsPage() {
             <UserPlus className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
-            <p className="text-sm text-gray-500">Manage new customer inquiries</p>
+            <h1 className="text-2xl font-bold text-gray-900">Leads Pipeline</h1>
+            <p className="text-sm text-gray-500">Track and manage your sales pipeline</p>
           </div>
         </div>
         <Button
@@ -352,48 +827,73 @@ export default function LeadsPage() {
         </Button>
       </div>
 
-      {/* ── Filter Bar ─────────────────────────────── */}
+      {/* ── Pipeline Statistics Bar ────────────────────── */}
+      {!loading && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-gray-50/50">
+            <CardContent className="p-3.5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-100">
+                  <Users className="h-3.5 w-3.5 text-gray-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500">Total Leads</span>
+              </div>
+              <p className="text-xl font-bold text-gray-900 ml-9">{stats.total}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-green-50/30">
+            <CardContent className="p-3.5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
+                  <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500">Conversion Rate</span>
+              </div>
+              <p className="text-xl font-bold text-green-700 ml-9">{stats.conversionRate}%</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-blue-50/30">
+            <CardContent className="p-3.5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
+                  <Layers className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500">Active Pipeline</span>
+              </div>
+              <p className="text-xl font-bold text-blue-700 ml-9">{stats.activeLeads}</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-emerald-50/30">
+            <CardContent className="p-3.5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-100">
+                  <Droplets className="h-3.5 w-3.5 text-emerald-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500">Expected Daily</span>
+              </div>
+              <p className="text-xl font-bold text-emerald-700 ml-9">{stats.totalQty}L</p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-green-50/30 col-span-2 sm:col-span-1 hidden lg:block">
+            <CardContent className="p-3.5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
+                  <ArrowRightLeft className="h-3.5 w-3.5 text-green-600" />
+                </div>
+                <span className="text-xs font-medium text-gray-500">Converted</span>
+              </div>
+              <p className="text-xl font-bold text-green-700 ml-9">{stats.converted}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── Filters & Search Bar ─────────────────────── */}
       <Card className="rounded-xl border-gray-200 shadow-sm">
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-            {/* Status Filter */}
-            <Select
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Area Filter */}
-            <Select
-              value={areaFilter}
-              onValueChange={setAreaFilter}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="All Areas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Areas</SelectItem>
-                {AREAS.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             {/* Search */}
-            <div className="relative flex-1 min-w-0 sm:max-w-[260px]">
+            <div className="relative flex-1 min-w-0 sm:max-w-[280px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Search name or phone..."
@@ -403,28 +903,106 @@ export default function LeadsPage() {
               />
             </div>
 
+            {/* Toggle filters */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filters
+              {(areaFilter !== 'all' || sourceFilter !== 'all') && (
+                <Badge className="h-4 min-w-[16px] px-1 text-[9px] bg-green-600 text-white border-0">
+                  {(areaFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0)}
+                </Badge>
+              )}
+            </Button>
+
             {/* Count */}
             <div className="flex items-center gap-1.5 text-sm text-gray-500 sm:ml-auto">
               <Users className="h-4 w-4" />
-              Showing <span className="font-medium text-gray-700">{filteredLeads.length}</span> leads
+              <span className="font-medium text-gray-700">{filteredLeads.length}</span> leads
             </div>
           </div>
+
+          {/* Expanded filters */}
+          {showFilters && (
+            <>
+              <Separator className="my-3" />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500 shrink-0">Area:</span>
+                  <Select
+                    value={areaFilter}
+                    onValueChange={setAreaFilter}
+                  >
+                    <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
+                      <SelectValue placeholder="All Areas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Areas</SelectItem>
+                      {areas.map((a) => (
+                        <SelectItem key={a.id} value={a.name}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500 shrink-0">Source:</span>
+                  <Select
+                    value={sourceFilter}
+                    onValueChange={setSourceFilter}
+                  >
+                    <SelectTrigger className="w-full sm:w-[160px] h-8 text-xs">
+                      <SelectValue placeholder="All Sources" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sources</SelectItem>
+                      {SOURCES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {(areaFilter !== 'all' || sourceFilter !== 'all') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs text-gray-500"
+                    onClick={() => {
+                      setAreaFilter('all')
+                      setSourceFilter('all')
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {/* ── Loading State ──────────────────────────── */}
+      {/* ── Loading State ────────────────────────────── */}
       {loading && (
         <Card className="rounded-xl border-gray-200 shadow-sm">
           <CardContent className="flex h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-              <p className="text-sm text-gray-500">Loading leads...</p>
+              <p className="text-sm text-gray-500">Loading pipeline...</p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* ── Empty State ────────────────────────────── */}
+      {/* ── Empty State ──────────────────────────────── */}
       {!loading && filteredLeads.length === 0 && (
         <Card className="rounded-xl border-gray-200 shadow-sm">
           <CardContent className="flex h-64 flex-col items-center justify-center gap-3 p-6">
@@ -434,12 +1012,12 @@ export default function LeadsPage() {
             <div className="text-center">
               <p className="font-medium text-gray-900">No leads found</p>
               <p className="text-sm text-gray-500 mt-1">
-                {searchQuery || statusFilter !== 'all' || areaFilter !== 'all'
+                {searchQuery || areaFilter !== 'all' || sourceFilter !== 'all'
                   ? 'Try adjusting your filters or search query'
                   : 'Add your first lead to get started'}
               </p>
             </div>
-            {!searchQuery && statusFilter === 'all' && areaFilter === 'all' && (
+            {!searchQuery && areaFilter === 'all' && sourceFilter === 'all' && (
               <Button
                 onClick={openAddForm}
                 className="mt-1 bg-green-600 hover:bg-green-700 text-white"
@@ -453,172 +1031,82 @@ export default function LeadsPage() {
         </Card>
       )}
 
-      {/* ── Desktop Table ──────────────────────────── */}
+      {/* ── Kanban Board ─────────────────────────────── */}
       {!loading && filteredLeads.length > 0 && (
-        <>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          {/* Desktop: horizontal scroll Kanban */}
           <div className="hidden md:block">
-            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
-                    <TableHead className="pl-4 font-semibold text-gray-600">Name</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Area</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Expected Qty</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Source</TableHead>
-                    <TableHead className="font-semibold text-gray-600">Status</TableHead>
-                    <TableHead className="text-right pr-4 font-semibold text-gray-600">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredLeads.map((lead) => (
-                    <TableRow key={lead.id} className="group">
-                      <TableCell className="pl-4">
-                        <div>
-                          <p className="font-medium text-gray-900">{lead.name}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{lead.phone}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-700">{lead.area}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm font-medium text-gray-700">
-                          {formatQty(lead.expectedQty)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${sourceBadgeClasses(lead.source)}`}
-                        >
-                          {lead.source}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${statusBadgeClasses(lead.status)}`}
-                        >
-                          {lead.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right pr-4">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => openEditForm(lead)}>
-                              <Pencil className="h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            {lead.status !== 'Converted' && (
-                              <DropdownMenuItem onClick={() => setConvertLead(lead)}>
-                                <ArrowRightLeft className="h-4 w-4" />
-                                Convert to Customer
-                              </DropdownMenuItem>
-                            )}
-                            {lead.status !== 'Lost' && lead.status !== 'Converted' && (
-                              <DropdownMenuItem onClick={() => handleMarkLost(lead)}>
-                                <XCircle className="h-4 w-4" />
-                                Mark Lost
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => setDeleteLead(lead)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+            <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar-horizontal">
+              {PIPELINE_STAGES.map((stage) => (
+                <DroppableKanbanColumn
+                  key={stage.id}
+                  stage={stage}
+                  leads={leadsByStatus[stage.id] || []}
+                  onEdit={openEditForm}
+                  onConvert={(lead) => setConvertLead(lead)}
+                  onMarkLost={handleMarkLost}
+                  onDelete={(lead) => setDeleteLead(lead)}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* ── Mobile Cards ────────────────────────── */}
-          <div className="flex flex-col gap-3 md:hidden">
-            {filteredLeads.map((lead) => (
-              <Card key={lead.id} className="rounded-xl border-gray-200 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 truncate">{lead.name}</h3>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${statusBadgeClasses(lead.status)}`}
-                        >
-                          {lead.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-500 mt-0.5">{lead.phone}</p>
+          {/* Mobile: vertical stacked columns */}
+          <div className="flex flex-col gap-4 md:hidden">
+            {PIPELINE_STAGES.map((stage) => {
+              const stageLeads = leadsByStatus[stage.id] || []
+              return (
+                <Card key={stage.id} className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+                  {/* Mobile column header */}
+                  <div
+                    className={`px-4 py-3 flex items-center justify-between ${stage.lightBg} border-b border-gray-100`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2.5 w-2.5 rounded-full ${stage.bgClass}`} />
+                      <h3 className="font-semibold text-sm text-gray-800">{stage.label}</h3>
+                      <Badge
+                        variant="secondary"
+                        className={`h-5 min-w-[20px] px-1.5 text-[10px] ${stage.badgeBg} ${stage.badgeText} border-0`}
+                      >
+                        {stageLeads.length}
+                      </Badge>
                     </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => openEditForm(lead)}>
-                          <Pencil className="h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        {lead.status !== 'Converted' && (
-                          <DropdownMenuItem onClick={() => setConvertLead(lead)}>
-                            <ArrowRightLeft className="h-4 w-4" />
-                            Convert to Customer
-                          </DropdownMenuItem>
-                        )}
-                        {lead.status !== 'Lost' && lead.status !== 'Converted' && (
-                          <DropdownMenuItem onClick={() => handleMarkLost(lead)}>
-                            <XCircle className="h-4 w-4" />
-                            Mark Lost
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => setDeleteLead(lead)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                    <span className="text-gray-600">{lead.area}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="font-medium text-gray-700">{formatQty(lead.expectedQty)}</span>
-                    <span className="text-gray-300">·</span>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${sourceBadgeClasses(lead.source)}`}
-                    >
-                      {lead.source}
-                    </Badge>
+                  {/* Mobile cards */}
+                  <div className="p-3 space-y-2.5">
+                    {stageLeads.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-6 px-4">
+                        <p className="text-xs text-gray-400 text-center">No leads here</p>
+                      </div>
+                    )}
+                    {stageLeads.map((lead) => (
+                      <SortableLeadCard
+                        key={lead.id}
+                        lead={lead}
+                        onEdit={openEditForm}
+                        onConvert={(l) => setConvertLead(l)}
+                        onMarkLost={handleMarkLost}
+                        onDelete={(l) => setDeleteLead(l)}
+                      />
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </Card>
+              )
+            })}
           </div>
-        </>
+
+          {/* Drag overlay */}
+          <DragOverlay>
+            {activeLead ? <DragOverlayCard lead={activeLead} /> : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* ── Add/Edit Lead Dialog ─────────────────────── */}
@@ -677,9 +1165,9 @@ export default function LeadsPage() {
                   <SelectValue placeholder="Select area" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AREAS.map((a) => (
-                    <SelectItem key={a} value={a}>
-                      {a}
+                  {areas.map((a) => (
+                    <SelectItem key={a.id} value={a.name}>
+                      {a.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

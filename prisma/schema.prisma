@@ -77,6 +77,7 @@ model InventoryItem {
   category     String   @default("Milk") // Milk, Yogurt, Butter, Cream, Eggs, Paneer, Other
   unit         String   @default("liters") // liters, kg, dozen, pieces
   pricePerUnit Float    @default(0)
+  status       String   @default("Active") // Active, Inactive
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   sales        Sale[]
@@ -108,4 +109,26 @@ model DailySummary {
   newCustomers    Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model Area {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MilkType {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  pricePerLiter Float   @default(60)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DeliveryTime {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -37,6 +37,11 @@ import {
 import { toast } from 'sonner'
 
 // --- Types ---
+interface Area {
+  id: string
+  name: string
+}
+
 interface Customer {
   id: string
   name: string
@@ -75,13 +80,7 @@ interface TodaySummary {
 }
 
 // --- Constants ---
-const ROUTES = [
-  { value: 'Route A', label: 'Route A - Gulshan' },
-  { value: 'Route B', label: 'Route B - DHA' },
-  { value: 'Route C', label: 'Route C - Clifton' },
-  { value: 'Route D', label: 'Route D - PECHS' },
-  { value: 'Route E', label: 'Route E - North Nazimabad' },
-]
+const ROUTE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
 const STATUSES = ['All', 'Pending', 'Delivered', 'Missed', 'Cancelled']
 
@@ -93,8 +92,16 @@ function formatQuantity(qty: number): string {
   return qty % 1 === 0 ? `${qty}L` : `${qty}L`
 }
 
-function getRouteLabel(route: string): string {
-  const found = ROUTES.find((r) => r.value === route)
+/** Build routes dynamically from areas, mapping each area to a route letter */
+function buildRoutes(areas: Area[]): { value: string; label: string }[] {
+  return areas.map((area, i) => {
+    const letter = ROUTE_LETTERS[i % ROUTE_LETTERS.length]
+    return { value: `Route ${letter}`, label: `Route ${letter} - ${area.name}` }
+  })
+}
+
+function getRouteLabel(route: string, routes: { value: string; label: string }[]): string {
+  const found = routes.find((r) => r.value === route)
   return found ? found.label : route
 }
 
@@ -141,6 +148,10 @@ export default function DeliveriesPage() {
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [areas, setAreas] = useState<Area[]>([])
+
+  // Derived routes from dynamic areas
+  const routes = useMemo(() => buildRoutes(areas), [areas])
 
   // Add delivery dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false)
@@ -189,9 +200,25 @@ export default function DeliveriesPage() {
     }
   }, [])
 
+  // Fetch areas for dynamic routes
+  const fetchAreas = useCallback(async () => {
+    try {
+      const res = await fetch('/api/areas')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setAreas(Array.isArray(data) ? data : [])
+    } catch {
+      // silently fail
+    }
+  }, [])
+
   useEffect(() => {
     fetchDeliveries()
   }, [fetchDeliveries])
+
+  useEffect(() => {
+    fetchAreas()
+  }, [fetchAreas])
 
   useEffect(() => {
     if (addDialogOpen) {
@@ -235,16 +262,16 @@ export default function DeliveriesPage() {
     }
     // Sort routes in the defined order
     const sortedKeys = Object.keys(groups).sort((a, b) => {
-      const idxA = ROUTES.findIndex((r) => r.value === a)
-      const idxB = ROUTES.findIndex((r) => r.value === b)
+      const idxA = routes.findIndex((r) => r.value === a)
+      const idxB = routes.findIndex((r) => r.value === b)
       return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB)
     })
     return sortedKeys.map((key) => ({
       route: key,
-      label: getRouteLabel(key),
+      label: getRouteLabel(key, routes),
       deliveries: groups[key],
     }))
-  }, [deliveries])
+  }, [deliveries, routes])
 
   // Update delivery status
   const updateStatus = async (id: string, status: string) => {
@@ -390,7 +417,7 @@ export default function DeliveriesPage() {
         customerId,
         quantity: customer.dailyQty || 1,
         route: customer.area
-          ? ROUTES.find((r) => r.label.toLowerCase().includes(customer.area.toLowerCase()))?.value || 'Route A'
+          ? routes.find((r) => r.label.toLowerCase().includes(customer.area.toLowerCase()))?.value || routes[0]?.value || 'Route A'
           : prev.route,
       }))
     }
@@ -493,7 +520,7 @@ export default function DeliveriesPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ROUTES.map((r) => (
+                      {routes.map((r) => (
                         <SelectItem key={r.value} value={r.value}>
                           {r.label}
                         </SelectItem>
@@ -605,7 +632,7 @@ export default function DeliveriesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Routes</SelectItem>
-            {ROUTES.map((r) => (
+            {routes.map((r) => (
               <SelectItem key={r.value} value={r.value}>
                 {r.label}
               </SelectItem>

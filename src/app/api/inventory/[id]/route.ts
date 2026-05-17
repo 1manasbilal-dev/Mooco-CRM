@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { name, category, unit, pricePerUnit } = body
+    const { name, category, unit, pricePerUnit, status } = body
 
     const item = await db.inventoryItem.update({
       where: { id },
@@ -17,6 +17,7 @@ export async function PUT(
         ...(category !== undefined && { category }),
         ...(unit !== undefined && { unit }),
         ...(pricePerUnit !== undefined && { pricePerUnit }),
+        ...(status !== undefined && { status }),
       },
     })
 

@@ -19,6 +19,13 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog'
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
   Settings,
   Store,
   Truck,
@@ -40,6 +47,7 @@ import {
   Phone,
   BadgeCheck,
   Milk,
+  MapPin,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -62,6 +70,22 @@ interface StaffMember {
   name: string
   role: string
   phone: string
+}
+
+interface Area {
+  id: string
+  name: string
+}
+
+interface MilkType {
+  id: string
+  name: string
+  pricePerLiter: number
+}
+
+interface DeliveryTime {
+  id: string
+  name: string
 }
 
 // ── Default Values ──────────────────────────────────────────────────────
@@ -103,6 +127,31 @@ export default function SettingsPage() {
   // Reset dialog
   const [resetOpen, setResetOpen] = useState(false)
 
+  // ── Area Management State ─────────────────────────────────────────
+  const [areas, setAreas] = useState<Area[]>([])
+  const [areasLoading, setAreasLoading] = useState(false)
+  const [areaDialogOpen, setAreaDialogOpen] = useState(false)
+  const [editingArea, setEditingArea] = useState<Area | null>(null)
+  const [areaName, setAreaName] = useState('')
+  const [areaSubmitting, setAreaSubmitting] = useState(false)
+
+  // ── Milk Type Management State ────────────────────────────────────
+  const [milkTypes, setMilkTypes] = useState<MilkType[]>([])
+  const [milkTypesLoading, setMilkTypesLoading] = useState(false)
+  const [milkTypeDialogOpen, setMilkTypeDialogOpen] = useState(false)
+  const [editingMilkType, setEditingMilkType] = useState<MilkType | null>(null)
+  const [milkTypeName, setMilkTypeName] = useState('')
+  const [milkTypePrice, setMilkTypePrice] = useState('')
+  const [milkTypeSubmitting, setMilkTypeSubmitting] = useState(false)
+
+  // ── Delivery Time Management State ────────────────────────────────
+  const [deliveryTimes, setDeliveryTimes] = useState<DeliveryTime[]>([])
+  const [deliveryTimesLoading, setDeliveryTimesLoading] = useState(false)
+  const [deliveryTimeDialogOpen, setDeliveryTimeDialogOpen] = useState(false)
+  const [editingDeliveryTime, setEditingDeliveryTime] = useState<DeliveryTime | null>(null)
+  const [deliveryTimeName, setDeliveryTimeName] = useState('')
+  const [deliveryTimeSubmitting, setDeliveryTimeSubmitting] = useState(false)
+
   // ── Dirty check ─────────────────────────────────────────────────────
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings)
 
@@ -128,9 +177,240 @@ export default function SettingsPage() {
     }
   }, [])
 
+  // ── Fetch Areas ──────────────────────────────────────────────────
+  const fetchAreas = useCallback(async () => {
+    setAreasLoading(true)
+    try {
+      const res = await fetch('/api/areas')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setAreas(Array.isArray(data) ? data : [])
+    } catch {
+      toast.error('Failed to load areas')
+    } finally {
+      setAreasLoading(false)
+    }
+  }, [])
+
+  // ── Fetch Milk Types ─────────────────────────────────────────────
+  const fetchMilkTypes = useCallback(async () => {
+    setMilkTypesLoading(true)
+    try {
+      const res = await fetch('/api/milk-types')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setMilkTypes(Array.isArray(data) ? data : [])
+    } catch {
+      toast.error('Failed to load milk types')
+    } finally {
+      setMilkTypesLoading(false)
+    }
+  }, [])
+
+  // ── Fetch Delivery Times ─────────────────────────────────────────
+  const fetchDeliveryTimes = useCallback(async () => {
+    setDeliveryTimesLoading(true)
+    try {
+      const res = await fetch('/api/delivery-times')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setDeliveryTimes(Array.isArray(data) ? data : [])
+    } catch {
+      toast.error('Failed to load delivery times')
+    } finally {
+      setDeliveryTimesLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchSettings()
-  }, [fetchSettings])
+    fetchAreas()
+    fetchMilkTypes()
+    fetchDeliveryTimes()
+  }, [fetchSettings, fetchAreas, fetchMilkTypes, fetchDeliveryTimes])
+
+  // ── Area CRUD ────────────────────────────────────────────────────
+  const openAddArea = () => {
+    setEditingArea(null)
+    setAreaName('')
+    setAreaDialogOpen(true)
+  }
+
+  const openEditArea = (area: Area) => {
+    setEditingArea(area)
+    setAreaName(area.name)
+    setAreaDialogOpen(true)
+  }
+
+  const handleAreaSubmit = async () => {
+    if (!areaName.trim()) {
+      toast.error('Area name is required')
+      return
+    }
+    setAreaSubmitting(true)
+    try {
+      if (editingArea) {
+        const res = await fetch(`/api/areas/${editingArea.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: areaName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Area updated successfully')
+      } else {
+        const res = await fetch('/api/areas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: areaName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Area added successfully')
+      }
+      setAreaDialogOpen(false)
+      fetchAreas()
+    } catch {
+      toast.error(editingArea ? 'Failed to update area' : 'Failed to add area')
+    } finally {
+      setAreaSubmitting(false)
+    }
+  }
+
+  const handleDeleteArea = async (id: string) => {
+    try {
+      const res = await fetch(`/api/areas/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Area deleted successfully')
+      fetchAreas()
+    } catch {
+      toast.error('Failed to delete area')
+    }
+  }
+
+  // ── Milk Type CRUD ───────────────────────────────────────────────
+  const openAddMilkType = () => {
+    setEditingMilkType(null)
+    setMilkTypeName('')
+    setMilkTypePrice('')
+    setMilkTypeDialogOpen(true)
+  }
+
+  const openEditMilkType = (mt: MilkType) => {
+    setEditingMilkType(mt)
+    setMilkTypeName(mt.name)
+    setMilkTypePrice(String(mt.pricePerLiter))
+    setMilkTypeDialogOpen(true)
+  }
+
+  const handleMilkTypeSubmit = async () => {
+    if (!milkTypeName.trim()) {
+      toast.error('Milk type name is required')
+      return
+    }
+    if (!milkTypePrice || isNaN(Number(milkTypePrice)) || Number(milkTypePrice) < 0) {
+      toast.error('Valid price per liter is required')
+      return
+    }
+    setMilkTypeSubmitting(true)
+    try {
+      if (editingMilkType) {
+        const res = await fetch(`/api/milk-types/${editingMilkType.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: milkTypeName.trim(),
+            pricePerLiter: Number(milkTypePrice),
+          }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Milk type updated successfully')
+      } else {
+        const res = await fetch('/api/milk-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: milkTypeName.trim(),
+            pricePerLiter: Number(milkTypePrice),
+          }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Milk type added successfully')
+      }
+      setMilkTypeDialogOpen(false)
+      fetchMilkTypes()
+    } catch {
+      toast.error(editingMilkType ? 'Failed to update milk type' : 'Failed to add milk type')
+    } finally {
+      setMilkTypeSubmitting(false)
+    }
+  }
+
+  const handleDeleteMilkType = async (id: string) => {
+    try {
+      const res = await fetch(`/api/milk-types/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Milk type deleted successfully')
+      fetchMilkTypes()
+    } catch {
+      toast.error('Failed to delete milk type')
+    }
+  }
+
+  // ── Delivery Time CRUD ───────────────────────────────────────────
+  const openAddDeliveryTime = () => {
+    setEditingDeliveryTime(null)
+    setDeliveryTimeName('')
+    setDeliveryTimeDialogOpen(true)
+  }
+
+  const openEditDeliveryTime = (dt: DeliveryTime) => {
+    setEditingDeliveryTime(dt)
+    setDeliveryTimeName(dt.name)
+    setDeliveryTimeDialogOpen(true)
+  }
+
+  const handleDeliveryTimeSubmit = async () => {
+    if (!deliveryTimeName.trim()) {
+      toast.error('Delivery time name is required')
+      return
+    }
+    setDeliveryTimeSubmitting(true)
+    try {
+      if (editingDeliveryTime) {
+        const res = await fetch(`/api/delivery-times/${editingDeliveryTime.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: deliveryTimeName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Delivery time updated successfully')
+      } else {
+        const res = await fetch('/api/delivery-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: deliveryTimeName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Delivery time added successfully')
+      }
+      setDeliveryTimeDialogOpen(false)
+      fetchDeliveryTimes()
+    } catch {
+      toast.error(editingDeliveryTime ? 'Failed to update delivery time' : 'Failed to add delivery time')
+    } finally {
+      setDeliveryTimeSubmitting(false)
+    }
+  }
+
+  const handleDeleteDeliveryTime = async (id: string) => {
+    try {
+      const res = await fetch(`/api/delivery-times/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Delivery time deleted successfully')
+      fetchDeliveryTimes()
+    } catch {
+      toast.error('Failed to delete delivery time')
+    }
+  }
 
   // ── Update field ────────────────────────────────────────────────────
   const updateField = (key: keyof SettingsMap, value: string) => {
@@ -563,7 +843,249 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* ── Card 7: Data Management ──────────────────────────────── */}
+        {/* ── Card 7: Area Management ───────────────────────────────── */}
+        <Card className="rounded-xl border-gray-200 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50">
+                  <MapPin className="h-4 w-4 text-rose-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Area Management
+                  </CardTitle>
+                  <CardDescription className="text-xs text-gray-500">
+                    Manage delivery areas
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddArea}
+                className="h-8 text-xs border-rose-200 text-rose-600 hover:bg-rose-50"
+              >
+                <Plus className="h-3 w-3" />
+                Add Area
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {areasLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-rose-500" />
+              </div>
+            ) : areas.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <MapPin className="h-8 w-8 mb-2" />
+                <p className="text-sm">No areas added yet</p>
+                <p className="text-xs">Click &quot;Add Area&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {areas.map((area) => (
+                  <div
+                    key={area.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 shrink-0">
+                        <MapPin className="h-3.5 w-3.5 text-rose-600" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {area.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditArea(area)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteArea(area.id)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 8: Milk Type Management ──────────────────────────── */}
+        <Card className="rounded-xl border-gray-200 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50">
+                  <Milk className="h-4 w-4 text-sky-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Milk Type Management
+                  </CardTitle>
+                  <CardDescription className="text-xs text-gray-500">
+                    Manage milk types and pricing
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddMilkType}
+                className="h-8 text-xs border-sky-200 text-sky-600 hover:bg-sky-50"
+              >
+                <Plus className="h-3 w-3" />
+                Add Type
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {milkTypesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
+              </div>
+            ) : milkTypes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <Milk className="h-8 w-8 mb-2" />
+                <p className="text-sm">No milk types added yet</p>
+                <p className="text-xs">Click &quot;Add Type&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {milkTypes.map((mt) => (
+                  <div
+                    key={mt.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 shrink-0">
+                        <Milk className="h-3.5 w-3.5 text-sky-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {mt.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          ₨ {mt.pricePerLiter.toLocaleString()} / liter
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditMilkType(mt)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteMilkType(mt.id)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 9: Delivery Time Management ──────────────────────── */}
+        <Card className="rounded-xl border-gray-200 shadow-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
+                  <Clock className="h-4 w-4 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Delivery Time Management
+                  </CardTitle>
+                  <CardDescription className="text-xs text-gray-500">
+                    Manage delivery time slots
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddDeliveryTime}
+                className="h-8 text-xs border-teal-200 text-teal-600 hover:bg-teal-50"
+              >
+                <Plus className="h-3 w-3" />
+                Add Time
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {deliveryTimesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
+              </div>
+            ) : deliveryTimes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <Clock className="h-8 w-8 mb-2" />
+                <p className="text-sm">No delivery times added yet</p>
+                <p className="text-xs">Click &quot;Add Time&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {deliveryTimes.map((dt) => (
+                  <div
+                    key={dt.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 shrink-0">
+                        <Clock className="h-3.5 w-3.5 text-teal-600" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {dt.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDeliveryTime(dt)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteDeliveryTime(dt.id)}
+                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 10: Data Management ──────────────────────────────── */}
         <Card className="rounded-xl border-gray-200 shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2.5">
@@ -631,7 +1153,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* ── Card 8: Account ──────────────────────────────────────── */}
+        {/* ── Card 11: Account ──────────────────────────────────────── */}
         <Card className="rounded-xl border-gray-200 shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2.5">
@@ -727,9 +1249,16 @@ export default function SettingsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                toast.info('Data reset feature will be available in a future update')
-                setResetOpen(false)
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/reset', { method: 'POST' })
+                  if (!res.ok) throw new Error()
+                  toast.success('All data has been reset successfully')
+                  setResetOpen(false)
+                  fetchSettings()
+                } catch {
+                  toast.error('Failed to reset data')
+                }
               }}
               className="rounded-lg bg-red-600 hover:bg-red-700 text-white"
             >
@@ -738,6 +1267,168 @@ export default function SettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ── Area Add/Edit Dialog ─────────────────────────────────────── */}
+      <Dialog open={areaDialogOpen} onOpenChange={setAreaDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-rose-600" />
+              {editingArea ? 'Edit Area' : 'Add Area'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-gray-700">Area Name</Label>
+              <Input
+                placeholder="Enter area name"
+                value={areaName}
+                onChange={(e) => setAreaName(e.target.value)}
+                className="rounded-lg border-gray-200"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAreaSubmit()
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAreaDialogOpen(false)}
+              className="rounded-lg"
+              disabled={areaSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAreaSubmit}
+              disabled={areaSubmitting}
+              className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white min-w-[100px]"
+            >
+              {areaSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingArea ? (
+                'Update'
+              ) : (
+                'Add Area'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Milk Type Add/Edit Dialog ────────────────────────────────── */}
+      <Dialog open={milkTypeDialogOpen} onOpenChange={setMilkTypeDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Milk className="h-5 w-5 text-sky-600" />
+              {editingMilkType ? 'Edit Milk Type' : 'Add Milk Type'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-gray-700">Milk Type Name</Label>
+              <Input
+                placeholder="e.g. Fresh, Buffalo, Camel"
+                value={milkTypeName}
+                onChange={(e) => setMilkTypeName(e.target.value)}
+                className="rounded-lg border-gray-200"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-gray-700">Price per Liter (PKR)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                  ₨
+                </span>
+                <Input
+                  type="number"
+                  placeholder="60"
+                  value={milkTypePrice}
+                  onChange={(e) => setMilkTypePrice(e.target.value)}
+                  className="rounded-lg border-gray-200 pl-8"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleMilkTypeSubmit()
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setMilkTypeDialogOpen(false)}
+              className="rounded-lg"
+              disabled={milkTypeSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleMilkTypeSubmit}
+              disabled={milkTypeSubmitting}
+              className="rounded-lg bg-sky-600 hover:bg-sky-700 text-white min-w-[100px]"
+            >
+              {milkTypeSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingMilkType ? (
+                'Update'
+              ) : (
+                'Add Type'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delivery Time Add/Edit Dialog ────────────────────────────── */}
+      <Dialog open={deliveryTimeDialogOpen} onOpenChange={setDeliveryTimeDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-teal-600" />
+              {editingDeliveryTime ? 'Edit Delivery Time' : 'Add Delivery Time'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-gray-700">Delivery Time</Label>
+              <Input
+                placeholder="e.g. Morning 6-9 AM"
+                value={deliveryTimeName}
+                onChange={(e) => setDeliveryTimeName(e.target.value)}
+                className="rounded-lg border-gray-200"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleDeliveryTimeSubmit()
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeliveryTimeDialogOpen(false)}
+              className="rounded-lg"
+              disabled={deliveryTimeSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeliveryTimeSubmit}
+              disabled={deliveryTimeSubmitting}
+              className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white min-w-[100px]"
+            >
+              {deliveryTimeSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingDeliveryTime ? (
+                'Update'
+              ) : (
+                'Add Time'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

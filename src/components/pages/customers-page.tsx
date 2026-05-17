@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   Users,
   Plus,
   Search,
@@ -57,6 +67,15 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  BookOpen,
+  ArrowUpRight,
+  ArrowDownRight,
+  X,
+  CheckSquare,
+  CreditCard,
+  BarChart3,
+  Wallet,
+  Activity,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -107,30 +126,79 @@ interface Payment {
   createdAt: string
 }
 
+interface LedgerEntry {
+  id: string
+  date: string
+  description: string
+  debit: number
+  credit: number
+  balance: number
+  type: 'delivery' | 'payment'
+  status: string
+}
+
 // ── Constants ───────────────────────────────────────────────────────────
-const MILK_TYPES = ['Full Cream', 'Toned', 'Double Toned', 'Skimmed', 'Buffalo']
-const DELIVERY_TIMES = ['Morning', 'Evening', 'Both']
 const STATUSES = ['Active', 'Paused']
-const AREAS = [
-  'Gulshan-e-Iqbal',
-  'DHA',
-  'Clifton',
-  'Bahadurabad',
-  'North Nazimabad',
-  'Saddar',
-  'PECHS',
-  'Tariq Road',
-  'Defence View',
-  'Korangi',
-]
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 function formatPKR(amount: number): string {
-  return '₨' + amount.toLocaleString('en-PK')
+  return '₨' + amount.toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
 function calcMonthlyBill(dailyQty: number, pricePerLiter: number): number {
   return dailyQty * pricePerLiter * 30
+}
+
+function buildLedger(customer: CustomerDetail): LedgerEntry[] {
+  const entries: LedgerEntry[] = []
+
+  // Add delivery entries as debits (amounts owed)
+  for (const d of customer.deliveries) {
+    if (d.status === 'Delivered') {
+      entries.push({
+        id: `d-${d.id}`,
+        date: d.date,
+        description: `Milk Delivery — ${d.quantity}L × ${formatPKR(customer.pricePerLiter)}/L`,
+        debit: d.quantity * customer.pricePerLiter,
+        credit: 0,
+        balance: 0,
+        type: 'delivery',
+        status: d.status,
+      })
+    }
+  }
+
+  // Add payment entries as credits (amounts paid)
+  for (const p of customer.payments) {
+    if (p.status === 'Completed') {
+      entries.push({
+        id: `p-${p.id}`,
+        date: p.date,
+        description: `Payment — ${p.method}${p.period ? ` (${p.period})` : ''}`,
+        debit: 0,
+        credit: p.amount,
+        balance: 0,
+        type: 'payment',
+        status: p.status,
+      })
+    }
+  }
+
+  // Sort by date, then by type (payments first on same date)
+  entries.sort((a, b) => {
+    const dateCompare = a.date.localeCompare(b.date)
+    if (dateCompare !== 0) return dateCompare
+    return a.type === 'payment' ? -1 : 1
+  })
+
+  // Calculate running balance (positive = owed to business)
+  let balance = 0
+  for (const entry of entries) {
+    balance += entry.debit - entry.credit
+    entry.balance = balance
+  }
+
+  return entries
 }
 
 // ── Component ───────────────────────────────────────────────────────────
@@ -142,10 +210,15 @@ export default function CustomersPage() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [milkFilter, setMilkFilter] = useState('All')
 
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkLoading, setBulkLoading] = useState(false)
+
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [detailTab, setDetailTab] = useState('overview')
 
   // Add/Edit dialog
   const [formOpen, setFormOpen] = useState(false)
@@ -168,6 +241,11 @@ export default function CustomersPage() {
     deliveryTime: 'Morning',
     notes: '',
   })
+
+  // Dynamic options from API
+  const [areas, setAreas] = useState<{ id: string; name: string }[]>([])
+  const [milkTypes, setMilkTypes] = useState<{ id: string; name: string; pricePerLiter: number }[]>([])
+  const [deliveryTimes, setDeliveryTimes] = useState<{ id: string; name: string }[]>([])
 
   // ── Fetch customers ──────────────────────────────────────────────────
   const fetchCustomers = useCallback(async () => {
@@ -193,10 +271,37 @@ export default function CustomersPage() {
     fetchCustomers()
   }, [fetchCustomers])
 
+  // Fetch dynamic options
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        const [areasRes, milkTypesRes, deliveryTimesRes] = await Promise.all([
+          fetch('/api/areas'),
+          fetch('/api/milk-types'),
+          fetch('/api/delivery-times'),
+        ])
+        if (areasRes.ok) {
+          const data = await areasRes.json()
+          setAreas(Array.isArray(data) ? data : [])
+        }
+        if (milkTypesRes.ok) {
+          const data = await milkTypesRes.json()
+          setMilkTypes(Array.isArray(data) ? data : [])
+        }
+        if (deliveryTimesRes.ok) {
+          const data = await deliveryTimesRes.json()
+          setDeliveryTimes(Array.isArray(data) ? data : [])
+        }
+      } catch { /* ignore */ }
+    }
+    fetchOptions()
+  }, [])
+
   // ── Fetch customer detail ────────────────────────────────────────────
-  const fetchDetail = async (id: string) => {
+  const fetchDetail = async (id: string, tab?: string) => {
     setDetailLoading(true)
     setDetailOpen(true)
+    setDetailTab(tab || 'overview')
     try {
       const res = await fetch(`/api/customers/${id}`)
       if (!res.ok) throw new Error()
@@ -294,11 +399,8 @@ export default function CustomersPage() {
         body: JSON.stringify({ status: newStatus }),
       })
       if (!res.ok) throw new Error()
-      toast.success(
-        newStatus === 'Paused' ? 'Delivery paused' : 'Delivery resumed'
-      )
+      toast.success(newStatus === 'Paused' ? 'Delivery paused' : 'Delivery resumed')
       fetchCustomers()
-      // Refresh detail if open
       if (detailOpen && selectedCustomer?.id === customer.id) {
         fetchDetail(customer.id)
       }
@@ -324,6 +426,56 @@ export default function CustomersPage() {
     }
   }
 
+  // ── Bulk actions ─────────────────────────────────────────────────────
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === customers.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(customers.map((c) => c.id)))
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+  }
+
+  const handleBulkAction = async (action: 'Active' | 'Paused' | 'delete') => {
+    setBulkLoading(true)
+    try {
+      const res = await fetch('/api/customers/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds), action }),
+      })
+      if (!res.ok) throw new Error()
+      const result = await res.json()
+
+      if (action === 'delete') {
+        toast.success(`${result.count} customer(s) deleted`)
+      } else {
+        toast.success(`${result.count} customer(s) set to ${action}`)
+      }
+      clearSelection()
+      fetchCustomers()
+    } catch {
+      toast.error('Failed to perform bulk action')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   // ── Computed stats ───────────────────────────────────────────────────
   const activeCount = customers.filter((c) => c.status === 'Active').length
   const pausedCount = customers.filter((c) => c.status === 'Paused').length
@@ -331,9 +483,44 @@ export default function CustomersPage() {
     .filter((c) => c.status === 'Active')
     .reduce((sum, c) => sum + c.monthlyBill, 0)
 
+  const allSelected = customers.length > 0 && selectedIds.size === customers.length
+
+  // Ledger computed values
+  const ledger = useMemo(() => {
+    if (!selectedCustomer) return []
+    return buildLedger(selectedCustomer)
+  }, [selectedCustomer])
+
+  const ledgerSummary = useMemo(() => {
+    const totalDebit = ledger.reduce((sum, e) => sum + e.debit, 0)
+    const totalCredit = ledger.reduce((sum, e) => sum + e.credit, 0)
+    return { totalDebit, totalCredit, balance: totalDebit - totalCredit }
+  }, [ledger])
+
+  // Current month stats for overview tab
+  const currentMonthStats = useMemo(() => {
+    if (!selectedCustomer) return { deliveries: 0, deliveredLiters: 0, paymentsCount: 0, paymentsTotal: 0 }
+    const now = new Date()
+    const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+    const monthDeliveries = selectedCustomer.deliveries.filter(
+      (d) => d.date.startsWith(monthStr) && d.status === 'Delivered'
+    )
+    const monthPayments = selectedCustomer.payments.filter(
+      (p) => p.date.startsWith(monthStr) && p.status === 'Completed'
+    )
+
+    return {
+      deliveries: monthDeliveries.length,
+      deliveredLiters: monthDeliveries.reduce((s, d) => s + d.quantity, 0),
+      paymentsCount: monthPayments.length,
+      paymentsTotal: monthPayments.reduce((s, p) => s + p.amount, 0),
+    }
+  }, [selectedCustomer])
+
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* ── Page Header ─────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -417,6 +604,15 @@ export default function CustomersPage() {
         <CardContent className="p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-1">
+              {/* Select All Checkbox */}
+              <div className="flex items-center gap-2 shrink-0">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={toggleSelectAll}
+                  className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                />
+                <span className="text-xs text-gray-500 whitespace-nowrap">Select All</span>
+              </div>
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -445,9 +641,9 @@ export default function CustomersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Types</SelectItem>
-                  {MILK_TYPES.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
+                  {milkTypes.map((m) => (
+                    <SelectItem key={m.id} value={m.name}>
+                      {m.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -491,103 +687,194 @@ export default function CustomersPage() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {customers.map((customer) => (
-            <Card
-              key={customer.id}
-              className="rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-shadow py-0"
-            >
-              <CardContent className="p-5">
-                {/* Header: Name + Status */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">
-                      {customer.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-                      <span className="text-xs text-gray-500 truncate">
-                        {customer.phone}
-                      </span>
+          {customers.map((customer) => {
+            const isSelected = selectedIds.has(customer.id)
+            return (
+              <Card
+                key={customer.id}
+                className={`rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-all py-0 relative ${
+                  isSelected ? 'ring-2 ring-green-500/40 border-green-300 bg-green-50/30' : ''
+                }`}
+              >
+                <CardContent className="p-5">
+                  {/* Checkbox + Header */}
+                  <div className="flex items-start gap-2 mb-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelect(customer.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-gray-900 truncate">
+                          {customer.name}
+                        </h3>
+                        <Badge
+                          className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${
+                            customer.status === 'Active'
+                              ? 'bg-green-50 text-green-700 border-green-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}
+                          variant="outline"
+                        >
+                          {customer.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Phone className="h-3 w-3 text-gray-400 shrink-0" />
+                        <span className="text-xs text-gray-500 truncate">
+                          {customer.phone}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <Badge
-                    className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${
-                      customer.status === 'Active'
-                        ? 'bg-green-50 text-green-700 border-green-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}
-                    variant="outline"
-                  >
-                    {customer.status}
-                  </Badge>
-                </div>
 
-                {/* Area */}
-                <div className="flex items-center gap-1.5 mb-3">
-                  <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
-                  <span className="text-xs text-gray-500 truncate">
-                    {customer.area}
-                  </span>
-                </div>
-
-                {/* Badges Row */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  <Badge
-                    variant="secondary"
-                    className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0"
-                  >
-                    <Package className="h-3 w-3 mr-0.5" />
-                    {customer.dailyQty}L/day
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0"
-                  >
-                    <Milk className="h-3 w-3 mr-0.5" />
-                    {customer.milkType}
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0"
-                  >
-                    <Clock className="h-3 w-3 mr-0.5" />
-                    {customer.deliveryTime}
-                  </Badge>
-                </div>
-
-                {/* Monthly Bill */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div>
-                    <p className="text-[11px] text-gray-400">Monthly Bill</p>
-                    <p className="text-sm font-bold text-gray-900">
-                      {formatPKR(customer.monthlyBill)}
-                    </p>
+                  {/* Area */}
+                  <div className="flex items-center gap-1.5 mb-3 pl-7">
+                    <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
+                    <span className="text-xs text-gray-500 truncate">
+                      {customer.area}
+                    </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fetchDetail(customer.id)}
-                    className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8"
-                  >
-                    <Eye className="h-3.5 w-3.5 mr-1" />
-                    View Details
-                  </Button>
+
+                  {/* Badges Row */}
+                  <div className="flex flex-wrap gap-1.5 mb-3 pl-7">
+                    <Badge
+                      variant="secondary"
+                      className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0"
+                    >
+                      <Package className="h-3 w-3 mr-0.5" />
+                      {customer.dailyQty}L/day
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0"
+                    >
+                      <Milk className="h-3 w-3 mr-0.5" />
+                      {customer.milkType}
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0"
+                    >
+                      <Clock className="h-3 w-3 mr-0.5" />
+                      {customer.deliveryTime}
+                    </Badge>
+                  </div>
+
+                  {/* Monthly Bill + Actions */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 pl-7">
+                    <div>
+                      <p className="text-[11px] text-gray-400">Monthly Bill</p>
+                      <p className="text-sm font-bold text-gray-900">
+                        {formatPKR(customer.monthlyBill)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fetchDetail(customer.id)}
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8"
+                      >
+                        <Eye className="h-3.5 w-3.5 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fetchDetail(customer.id, 'ledger')}
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8"
+                      >
+                        <BookOpen className="h-3.5 w-3.5 mr-1" />
+                        Ledger
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Bulk Action Bar ─────────────────────────────────────────── */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="mx-auto max-w-5xl px-4 pb-4">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100">
+                  <CheckSquare className="h-4 w-4 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {selectedIds.size} customer{selectedIds.size !== 1 ? 's' : ''} selected
+                  </p>
+                  <p className="text-xs text-gray-500">Choose an action below</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('Active')}
+                  disabled={bulkLoading}
+                  className="h-8 text-xs border-green-200 text-green-600 hover:bg-green-50"
+                >
+                  <UserCheck className="h-3 w-3" />
+                  Set Active
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('Paused')}
+                  disabled={bulkLoading}
+                  className="h-8 text-xs border-amber-200 text-amber-600 hover:bg-amber-50"
+                >
+                  <Pause className="h-3 w-3" />
+                  Set Paused
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={bulkLoading}
+                  className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  {bulkLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3 w-3" />
+                  )}
+                  Delete
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="h-8 text-xs text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-3 w-3" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
       {/* ── Customer Detail Dialog ──────────────────────────────────── */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-3xl max-h-[92vh] p-0 overflow-hidden">
           {detailLoading ? (
             <div className="flex h-64 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-green-600" />
             </div>
           ) : selectedCustomer ? (
-            <div className="flex flex-col max-h-[90vh]">
+            <div className="flex flex-col max-h-[92vh]">
               {/* Header */}
               <div className="p-6 pb-4 border-b border-gray-100">
                 <div className="flex items-start justify-between gap-3">
@@ -600,7 +887,7 @@ export default function CustomersPage() {
                         {selectedCustomer.name}
                       </DialogTitle>
                       <DialogDescription className="text-sm text-gray-500 mt-0.5">
-                        Customer details and history
+                        Customer details and transaction history
                       </DialogDescription>
                     </div>
                   </div>
@@ -667,117 +954,314 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              {/* Scrollable Content */}
+              {/* Scrollable Content with Tabs */}
               <ScrollArea className="flex-1">
-                <div className="p-6 pt-4 space-y-5">
-                  {/* Profile Info */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                      Profile Information
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3.5 w-3.5 text-gray-400" />
-                        <div>
-                          <p className="text-[11px] text-gray-400">Phone</p>
-                          <p className="text-sm text-gray-900">{selectedCustomer.phone}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-3.5 w-3.5 text-gray-400" />
-                        <div>
-                          <p className="text-[11px] text-gray-400">Area</p>
-                          <p className="text-sm text-gray-900">{selectedCustomer.area}</p>
-                        </div>
-                      </div>
-                      <div className="col-span-2 flex items-start gap-2">
-                        <MapPin className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
-                        <div>
-                          <p className="text-[11px] text-gray-400">Address</p>
-                          <p className="text-sm text-gray-900">
-                            {selectedCustomer.address || '—'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Milk Details */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                      Milk Details
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-lg bg-gray-50 p-3">
-                        <p className="text-[11px] text-gray-400">Daily Quantity</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {selectedCustomer.dailyQty} L/day
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-gray-50 p-3">
-                        <p className="text-[11px] text-gray-400">Milk Type</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {selectedCustomer.milkType}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-gray-50 p-3">
-                        <p className="text-[11px] text-gray-400">Price per Liter</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {formatPKR(selectedCustomer.pricePerLiter)}
-                        </p>
-                      </div>
-                      <div className="rounded-lg bg-green-50 p-3">
-                        <p className="text-[11px] text-green-600">Monthly Bill</p>
-                        <p className="text-sm font-bold text-green-700">
-                          {formatPKR(selectedCustomer.monthlyBill)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Delivery Info */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                      Delivery Information
-                    </h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3.5 w-3.5 text-gray-400" />
-                        <div>
-                          <p className="text-[11px] text-gray-400">Delivery Time</p>
-                          <p className="text-sm text-gray-900">
-                            {selectedCustomer.deliveryTime}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    {selectedCustomer.notes && (
-                      <div className="mt-3 rounded-lg bg-gray-50 p-3">
-                        <p className="text-[11px] text-gray-400">Notes</p>
-                        <p className="text-sm text-gray-700">{selectedCustomer.notes}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {/* History Tabs */}
-                  <Tabs defaultValue="deliveries" className="w-full">
-                    <TabsList className="w-full">
-                      <TabsTrigger value="deliveries" className="flex-1">
+                <div className="p-6 pt-4">
+                  <Tabs value={detailTab} onValueChange={setDetailTab} className="w-full">
+                    <TabsList className="w-full grid grid-cols-4">
+                      <TabsTrigger value="overview" className="text-xs">
+                        <Activity className="h-3.5 w-3.5 mr-1" />
+                        Overview
+                      </TabsTrigger>
+                      <TabsTrigger value="ledger" className="text-xs">
+                        <BookOpen className="h-3.5 w-3.5 mr-1" />
+                        Ledger
+                      </TabsTrigger>
+                      <TabsTrigger value="deliveries" className="text-xs">
                         <Package className="h-3.5 w-3.5 mr-1" />
                         Deliveries
                       </TabsTrigger>
-                      <TabsTrigger value="payments" className="flex-1">
-                        <IndianRupee className="h-3.5 w-3.5 mr-1" />
+                      <TabsTrigger value="payments" className="text-xs">
+                        <CreditCard className="h-3.5 w-3.5 mr-1" />
                         Payments
                       </TabsTrigger>
                     </TabsList>
 
+                    {/* ── Overview Tab ─────────────────────────────── */}
+                    <TabsContent value="overview" className="mt-4 space-y-5">
+                      {/* Profile Info */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                          Profile Information
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-3.5 w-3.5 text-gray-400" />
+                            <div>
+                              <p className="text-[11px] text-gray-400">Phone</p>
+                              <p className="text-sm text-gray-900">{selectedCustomer.phone}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                            <div>
+                              <p className="text-[11px] text-gray-400">Area</p>
+                              <p className="text-sm text-gray-900">{selectedCustomer.area}</p>
+                            </div>
+                          </div>
+                          <div className="col-span-2 flex items-start gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                            <div>
+                              <p className="text-[11px] text-gray-400">Address</p>
+                              <p className="text-sm text-gray-900">
+                                {selectedCustomer.address || '—'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Milk Details */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                          Milk Details
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-lg bg-gray-50 p-3">
+                            <p className="text-[11px] text-gray-400">Daily Quantity</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {selectedCustomer.dailyQty} L/day
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 p-3">
+                            <p className="text-[11px] text-gray-400">Milk Type</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {selectedCustomer.milkType}
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 p-3">
+                            <p className="text-[11px] text-gray-400">Price per Liter</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {formatPKR(selectedCustomer.pricePerLiter)}
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-green-50 p-3">
+                            <p className="text-[11px] text-green-600">Monthly Bill</p>
+                            <p className="text-sm font-bold text-green-700">
+                              {formatPKR(selectedCustomer.monthlyBill)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Current Month Summary */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                          Current Month Summary
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-xl border border-green-100 bg-green-50/50 p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Package className="h-4 w-4 text-green-600" />
+                              <p className="text-xs font-medium text-green-700">Deliveries</p>
+                            </div>
+                            <p className="text-2xl font-bold text-green-800">
+                              {currentMonthStats.deliveries}
+                            </p>
+                            <p className="text-xs text-green-600 mt-0.5">
+                              {currentMonthStats.deliveredLiters.toFixed(1)}L delivered
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <CreditCard className="h-4 w-4 text-emerald-600" />
+                              <p className="text-xs font-medium text-emerald-700">Payments</p>
+                            </div>
+                            <p className="text-2xl font-bold text-emerald-800">
+                              {currentMonthStats.paymentsCount}
+                            </p>
+                            <p className="text-xs text-emerald-600 mt-0.5">
+                              {formatPKR(currentMonthStats.paymentsTotal)} received
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Quick Stats */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                          Quick Stats
+                        </h4>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="rounded-lg bg-gray-50 p-3 text-center">
+                            <Wallet className="h-4 w-4 text-gray-400 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-gray-900">
+                              {selectedCustomer.deliveries.filter((d) => d.status === 'Delivered').length}
+                            </p>
+                            <p className="text-[10px] text-gray-400">Total Deliveries</p>
+                          </div>
+                          <div className="rounded-lg bg-gray-50 p-3 text-center">
+                            <BarChart3 className="h-4 w-4 text-gray-400 mx-auto mb-1" />
+                            <p className="text-lg font-bold text-gray-900">
+                              {selectedCustomer.payments.filter((p) => p.status === 'Completed').length}
+                            </p>
+                            <p className="text-[10px] text-gray-400">Total Payments</p>
+                          </div>
+                          <div className={`rounded-lg p-3 text-center ${
+                            ledgerSummary.balance > 0 ? 'bg-red-50' : 'bg-green-50'
+                          }`}>
+                            <IndianRupee className={`h-4 w-4 mx-auto mb-1 ${
+                              ledgerSummary.balance > 0 ? 'text-red-400' : 'text-green-400'
+                            }`} />
+                            <p className={`text-lg font-bold ${
+                              ledgerSummary.balance > 0 ? 'text-red-700' : 'text-green-700'
+                            }`}>
+                              {formatPKR(Math.abs(ledgerSummary.balance))}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              {ledgerSummary.balance > 0 ? 'Outstanding' : ledgerSummary.balance < 0 ? 'Overpaid' : 'Settled'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      {selectedCustomer.notes && (
+                        <>
+                          <Separator />
+                          <div className="rounded-lg bg-gray-50 p-3">
+                            <p className="text-[11px] text-gray-400">Notes</p>
+                            <p className="text-sm text-gray-700">{selectedCustomer.notes}</p>
+                          </div>
+                        </>
+                      )}
+                    </TabsContent>
+
+                    {/* ── Ledger Tab ───────────────────────────────── */}
+                    <TabsContent value="ledger" className="mt-4">
+                      {ledger.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                          <BookOpen className="h-10 w-10 mb-3" />
+                          <p className="text-sm font-medium">No ledger entries yet</p>
+                          <p className="text-xs mt-1">Transactions will appear here as deliveries and payments are recorded</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Ledger Summary Cards */}
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="rounded-lg bg-red-50 p-3 text-center">
+                              <ArrowUpRight className="h-4 w-4 text-red-500 mx-auto mb-1" />
+                              <p className="text-xs text-red-600">Total Debit</p>
+                              <p className="text-base font-bold text-red-700">
+                                {formatPKR(ledgerSummary.totalDebit)}
+                              </p>
+                            </div>
+                            <div className="rounded-lg bg-green-50 p-3 text-center">
+                              <ArrowDownRight className="h-4 w-4 text-green-500 mx-auto mb-1" />
+                              <p className="text-xs text-green-600">Total Credit</p>
+                              <p className="text-base font-bold text-green-700">
+                                {formatPKR(ledgerSummary.totalCredit)}
+                              </p>
+                            </div>
+                            <div className={`rounded-lg p-3 text-center ${
+                              ledgerSummary.balance > 0 ? 'bg-amber-50' : ledgerSummary.balance < 0 ? 'bg-green-50' : 'bg-gray-50'
+                            }`}>
+                              <Wallet className={`h-4 w-4 mx-auto mb-1 ${
+                                ledgerSummary.balance > 0 ? 'text-amber-500' : 'text-green-500'
+                              }`} />
+                              <p className={`text-xs ${
+                                ledgerSummary.balance > 0 ? 'text-amber-600' : 'text-green-600'
+                              }`}>
+                                {ledgerSummary.balance > 0 ? 'Balance Due' : 'Balance'}
+                              </p>
+                              <p className={`text-base font-bold ${
+                                ledgerSummary.balance > 0 ? 'text-amber-700' : 'text-green-700'
+                              }`}>
+                                {formatPKR(Math.abs(ledgerSummary.balance))}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Ledger Table */}
+                          <div className="rounded-xl border border-gray-200 overflow-hidden">
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="bg-gray-50 hover:bg-gray-50">
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 w-[100px]">Date</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500">Description</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Debit</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Credit</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Balance</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {ledger.map((entry, idx) => (
+                                  <TableRow
+                                    key={entry.id}
+                                    className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-gray-50`}
+                                  >
+                                    <TableCell className="text-xs text-gray-600 font-mono">
+                                      {entry.date}
+                                    </TableCell>
+                                    <TableCell className="text-xs text-gray-700">
+                                      <div className="flex items-center gap-2">
+                                        {entry.type === 'delivery' ? (
+                                          <ArrowUpRight className="h-3 w-3 text-red-400 shrink-0" />
+                                        ) : (
+                                          <ArrowDownRight className="h-3 w-3 text-green-400 shrink-0" />
+                                        )}
+                                        <span className="truncate max-w-[200px]">{entry.description}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-xs text-right font-mono">
+                                      {entry.debit > 0 ? (
+                                        <span className="text-red-600 font-semibold">
+                                          {formatPKR(entry.debit)}
+                                        </span>
+                                      ) : (
+                                        <span className="text-gray-300">—</span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-xs text-right font-mono">
+                                      {entry.credit > 0 ? (
+                                        <span className="text-green-600 font-semibold">
+                                          {formatPKR(entry.credit)}
+                                        </span>
+                                      ) : (
+                                        <span className="text-gray-300">—</span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-xs text-right font-mono">
+                                      <span className={`font-semibold ${
+                                        entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400'
+                                      }`}>
+                                        {entry.balance !== 0 ? formatPKR(Math.abs(entry.balance)) : '—'}
+                                      </span>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                              <TableFooter>
+                                <TableRow className="bg-gray-100 hover:bg-gray-100">
+                                  <TableCell className="text-xs font-bold text-gray-700" colSpan={2}>
+                                    Total
+                                  </TableCell>
+                                  <TableCell className="text-xs text-right font-mono font-bold text-red-600">
+                                    {formatPKR(ledgerSummary.totalDebit)}
+                                  </TableCell>
+                                  <TableCell className="text-xs text-right font-mono font-bold text-green-600">
+                                    {formatPKR(ledgerSummary.totalCredit)}
+                                  </TableCell>
+                                  <TableCell className={`text-xs text-right font-mono font-bold ${
+                                    ledgerSummary.balance > 0 ? 'text-amber-700' : 'text-green-700'
+                                  }`}>
+                                    {formatPKR(Math.abs(ledgerSummary.balance))}
+                                  </TableCell>
+                                </TableRow>
+                              </TableFooter>
+                            </Table>
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+
+                    {/* ── Deliveries Tab ───────────────────────────── */}
                     <TabsContent value="deliveries" className="mt-3">
                       {selectedCustomer.deliveries.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
@@ -785,7 +1269,7 @@ export default function CustomersPage() {
                           <p className="text-sm">No delivery records yet</p>
                         </div>
                       ) : (
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
                           {selectedCustomer.deliveries.map((d) => (
                             <div
                               key={d.id}
@@ -823,34 +1307,42 @@ export default function CustomersPage() {
                                   </div>
                                 </div>
                               </div>
-                              <Badge
-                                variant="outline"
-                                className={`text-[10px] px-2 py-0.5 rounded-md ${
-                                  d.status === 'Delivered'
-                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                    : d.status === 'Missed'
-                                    ? 'bg-red-50 text-red-600 border-red-200'
-                                    : d.status === 'Cancelled'
-                                    ? 'bg-gray-100 text-gray-600 border-gray-200'
-                                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                                }`}
-                              >
-                                {d.status}
-                              </Badge>
+                              <div className="flex items-center gap-3">
+                                {d.status === 'Delivered' && (
+                                  <span className="text-xs font-mono text-red-600 font-semibold">
+                                    {formatPKR(d.quantity * selectedCustomer.pricePerLiter)}
+                                  </span>
+                                )}
+                                <Badge
+                                  variant="outline"
+                                  className={`text-[10px] px-2 py-0.5 rounded-md ${
+                                    d.status === 'Delivered'
+                                      ? 'bg-green-50 text-green-700 border-green-200'
+                                      : d.status === 'Missed'
+                                      ? 'bg-red-50 text-red-600 border-red-200'
+                                      : d.status === 'Cancelled'
+                                      ? 'bg-gray-100 text-gray-600 border-gray-200'
+                                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                                  }`}
+                                >
+                                  {d.status}
+                                </Badge>
+                              </div>
                             </div>
                           ))}
                         </div>
                       )}
                     </TabsContent>
 
+                    {/* ── Payments Tab ─────────────────────────────── */}
                     <TabsContent value="payments" className="mt-3">
                       {selectedCustomer.payments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                          <IndianRupee className="h-8 w-8 mb-2" />
+                          <CreditCard className="h-8 w-8 mb-2" />
                           <p className="text-sm">No payment records yet</p>
                         </div>
                       ) : (
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
                           {selectedCustomer.payments.map((p) => (
                             <div
                               key={p.id}
@@ -971,9 +1463,9 @@ export default function CustomersPage() {
                     <SelectValue placeholder="Select area" />
                   </SelectTrigger>
                   <SelectContent>
-                    {AREAS.map((a) => (
-                      <SelectItem key={a} value={a}>
-                        {a}
+                    {areas.map((a) => (
+                      <SelectItem key={a.id} value={a.name}>
+                        {a.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -988,7 +1480,7 @@ export default function CustomersPage() {
               </Label>
               <Input
                 id="address"
-                placeholder="Street / house number"
+                placeholder="Street, building, landmark..."
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 className="rounded-lg border-gray-200"
@@ -999,13 +1491,13 @@ export default function CustomersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="dailyQty" className="text-sm font-medium">
-                  Daily Quantity (L)
+                  Daily Qty (Liters)
                 </Label>
                 <Input
                   id="dailyQty"
                   type="number"
-                  min="0.5"
-                  step="0.5"
+                  min={0.5}
+                  step={0.5}
                   value={form.dailyQty}
                   onChange={(e) =>
                     setForm({ ...form, dailyQty: parseFloat(e.target.value) || 0 })
@@ -1017,15 +1509,22 @@ export default function CustomersPage() {
                 <Label className="text-sm font-medium">Milk Type</Label>
                 <Select
                   value={form.milkType}
-                  onValueChange={(v) => setForm({ ...form, milkType: v })}
+                  onValueChange={(v) => {
+                    const selected = milkTypes.find((m) => m.name === v)
+                    setForm({
+                      ...form,
+                      milkType: v,
+                      pricePerLiter: selected ? selected.pricePerLiter : form.pricePerLiter,
+                    })
+                  }}
                 >
                   <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MILK_TYPES.map((m) => (
-                      <SelectItem key={m} value={m}>
-                        {m}
+                    {milkTypes.map((m) => (
+                      <SelectItem key={m.id} value={m.name}>
+                        {m.name} (₨{m.pricePerLiter}/L)
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1033,17 +1532,16 @@ export default function CustomersPage() {
               </div>
             </div>
 
-            {/* Price per Liter + Delivery Time */}
+            {/* Price + Delivery Time */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="pricePerLiter" className="text-sm font-medium">
-                  Price per Liter (PKR)
+                  Price per Liter (₨)
                 </Label>
                 <Input
                   id="pricePerLiter"
                   type="number"
-                  min="0"
-                  step="5"
+                  min={0}
                   value={form.pricePerLiter}
                   onChange={(e) =>
                     setForm({ ...form, pricePerLiter: parseFloat(e.target.value) || 0 })
@@ -1058,12 +1556,12 @@ export default function CustomersPage() {
                   onValueChange={(v) => setForm({ ...form, deliveryTime: v })}
                 >
                   <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DELIVERY_TIMES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
+                    {deliveryTimes.map((t) => (
+                      <SelectItem key={t.id} value={t.name}>
+                        {t.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1073,12 +1571,10 @@ export default function CustomersPage() {
 
             {/* Monthly Bill Preview */}
             <div className="rounded-lg bg-green-50 p-3 flex items-center justify-between">
-              <span className="text-sm text-green-700 font-medium">
-                Estimated Monthly Bill
-              </span>
-              <span className="text-sm font-bold text-green-700">
+              <p className="text-sm text-green-700 font-medium">Estimated Monthly Bill</p>
+              <p className="text-lg font-bold text-green-800">
                 {formatPKR(calcMonthlyBill(form.dailyQty, form.pricePerLiter))}
-              </span>
+              </p>
             </div>
 
             {/* Notes */}
@@ -1088,15 +1584,15 @@ export default function CustomersPage() {
               </Label>
               <Textarea
                 id="notes"
-                placeholder="Any special instructions..."
+                placeholder="Additional notes..."
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="rounded-lg border-gray-200 min-h-[72px]"
+                className="rounded-lg border-gray-200 min-h-[60px]"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
             <Button
               variant="outline"
               onClick={() => setFormOpen(false)}
@@ -1109,26 +1605,20 @@ export default function CustomersPage() {
               disabled={formLoading}
               className="bg-green-600 hover:bg-green-700 text-white rounded-lg"
             >
-              {formLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : editingCustomer ? (
-                'Update Customer'
-              ) : (
-                'Add Customer'
-              )}
+              {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+              {editingCustomer ? 'Update Customer' : 'Add Customer'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirmation Dialog ──────────────────────────────── */}
+      {/* ── Delete Confirm Dialog ──────────────────────────────────── */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Customer</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this customer and all their delivery and payment
-              records. This action cannot be undone.
+              This will permanently delete this customer and all their delivery and payment records. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

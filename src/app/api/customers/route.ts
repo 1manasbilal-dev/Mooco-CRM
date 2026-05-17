@@ -39,11 +39,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, phone, area, address, dailyQty, milkType, pricePerLiter, status, deliveryTime, notes } = body
+    const { name, phone, area, address, dailyQty, milkType, pricePerLiter, status, deliveryTime, notes, monthlyBill } = body
 
     if (!name || !phone || !area) {
       return NextResponse.json({ error: 'Name, phone, and area are required' }, { status: 400 })
     }
+
+    const resolvedDailyQty = dailyQty ?? 1
+    const resolvedPricePerLiter = pricePerLiter ?? 60
+    const resolvedMonthlyBill = monthlyBill ?? (resolvedDailyQty * resolvedPricePerLiter * 30)
 
     const customer = await db.customer.create({
       data: {
@@ -51,11 +55,12 @@ export async function POST(request: NextRequest) {
         phone,
         area,
         address: address || '',
-        dailyQty: dailyQty ?? 1,
+        dailyQty: resolvedDailyQty,
         milkType: milkType || 'Full Cream',
-        pricePerLiter: pricePerLiter ?? 60,
+        pricePerLiter: resolvedPricePerLiter,
         status: status || 'Active',
         deliveryTime: deliveryTime || 'Morning',
+        monthlyBill: resolvedMonthlyBill,
         notes: notes || '',
       },
     })

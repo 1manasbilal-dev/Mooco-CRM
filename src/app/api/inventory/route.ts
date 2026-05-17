@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
         category: category || 'Milk',
         unit: unit || 'liters',
         pricePerUnit: pricePerUnit ?? 0,
+        status: 'Active',
       },
     })
 

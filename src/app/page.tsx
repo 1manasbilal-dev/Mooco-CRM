@@ -19,7 +19,7 @@ import {
   Users,
   Truck,
   Wallet,
-  BarChart3,
+
   Package,
   Settings,
   Search,
@@ -34,7 +34,7 @@ import LeadsPage from '@/components/pages/leads-page'
 import CustomersPage from '@/components/pages/customers-page'
 import DeliveriesPage from '@/components/pages/deliveries-page'
 import PaymentsPage from '@/components/pages/payments-page'
-import ReportsPage from '@/components/pages/reports-page'
+
 import InventoryPage from '@/components/pages/inventory-page'
 import SettingsPage from '@/components/pages/settings-page'
 
@@ -44,7 +44,7 @@ const navItems = [
   { id: 'customers', label: 'Customers', icon: Users },
   { id: 'deliveries', label: 'Deliveries', icon: Truck },
   { id: 'payments', label: 'Payments', icon: Wallet },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
+
   { id: 'inventory', label: 'Inventory', icon: Package },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
@@ -55,7 +55,7 @@ const pageComponents: Record<string, React.ComponentType> = {
   customers: CustomersPage,
   deliveries: DeliveriesPage,
   payments: PaymentsPage,
-  reports: ReportsPage,
+
   inventory: InventoryPage,
   settings: SettingsPage,
 }

@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Package,
   Plus,
@@ -43,7 +43,10 @@ import {
   TrendingUp,
   IndianRupee,
   Milk,
+  CheckSquare,
   X,
+  Power,
+  PowerOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -53,6 +56,7 @@ interface InventoryItem {
   category: string
   unit: string
   pricePerUnit: number
+  status: string
   todaySold: number
   todayRevenue: number
   salesCount: number
@@ -80,10 +84,14 @@ const categoryConfig: Record<string, { color: string; bg: string }> = {
   Other: { color: 'text-gray-700', bg: 'bg-gray-50 border-gray-200' },
 }
 
+const categories = ['all', 'Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
+const statusFilters = ['all', 'Active', 'Inactive'] as const
+
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddItemDialog, setShowAddItemDialog] = useState(false)
   const [showEditItemDialog, setShowEditItemDialog] = useState(false)
@@ -93,6 +101,10 @@ export default function InventoryPage() {
   const [saving, setSaving] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
   const [salesHistory, setSalesHistory] = useState<SaleRecord[]>([])
+
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   // Add item form
   const [itemName, setItemName] = useState('')
@@ -233,6 +245,34 @@ export default function InventoryPage() {
     }
   }
 
+  const handleBulkAction = async (action: 'Active' | 'Inactive' | 'delete') => {
+    if (selectedIds.size === 0) return
+    try {
+      setBulkActionLoading(true)
+      const res = await fetch('/api/inventory/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds), action }),
+      })
+      if (res.ok) {
+        const count = selectedIds.size
+        if (action === 'delete') {
+          toast.success(`${count} product${count > 1 ? 's' : ''} deleted`)
+        } else {
+          toast.success(`${count} product${count > 1 ? 's' : ''} set to ${action}`)
+        }
+        setSelectedIds(new Set())
+        fetchItems()
+      } else {
+        toast.error('Bulk action failed')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
   const fetchSalesHistory = async (itemId: string) => {
     try {
       const res = await fetch(`/api/sales?itemId=${itemId}&startDate=${getDateStr(7)}&endDate=${new Date().toISOString().split('T')[0]}`)
@@ -285,6 +325,34 @@ export default function InventoryPage() {
     return d.toISOString().split('T')[0]
   }
 
+  // Toggle selection for a single item
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  // Select/deselect all filtered items
+  const toggleSelectAll = () => {
+    const filteredIds = filteredItems.map(i => i.id)
+    const allSelected = filteredIds.every(id => selectedIds.has(id))
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredIds))
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+  }
+
   // Summary calculations
   const totalItems = items.length
   const totalSoldToday = items.reduce((sum, i) => sum + i.todaySold, 0)
@@ -295,7 +363,8 @@ export default function InventoryPage() {
   const filteredItems = items.filter((item) => {
     const matchCategory = categoryFilter === 'all' || item.category === categoryFilter
     const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchCategory && matchSearch
+    const matchStatus = statusFilter === 'all' || item.status === statusFilter
+    return matchCategory && matchSearch && matchStatus
   })
 
   // Category counts
@@ -304,10 +373,12 @@ export default function InventoryPage() {
     categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1
   })
 
-  const categories = ['all', 'Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
+  // Check if all filtered items are selected
+  const allFilteredSelected = filteredItems.length > 0 && filteredItems.every(i => selectedIds.has(i.id))
+  const someFilteredSelected = filteredItems.some(i => selectedIds.has(i.id)) && !allFilteredSelected
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -384,10 +455,23 @@ export default function InventoryPage() {
         </Card>
       </div>
 
-      {/* Filter & Search */}
+      {/* Filter & Search Bar */}
       <Card className="rounded-xl border-gray-200 shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={allFilteredSelected}
+                ref={(el) => {
+                  if (el) {
+                    (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = someFilteredSelected
+                  }
+                }}
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all products"
+              />
+              <span className="text-sm text-gray-500 whitespace-nowrap">Select All</span>
+            </div>
             <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -396,6 +480,27 @@ export default function InventoryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+            </div>
+            <div className="flex items-center gap-2">
+              {statusFilters.map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`
+                    shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all
+                    ${statusFilter === status
+                      ? status === 'Active'
+                        ? 'bg-green-500 text-white'
+                        : status === 'Inactive'
+                          ? 'bg-gray-500 text-white'
+                          : 'bg-green-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }
+                  `}
+                >
+                  {status === 'all' ? 'All Status' : status}
+                </button>
+              ))}
             </div>
             <span className="text-sm text-gray-500 whitespace-nowrap">
               {filteredItems.length} products
@@ -450,15 +555,41 @@ export default function InventoryPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => {
             const catStyle = categoryConfig[item.category] || categoryConfig.Other
+            const isSelected = selectedIds.has(item.id)
+            const isInactive = item.status === 'Inactive'
             return (
-              <Card key={item.id} className="rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <Card
+                key={item.id}
+                className={`
+                  rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 relative
+                  ${isInactive ? 'opacity-60' : ''}
+                  ${isSelected ? 'ring-2 ring-green-500 ring-offset-1' : ''}
+                `}
+              >
                 <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-3">
+                  {/* Top row: Checkbox + Name + Status Badge */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="pt-0.5">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelect(item.id)}
+                        aria-label={`Select ${item.name}`}
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
                         <Badge variant="outline" className={`shrink-0 text-[10px] px-2 py-0 ${catStyle.bg} ${catStyle.color}`}>
                           {item.category}
+                        </Badge>
+                        <Badge
+                          className={`shrink-0 text-[10px] px-2 py-0 border-0 ${
+                            item.status === 'Active'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {item.status === 'Active' ? '● Active' : '○ Inactive'}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-500">
@@ -485,6 +616,7 @@ export default function InventoryPage() {
                     <Button
                       onClick={() => openRecordSale(item)}
                       className="flex-1 bg-green-500 hover:bg-green-600 text-white h-9 rounded-lg text-sm"
+                      disabled={isInactive}
                     >
                       <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
                       Record Sale
@@ -523,6 +655,77 @@ export default function InventoryPage() {
           })}
         </div>
       )}
+
+      {/* Bulk Action Bar */}
+      <div
+        className={`
+          fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out
+          ${selectedIds.size > 0
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-full opacity-0 pointer-events-none'
+          }
+        `}
+      >
+        <div className="bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 gap-4">
+              {/* Left: Selection info */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+                  <CheckSquare className="h-4 w-4 text-green-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                  {selectedIds.size} product{selectedIds.size !== 1 ? 's' : ''} selected
+                </span>
+              </div>
+
+              {/* Right: Actions */}
+              <div className="flex items-center gap-2 overflow-x-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('Active')}
+                  disabled={bulkActionLoading}
+                  className="rounded-lg text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 whitespace-nowrap"
+                >
+                  <Power className="h-3.5 w-3.5 mr-1.5" />
+                  Set Active
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('Inactive')}
+                  disabled={bulkActionLoading}
+                  className="rounded-lg text-gray-600 border-gray-200 hover:bg-gray-50 whitespace-nowrap"
+                >
+                  <PowerOff className="h-3.5 w-3.5 mr-1.5" />
+                  Set Inactive
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={bulkActionLoading}
+                  className="rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 whitespace-nowrap"
+                >
+                  {bulkActionLoading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
+                  Delete
+                </Button>
+                <div className="w-px h-6 bg-gray-200 mx-1 hidden sm:block" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="rounded-lg text-gray-500 hover:text-gray-700 whitespace-nowrap"
+                >
+                  <X className="h-3.5 w-3.5 mr-1.5" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Add Item Dialog */}
       <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>

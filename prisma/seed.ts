@@ -4,6 +4,14 @@ const AREAS = ['Gulshan-e-Iqbal', 'DHA Phase 5', 'Clifton Block 2', 'Bahadurabad
 const ROUTES = ['Route A - Gulshan', 'Route B - DHA', 'Route C - Clifton', 'Route D - PECHS', 'Route E - North Nazimabad']
 const SOURCES = ['Walk-in', 'Phone', 'Referral', 'Online', 'Ad']
 const PAYMENT_METHODS = ['Cash', 'UPI', 'Bank Transfer', 'Cheque']
+const MILK_TYPES = [
+  { name: 'Full Cream', pricePerLiter: 60 },
+  { name: 'Toned', pricePerLiter: 55 },
+  { name: 'Double Toned', pricePerLiter: 45 },
+  { name: 'Skimmed', pricePerLiter: 50 },
+  { name: 'Buffalo', pricePerLiter: 80 },
+]
+const DELIVERY_TIMES = ['Morning', 'Evening', 'Both']
 
 function randomItem<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
@@ -16,17 +24,50 @@ function getDateStr(daysAgo: number): string {
 }
 
 async function seed() {
-  console.log('🌱 Seeding database...')
+  console.log('🌱 Seeding database (only if empty)...')
 
-  // Clear existing data
-  await db.sale.deleteMany()
-  await db.payment.deleteMany()
-  await db.delivery.deleteMany()
-  await db.customer.deleteMany()
-  await db.lead.deleteMany()
-  await db.inventoryItem.deleteMany()
-  await db.shopSetting.deleteMany()
-  await db.dailySummary.deleteMany()
+  // ── Seed Areas (if empty) ────────────────────────────
+  const existingAreas = await db.area.count()
+  if (existingAreas === 0) {
+    console.log('  Seeding areas...')
+    for (const name of AREAS) {
+      await db.area.create({ data: { name } })
+    }
+  } else {
+    console.log(`  Areas already exist (${existingAreas}), skipping.`)
+  }
+
+  // ── Seed Milk Types (if empty) ───────────────────────
+  const existingMilkTypes = await db.milkType.count()
+  if (existingMilkTypes === 0) {
+    console.log('  Seeding milk types...')
+    for (const mt of MILK_TYPES) {
+      await db.milkType.create({ data: mt })
+    }
+  } else {
+    console.log(`  Milk types already exist (${existingMilkTypes}), skipping.`)
+  }
+
+  // ── Seed Delivery Times (if empty) ───────────────────
+  const existingDeliveryTimes = await db.deliveryTime.count()
+  if (existingDeliveryTimes === 0) {
+    console.log('  Seeding delivery times...')
+    for (const name of DELIVERY_TIMES) {
+      await db.deliveryTime.create({ data: { name } })
+    }
+  } else {
+    console.log(`  Delivery times already exist (${existingDeliveryTimes}), skipping.`)
+  }
+
+  // ── Check if we should seed the rest ─────────────────
+  const existingCustomers = await db.customer.count()
+  if (existingCustomers > 0) {
+    console.log(`  Data already exists (${existingCustomers} customers), skipping full seed.`)
+    console.log('✅ Seed complete (no data overwritten).')
+    return
+  }
+
+  // ── Only seed demo data if database is empty ─────────
 
   // Shop settings
   const settings = [
@@ -69,7 +110,6 @@ async function seed() {
   }
 
   // Create sales for last 30 days
-  // Daily typical quantities for each product
   const dailyQtyMap: Record<string, [number, number]> = {
     'Full Cream Milk': [120, 180],
     'Toned Milk': [60, 100],
@@ -217,7 +257,7 @@ async function seed() {
     })
   }
 
-  console.log('✅ Database seeded successfully!')
+  console.log('✅ Database seeded successfully (full demo data)!')
   console.log(`  - 12 leads`)
   console.log(`  - ${createdCustomers.length} customers`)
   console.log(`  - Deliveries for 30 days`)
@@ -226,6 +266,9 @@ async function seed() {
   console.log(`  - Sales for 30 days`)
   console.log(`  - ${settings.length} shop settings`)
   console.log(`  - 30 daily summaries`)
+  console.log(`  - ${AREAS.length} areas`)
+  console.log(`  - ${MILK_TYPES.length} milk types`)
+  console.log(`  - ${DELIVERY_TIMES.length} delivery times`)
 }
 
 seed()
