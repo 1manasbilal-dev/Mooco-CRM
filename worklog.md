@@ -107,3 +107,30 @@ Stage Summary:
 - Status support for inventory items (Active/Inactive)
 - Bulk actions working
 - Lint passes clean
+
+---
+Task ID: 7
+Agent: Main Agent
+Task: Fix app crash after update - Prisma client models not synced
+
+Work Log:
+- Identified root cause: Prisma schema had Area, MilkType, DeliveryTime models but db:push had never been run after they were added
+- The Prisma client was stale — db.area, db.milkType, db.deliveryTime were all undefined
+- This caused all 3 API endpoints (/api/areas, /api/milk-types, /api/delivery-times) to return 500 errors
+- Ran `bun run db:push` to sync schema and regenerate Prisma client
+- Restarted the dev server to pick up the new Prisma client
+- Verified all API endpoints return 200 with correct data
+- Removed orphaned Reports page component file (reports-page.tsx) and API route (/api/reports)
+- Ran lint — passes clean
+- Verified seed.ts is conditional (only seeds if DB is empty, doesn't overwrite real data)
+- Verified Reset API re-seeds default Areas, MilkTypes, DeliveryTimes after clearing data
+- Verified all forms (Leads, Customers) use dynamic dropdowns from API for Area, MilkType, DeliveryTime
+- Verified Customer form auto-fills price when MilkType is selected
+
+Stage Summary:
+- App crash fixed — root cause was Prisma client not regenerated after schema changes
+- All 3 new API endpoints working: Areas (10), MilkTypes (5), DeliveryTimes (3)
+- Reports page and API completely removed (file + route)
+- Database persistence: seed.ts is conditional, won't overwrite real data on redeploy
+- All forms use dynamic data from API (Areas, MilkTypes, DeliveryTimes)
+- Lint passes clean
