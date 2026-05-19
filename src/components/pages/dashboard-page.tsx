@@ -165,36 +165,39 @@ interface KPICardProps {
   iconBg: string
   trend?: { value: number; direction: 'up' | 'down' }
   accentBg: string
+  accentBorder: string
 }
 
-function KPICard({ label, value, icon, iconBg, trend, accentBg }: KPICardProps) {
+function KPICard({ label, value, icon, iconBg, trend, accentBg, accentBorder }: KPICardProps) {
   return (
-    <Card className={`rounded-xl border-gray-200 shadow-sm overflow-hidden relative ${accentBg}`}>
-      <CardContent className="p-5">
+    <Card
+      className={`group rounded-xl border shadow-sm overflow-hidden relative transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${accentBorder} ${accentBg}`}
+    >
+      <CardContent className="p-3 md:p-5">
         <div className="flex items-start justify-between">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg}`}
+            className={`flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 ${iconBg}`}
           >
             {icon}
           </div>
           {trend && (
             <div
-              className={`flex items-center gap-0.5 text-xs font-medium ${
+              className={`flex items-center gap-0.5 text-[10px] md:text-xs font-medium ${
                 trend.direction === 'up' ? 'text-green-600' : 'text-red-500'
               }`}
             >
               {trend.direction === 'up' ? (
-                <TrendingUp className="h-3.5 w-3.5" />
+                <TrendingUp className="h-3 w-3 md:h-3.5 md:w-3.5" />
               ) : (
-                <TrendingDown className="h-3.5 w-3.5" />
+                <TrendingDown className="h-3 w-3 md:h-3.5 md:w-3.5" />
               )}
               {trend.value}%
             </div>
           )}
         </div>
-        <div className="mt-3">
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+        <div className="mt-2 md:mt-3">
+          <p className="text-xs md:text-sm font-medium text-gray-500">{label}</p>
+          <p className="mt-0.5 md:mt-1 text-lg md:text-2xl font-bold text-gray-900">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -205,7 +208,7 @@ function KPICard({ label, value, icon, iconBg, trend, accentBg }: KPICardProps) 
 function SalesTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) {
   if (!active || !payload || !payload.length) return null
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg">
+    <div className="rounded-lg border border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-2 shadow-lg">
       <p className="mb-1 text-xs font-medium text-gray-500">{label}</p>
       {payload.map((entry, index) => (
         <p key={index} className="text-sm font-semibold" style={{ color: entry.color }}>
@@ -230,14 +233,14 @@ function SalesTooltip({ active, payload, label }: { active?: boolean; payload?: 
 function KPISkeleton() {
   return (
     <Card className="rounded-xl border-gray-200 shadow-sm">
-      <CardContent className="p-5">
+      <CardContent className="p-3 md:p-5">
         <div className="flex items-start justify-between">
-          <Skeleton className="h-10 w-10 rounded-lg" />
+          <Skeleton className="h-8 w-8 md:h-10 md:w-10 rounded-lg" />
           <Skeleton className="h-4 w-12" />
         </div>
-        <div className="mt-3 space-y-2">
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="h-7 w-24" />
+        <div className="mt-2 md:mt-3 space-y-1.5 md:space-y-2">
+          <Skeleton className="h-3 w-16 md:w-20" />
+          <Skeleton className="h-6 w-20 md:h-7 md:w-24" />
         </div>
       </CardContent>
     </Card>
@@ -247,11 +250,11 @@ function KPISkeleton() {
 function ChartSkeleton() {
   return (
     <Card className="rounded-xl border-gray-200 shadow-sm">
-      <CardHeader className="pb-2">
-        <Skeleton className="h-5 w-40" />
+      <CardHeader className="pb-0 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
+        <Skeleton className="h-4 md:h-5 w-28 md:w-40" />
       </CardHeader>
-      <CardContent className="px-6 pb-6">
-        <Skeleton className="h-64 w-full rounded-lg" />
+      <CardContent className="px-3 md:px-6 pb-4 md:pb-6 pt-2">
+        <Skeleton className="h-48 md:h-64 w-full rounded-lg" />
       </CardContent>
     </Card>
   )
@@ -260,20 +263,19 @@ function ChartSkeleton() {
 function ListSkeleton() {
   return (
     <Card className="rounded-xl border-gray-200 shadow-sm">
-      <CardHeader className="pb-2">
-        <Skeleton className="h-5 w-40" />
+      <CardHeader className="pb-0 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
+        <Skeleton className="h-4 md:h-5 w-28 md:w-40" />
       </CardHeader>
-      <CardContent className="px-6 pb-6">
-        <div className="space-y-4">
+      <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+        <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-3 w-20" />
+            <div key={i} className="flex items-center justify-between min-h-[44px]">
+              <div className="space-y-1.5 md:space-y-2">
+                <Skeleton className="h-3.5 md:h-4 w-20 md:w-28" />
+                <Skeleton className="h-3 w-16 md:w-20" />
               </div>
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="h-5 w-16 rounded-full" />
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Skeleton className="h-5 w-12 md:w-16 rounded-full" />
               </div>
             </div>
           ))}
@@ -314,33 +316,36 @@ export default function DashboardPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* ── Page Header ────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-            <LayoutDashboard className="h-5 w-5 text-green-600" />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm">
+            <LayoutDashboard className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-sm text-gray-500">Overview of your dairy business</p>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="hidden md:block text-sm text-gray-500">Overview of your dairy business</p>
           </div>
         </div>
         <Badge
           variant="outline"
-          className="flex items-center gap-1.5 self-start border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 sm:self-auto"
+          className="flex items-center gap-1 md:gap-1.5 border-gray-200 px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-gray-600"
         >
-          <CalendarDays className="h-3.5 w-3.5" />
-          {today}
+          <CalendarDays className="h-3 w-3 md:h-3.5 md:w-3.5" />
+          <span className="hidden sm:inline">{today}</span>
+          <span className="sm:hidden">
+            {new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}
+          </span>
         </Badge>
       </div>
 
       {/* ── KPI Cards ──────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 md:gap-4 md:grid-cols-3 xl:grid-cols-5">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => <KPISkeleton key={i} />)
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
             Failed to load KPI data
           </div>
         ) : (
@@ -348,41 +353,46 @@ export default function DashboardPage() {
             <KPICard
               label="Active Customers"
               value={data?.totalActiveCustomers.toLocaleString() ?? '0'}
-              icon={<Users className="h-5 w-5 text-green-600" />}
+              icon={<Users className="h-4 w-4 md:h-5 md:w-5 text-green-600" />}
               iconBg="bg-green-100"
               accentBg="bg-gradient-to-br from-white to-green-50/40"
+              accentBorder="border-green-200/60"
               trend={{ value: 12, direction: 'up' }}
             />
             <KPICard
               label="New Leads"
               value={data?.newLeadsToday.toLocaleString() ?? '0'}
-              icon={<UserPlus className="h-5 w-5 text-blue-600" />}
+              icon={<UserPlus className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />}
               iconBg="bg-blue-100"
               accentBg="bg-gradient-to-br from-white to-blue-50/40"
+              accentBorder="border-blue-200/60"
               trend={{ value: 8, direction: 'up' }}
             />
             <KPICard
               label="Milk Delivered"
               value={`${data?.milkDeliveredToday.toLocaleString() ?? '0'}L`}
-              icon={<Droplets className="h-5 w-5 text-emerald-600" />}
+              icon={<Droplets className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />}
               iconBg="bg-emerald-100"
               accentBg="bg-gradient-to-br from-white to-emerald-50/40"
+              accentBorder="border-emerald-200/60"
               trend={{ value: 5, direction: 'up' }}
             />
             <KPICard
               label="Revenue Today"
               value={formatPKR(data?.revenueToday ?? 0)}
-              icon={<DollarSign className="h-5 w-5 text-amber-600" />}
+              icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5 text-amber-600" />}
               iconBg="bg-amber-100"
               accentBg="bg-gradient-to-br from-white to-amber-50/40"
+              accentBorder="border-amber-200/60"
               trend={{ value: 15, direction: 'up' }}
             />
             <KPICard
               label="Pending Dues"
               value={formatPKR(data?.pendingPayments ?? 0)}
-              icon={<AlertCircle className="h-5 w-5 text-red-500" />}
+              icon={<AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500" />}
               iconBg="bg-red-100"
               accentBg="bg-gradient-to-br from-white to-red-50/40"
+              accentBorder="border-red-200/60"
               trend={{ value: 3, direction: 'down' }}
             />
           </>
@@ -390,35 +400,35 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Charts Section ─────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
         {loading ? (
           <>
             <ChartSkeleton />
             <ChartSkeleton />
           </>
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
             Failed to load chart data
           </div>
         ) : (
           <>
             {/* Monthly Sales Trend */}
-            <Card className="rounded-xl border-gray-200 shadow-sm">
-              <CardHeader className="pb-0">
-                <CardTitle className="text-base font-semibold text-gray-800">
+            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+              <CardHeader className="pb-0 px-3 md:px-6 pt-4 md:pt-6">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
                   Monthly Sales Trend
                 </CardTitle>
-                <p className="text-xs text-gray-400">Revenue over the last 30 days</p>
+                <p className="text-[10px] md:text-xs text-gray-400">Revenue over the last 30 days</p>
               </CardHeader>
-              <CardContent className="pt-2">
-                <div className="h-72">
+              <CardContent className="px-2 md:px-4 pt-2 pb-3 md:pb-4">
+                <div className="h-48 md:h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={(data?.monthlySalesTrend ?? []).map((d) => ({
                         ...d,
                         dateLabel: formatChartDate(d.date),
                       }))}
-                      margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+                      margin={{ top: 5, right: 5, left: -15, bottom: 0 }}
                     >
                       <defs>
                         <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
@@ -429,16 +439,17 @@ export default function DashboardPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis
                         dataKey="dateLabel"
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        tick={{ fontSize: 9, fill: '#9ca3af' }}
                         tickLine={false}
                         axisLine={{ stroke: '#e5e7eb' }}
                         interval="preserveStartEnd"
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        tick={{ fontSize: 9, fill: '#9ca3af' }}
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(v: number) => `₨${(v / 1000).toFixed(0)}k`}
+                        width={45}
                       />
                       <Tooltip content={<SalesTooltip />} />
                       <Area
@@ -446,10 +457,10 @@ export default function DashboardPage() {
                         dataKey="totalRevenue"
                         name="totalRevenue"
                         stroke="#22c55e"
-                        strokeWidth={2.5}
+                        strokeWidth={2}
                         fill="url(#revenueGradient)"
                         dot={false}
-                        activeDot={{ r: 5, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }}
+                        activeDot={{ r: 4, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -458,43 +469,44 @@ export default function DashboardPage() {
             </Card>
 
             {/* Customer Growth */}
-            <Card className="rounded-xl border-gray-200 shadow-sm">
-              <CardHeader className="pb-0">
-                <CardTitle className="text-base font-semibold text-gray-800">
+            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+              <CardHeader className="pb-0 px-3 md:px-6 pt-4 md:pt-6">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
                   Customer Growth
                 </CardTitle>
-                <p className="text-xs text-gray-400">New customers by month</p>
+                <p className="text-[10px] md:text-xs text-gray-400">New customers by month</p>
               </CardHeader>
-              <CardContent className="pt-2">
-                <div className="h-72">
+              <CardContent className="px-2 md:px-4 pt-2 pb-3 md:pb-4">
+                <div className="h-48 md:h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={(data?.customerGrowth ?? []).map((d) => ({
                         ...d,
                         monthLabel: formatMonth(d.month),
                       }))}
-                      margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+                      margin={{ top: 5, right: 5, left: -15, bottom: 0 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                       <XAxis
                         dataKey="monthLabel"
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        tick={{ fontSize: 9, fill: '#9ca3af' }}
                         tickLine={false}
                         axisLine={{ stroke: '#e5e7eb' }}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        tick={{ fontSize: 9, fill: '#9ca3af' }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
+                        width={30}
                       />
                       <Tooltip content={<SalesTooltip />} />
                       <Bar
                         dataKey="count"
                         name="count"
                         fill="#3b82f6"
-                        radius={[6, 6, 0, 0]}
-                        maxBarSize={48}
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={40}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -506,55 +518,55 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Recent Deliveries & Payments ───────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
         {loading ? (
           <>
             <ListSkeleton />
             <ListSkeleton />
           </>
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
             Failed to load recent activity
           </div>
         ) : (
           <>
             {/* Recent Deliveries */}
-            <Card className="rounded-xl border-gray-200 shadow-sm">
-              <CardHeader className="pb-2">
+            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+              <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
-                    <Truck className="h-3.5 w-3.5 text-green-600" />
+                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100">
+                    <Truck className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-600" />
                   </div>
-                  <CardTitle className="text-base font-semibold text-gray-800">
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
                     Recent Deliveries
                   </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="px-6 pb-6">
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
                 {(data?.recentDeliveries ?? []).length === 0 ? (
-                  <p className="py-8 text-center text-sm text-gray-400">
+                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
                     No recent deliveries
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {(data?.recentDeliveries ?? []).slice(0, 5).map((d) => {
                       const statusStyle = deliveryStatusConfig(d.status)
                       return (
                         <div
                           key={d.id}
-                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 transition-colors hover:bg-gray-50"
+                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 active:scale-[0.98]"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-gray-800">
+                            <p className="truncate text-xs md:text-sm font-medium text-gray-800">
                               {d.customer.name}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-[10px] md:text-xs text-gray-400">
                               {d.quantity}L · {formatDate(d.date)}
                             </p>
                           </div>
                           <Badge
                             variant="outline"
-                            className={`ml-2 shrink-0 text-[11px] ${statusStyle.bg}`}
+                            className={`ml-2 shrink-0 text-[10px] md:text-[11px] ${statusStyle.bg}`}
                           >
                             {d.status}
                           </Badge>
@@ -567,50 +579,50 @@ export default function DashboardPage() {
             </Card>
 
             {/* Recent Payments */}
-            <Card className="rounded-xl border-gray-200 shadow-sm">
-              <CardHeader className="pb-2">
+            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+              <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-100">
-                    <CreditCard className="h-3.5 w-3.5 text-amber-600" />
+                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-100 to-yellow-100">
+                    <CreditCard className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600" />
                   </div>
-                  <CardTitle className="text-base font-semibold text-gray-800">
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
                     Recent Payments
                   </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="px-6 pb-6">
+              <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
                 {(data?.recentPayments ?? []).length === 0 ? (
-                  <p className="py-8 text-center text-sm text-gray-400">
+                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
                     No recent payments
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {(data?.recentPayments ?? []).slice(0, 5).map((p) => {
                       const statusStyle = paymentStatusConfig(p.status)
                       const methodStyle = paymentMethodBadge(p.method)
                       return (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 transition-colors hover:bg-gray-50"
+                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 active:scale-[0.98]"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-gray-800">
+                            <p className="truncate text-xs md:text-sm font-medium text-gray-800">
                               {p.customer.name}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-[10px] md:text-xs text-gray-400">
                               {formatPKR(p.amount)} · {formatDate(p.date)}
                             </p>
                           </div>
-                          <div className="ml-2 flex shrink-0 items-center gap-1.5">
+                          <div className="ml-2 flex shrink-0 items-center gap-1 md:gap-1.5">
                             <Badge
                               variant="outline"
-                              className={`text-[11px] ${methodStyle}`}
+                              className={`hidden sm:inline-flex text-[10px] md:text-[11px] ${methodStyle}`}
                             >
                               {p.method}
                             </Badge>
                             <Badge
                               variant="outline"
-                              className={`text-[11px] ${statusStyle.bg}`}
+                              className={`text-[10px] md:text-[11px] ${statusStyle.bg}`}
                             >
                               {p.status}
                             </Badge>
@@ -628,45 +640,45 @@ export default function DashboardPage() {
 
       {/* ── Today's Product Sales ───────────────────────────── */}
       {!loading && !error && data?.todaySales && data.todaySales.length > 0 && (
-        <Card className="rounded-xl border-green-200 bg-gradient-to-br from-white to-green-50/20 shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+        <Card className="rounded-xl border-green-200 bg-gradient-to-br from-white to-green-50/20 shadow-sm overflow-hidden">
+          <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
-                  <Package className="h-3.5 w-3.5 text-green-600" />
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100">
+                  <Package className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-600" />
                 </div>
-                <CardTitle className="text-base font-semibold text-gray-800">
-                  Today's Product Sales
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                  Today&apos;s Product Sales
                 </CardTitle>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge className="bg-green-50 text-green-700 border-green-200">
+              <div className="flex items-center gap-1.5 md:gap-3">
+                <Badge className="bg-green-50 text-green-700 border-green-200 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
                   {data.todayTotalSold.toFixed(1)} sold
                 </Badge>
-                <Badge className="bg-amber-50 text-amber-700 border-amber-200">
-                  {formatPKR(data.todaySalesRevenue)} revenue
+                <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
+                  {formatPKR(data.todaySalesRevenue)}
                 </Badge>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-2.5">
               {data.todaySales.map((sale) => (
                 <div
                   key={sale.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-3 py-2.5"
+                  className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{sale.item?.name}</p>
-                    <p className="text-xs text-gray-400">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs md:text-sm font-medium text-gray-800 truncate">{sale.item?.name}</p>
+                    <p className="text-[10px] md:text-xs text-gray-400">
                       {sale.item?.category} · ₨{sale.item?.pricePerUnit}/{sale.item?.unit}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-green-700">
+                  <div className="text-right ml-2 shrink-0">
+                    <p className="text-xs md:text-sm font-semibold text-green-700">
                       {sale.quantity} {sale.item?.unit}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-[10px] md:text-xs text-gray-500">
                       {formatPKR(sale.quantity * (sale.item?.pricePerUnit ?? 0))}
                     </p>
                   </div>

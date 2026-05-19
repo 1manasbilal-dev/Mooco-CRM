@@ -24,6 +24,19 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import {
   Truck,
   CheckCircle,
   Clock,
@@ -33,8 +46,11 @@ import {
   RotateCcw,
   Loader2,
   Milk,
+  ChevronDown,
+  PackageCheck,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 // --- Types ---
 interface Area {
@@ -105,42 +121,47 @@ function getRouteLabel(route: string, routes: { value: string; label: string }[]
   return found ? found.label : route
 }
 
-function getStatusBadge(status: string) {
+function getStatusBadge(status: string, compact = false) {
+  const sizeClasses = compact
+    ? 'text-xs px-2 py-0.5 min-h-[24px]'
+    : 'text-xs sm:text-sm px-2.5 py-1 sm:px-3 sm:py-1 min-h-[28px] sm:min-h-[32px]'
+
   switch (status) {
     case 'Pending':
       return (
-        <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50">
-          <Clock className="size-3 mr-1" />
+        <Badge className={`${sizeClasses} bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 font-medium`}>
+          <Clock className="size-3 mr-1 shrink-0" />
           Pending
         </Badge>
       )
     case 'Delivered':
       return (
-        <Badge className="bg-green-50 text-green-700 border-green-200 hover:bg-green-50">
-          <CheckCircle className="size-3 mr-1" />
+        <Badge className={`${sizeClasses} bg-green-50 text-green-700 border-green-200 hover:bg-green-50 font-medium`}>
+          <CheckCircle className="size-3 mr-1 shrink-0" />
           Delivered
         </Badge>
       )
     case 'Missed':
       return (
-        <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-50">
-          <XCircle className="size-3 mr-1" />
+        <Badge className={`${sizeClasses} bg-red-50 text-red-700 border-red-200 hover:bg-red-50 font-medium`}>
+          <XCircle className="size-3 mr-1 shrink-0" />
           Missed
         </Badge>
       )
     case 'Cancelled':
       return (
-        <Badge className="bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50">
+        <Badge className={`${sizeClasses} bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50 font-medium`}>
           Cancelled
         </Badge>
       )
     default:
-      return <Badge variant="outline">{status}</Badge>
+      return <Badge variant="outline" className={sizeClasses}>{status}</Badge>
   }
 }
 
 // --- Main Component ---
 export default function DeliveriesPage() {
+  const isMobile = useIsMobile()
   const [selectedDate, setSelectedDate] = useState(getTodayStr)
   const [routeFilter, setRouteFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -149,6 +170,13 @@ export default function DeliveriesPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [areas, setAreas] = useState<Area[]>([])
+
+  // Collapsible route groups state
+  const [collapsedRoutes, setCollapsedRoutes] = useState<Record<string, boolean>>({})
+
+  const toggleRoute = (route: string) => {
+    setCollapsedRoutes((prev) => ({ ...prev, [route]: !prev[route] }))
+  }
 
   // Derived routes from dynamic areas
   const routes = useMemo(() => buildRoutes(areas), [areas])
@@ -425,191 +453,234 @@ export default function DeliveriesPage() {
 
   const pendingCount = summary.pending
 
+  // Shared add delivery form (used in both Dialog and Drawer)
+  const addDeliveryForm = (
+    <div className="grid gap-4 py-2">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Customer</Label>
+        <Select
+          value={newDelivery.customerId}
+          onValueChange={handleCustomerSelect}
+        >
+          <SelectTrigger className="w-full h-11">
+            <SelectValue placeholder="Select customer" />
+          </SelectTrigger>
+          <SelectContent>
+            {customers.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name} - {c.area}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Date</Label>
+          <Input
+            type="date"
+            value={newDelivery.date}
+            onChange={(e) =>
+              setNewDelivery((prev) => ({ ...prev, date: e.target.value }))
+            }
+            className="h-11"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Quantity (L)</Label>
+          <Input
+            type="number"
+            step="0.5"
+            min="0.5"
+            value={newDelivery.quantity}
+            onChange={(e) =>
+              setNewDelivery((prev) => ({
+                ...prev,
+                quantity: parseFloat(e.target.value) || 0,
+              }))
+            }
+            className="h-11"
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Route</Label>
+        <Select
+          value={newDelivery.route}
+          onValueChange={(v) =>
+            setNewDelivery((prev) => ({ ...prev, route: v }))
+          }
+        >
+          <SelectTrigger className="w-full h-11">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {routes.map((r) => (
+              <SelectItem key={r.value} value={r.value}>
+                {r.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Notes</Label>
+        <Textarea
+          placeholder="Optional notes..."
+          value={newDelivery.notes}
+          onChange={(e) =>
+            setNewDelivery((prev) => ({ ...prev, notes: e.target.value }))
+          }
+          rows={2}
+          className="min-h-[60px]"
+        />
+      </div>
+    </div>
+  )
+
+  const addDeliveryButtons = (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setAddDialogOpen(false)}
+        className="h-11 min-w-[80px]"
+      >
+        Cancel
+      </Button>
+      <Button
+        className="bg-green-600 hover:bg-green-700 text-white h-11 min-w-[120px]"
+        onClick={handleAddDelivery}
+        disabled={addingDelivery}
+      >
+        {addingDelivery ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Adding...
+          </>
+        ) : (
+          'Add Delivery'
+        )}
+      </Button>
+    </>
+  )
+
   return (
-    <div className="space-y-6">
-      {/* 1. Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-100">
-            <Truck className="h-6 w-6 text-green-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Deliveries</h1>
-            <p className="text-sm text-gray-500">Track daily milk deliveries</p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* 1. Page Header - Compact on mobile */}
+      <div className="flex flex-col gap-3 sm:gap-4">
+        {/* Title row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-green-100">
+              <Truck className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Deliveries</h1>
+              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Track daily milk deliveries</p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Date + Add button row */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <Input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-44 h-9 text-sm"
+            className="flex-1 sm:w-44 h-11 sm:h-9 text-sm"
           />
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2">
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Delivery</span>
-                <span className="sm:hidden">Add</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Delivery</DialogTitle>
-                <DialogDescription>
-                  Create a new delivery entry for a customer
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-2">
-                <div className="space-y-2">
-                  <Label>Customer</Label>
-                  <Select
-                    value={newDelivery.customerId}
-                    onValueChange={handleCustomerSelect}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name} - {c.area}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <Button
+            className="bg-green-600 hover:bg-green-700 text-white h-11 sm:h-9 gap-2 shrink-0 px-4 sm:px-3"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sm:hidden">Add</span>
+            <span className="hidden sm:inline">Add Delivery</span>
+          </Button>
+
+          {/* Desktop Dialog */}
+          {!isMobile && (
+            <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Delivery</DialogTitle>
+                  <DialogDescription>
+                    Create a new delivery entry for a customer
+                  </DialogDescription>
+                </DialogHeader>
+                {addDeliveryForm}
+                <DialogFooter>
+                  {addDeliveryButtons}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {/* Mobile Drawer (bottom sheet) */}
+          {isMobile && (
+            <Drawer open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+              <DrawerContent className="max-h-[92vh]">
+                <DrawerHeader className="text-left">
+                  <DrawerTitle>Add New Delivery</DrawerTitle>
+                  <DrawerDescription>
+                    Create a new delivery entry for a customer
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 overflow-y-auto">
+                  {addDeliveryForm}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Date</Label>
-                    <Input
-                      type="date"
-                      value={newDelivery.date}
-                      onChange={(e) =>
-                        setNewDelivery((prev) => ({ ...prev, date: e.target.value }))
-                      }
-                      className="h-9"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Quantity (L)</Label>
-                    <Input
-                      type="number"
-                      step="0.5"
-                      min="0.5"
-                      value={newDelivery.quantity}
-                      onChange={(e) =>
-                        setNewDelivery((prev) => ({
-                          ...prev,
-                          quantity: parseFloat(e.target.value) || 0,
-                        }))
-                      }
-                      className="h-9"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Route</Label>
-                  <Select
-                    value={newDelivery.route}
-                    onValueChange={(v) =>
-                      setNewDelivery((prev) => ({ ...prev, route: v }))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {routes.map((r) => (
-                        <SelectItem key={r.value} value={r.value}>
-                          {r.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    placeholder="Optional notes..."
-                    value={newDelivery.notes}
-                    onChange={(e) =>
-                      setNewDelivery((prev) => ({ ...prev, notes: e.target.value }))
-                    }
-                    rows={2}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setAddDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={handleAddDelivery}
-                  disabled={addingDelivery}
-                >
-                  {addingDelivery ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Delivery'
-                  )}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                <DrawerFooter>
+                  {addDeliveryButtons}
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          )}
         </div>
       </div>
 
-      {/* 2. Summary Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-xl border-gray-200 border-l-4 border-l-gray-400 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-              <Truck className="h-5 w-5 text-gray-600" />
+      {/* 2. Summary Stats Row - 2 per row on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-gray-400 shadow-sm">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-gray-100">
+              <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{summary.total}</p>
-              <p className="text-xs text-gray-500">Total Deliveries</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="rounded-xl border-gray-200 border-l-4 border-l-green-500 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-50">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-green-600">{summary.delivered}</p>
-              <p className="text-xs text-gray-500">Delivered</p>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{summary.total}</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Total Deliveries</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 border-l-4 border-l-amber-500 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50">
-              <Clock className="h-5 w-5 text-amber-600" />
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-green-500 shadow-sm">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-green-50">
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-amber-600">{summary.pending}</p>
-              <p className="text-xs text-gray-500">Pending</p>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-green-600">{summary.delivered}</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Delivered</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 border-l-4 border-l-red-500 shadow-sm">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50">
-              <XCircle className="h-5 w-5 text-red-600" />
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-amber-500 shadow-sm">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-amber-50">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600">{summary.missed}</p>
-              <p className="text-xs text-gray-500">Missed</p>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-amber-600">{summary.pending}</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Pending</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-red-500 shadow-sm">
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-red-50">
+              <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-red-600">{summary.missed}</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Missed</p>
             </div>
           </CardContent>
         </Card>
@@ -617,17 +688,17 @@ export default function DeliveriesPage() {
 
       {/* Total milk banner */}
       <div className="flex items-center gap-2 px-1">
-        <Milk className="h-4 w-4 text-green-600" />
-        <span className="text-sm text-gray-600">
+        <Milk className="h-4 w-4 text-green-600 shrink-0" />
+        <span className="text-xs sm:text-sm text-gray-600">
           Total milk for <span className="font-semibold">{selectedDate}</span>:{' '}
           <span className="font-bold text-green-700">{formatQuantity(summary.totalMilk)}</span>
         </span>
       </div>
 
-      {/* 3. Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      {/* 3. Filter Bar - Stack vertically on mobile, full-width selects */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
         <Select value={routeFilter} onValueChange={setRouteFilter}>
-          <SelectTrigger className="w-full sm:w-52 h-9 text-sm">
+          <SelectTrigger className="w-full sm:w-52 h-11 sm:h-9 text-sm">
             <SelectValue placeholder="All Routes" />
           </SelectTrigger>
           <SelectContent>
@@ -640,7 +711,7 @@ export default function DeliveriesPage() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-40 h-9 text-sm">
+          <SelectTrigger className="w-full sm:w-40 h-11 sm:h-9 text-sm">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
@@ -653,10 +724,10 @@ export default function DeliveriesPage() {
         </Select>
         {pendingCount > 0 && (
           <Button
-            className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2 ml-auto"
+            className="bg-green-600 hover:bg-green-700 text-white h-11 sm:h-9 gap-2 sm:ml-auto w-full sm:w-auto font-medium"
             onClick={markAllDelivered}
           >
-            <CheckCircle className="h-4 w-4" />
+            <PackageCheck className="h-4 w-4" />
             Mark All Delivered ({pendingCount})
           </Button>
         )}
@@ -664,8 +735,8 @@ export default function DeliveriesPage() {
 
       {/* 4. Route-Grouped Delivery List */}
       {loading ? (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="flex h-48 items-center justify-center p-6">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm">
+          <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-green-500" />
               <p className="text-sm text-gray-500">Loading deliveries...</p>
@@ -673,8 +744,8 @@ export default function DeliveriesPage() {
           </CardContent>
         </Card>
       ) : deliveries.length === 0 ? (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="flex h-48 items-center justify-center p-6">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm">
+          <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3 text-center">
               <Truck className="h-10 w-10 text-gray-300" />
               <div>
@@ -686,7 +757,7 @@ export default function DeliveriesPage() {
                 </p>
               </div>
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white h-9 gap-2 mt-1"
+                className="bg-green-600 hover:bg-green-700 text-white h-11 gap-2 mt-1"
                 onClick={() => setAddDialogOpen(true)}
               >
                 <Plus className="h-4 w-4" />
@@ -696,144 +767,168 @@ export default function DeliveriesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {groupedDeliveries.map((group) => (
-            <Card key={group.route} className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
-              {/* Route header */}
-              <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <span className="font-semibold text-gray-800">{group.label}</span>
-                </div>
-                <Badge variant="outline" className="text-xs font-medium">
-                  {group.deliveries.length} delivery{group.deliveries.length !== 1 ? 's' : ''}
-                </Badge>
-              </div>
-              {/* Delivery items */}
-              <div className="divide-y divide-gray-100">
-                {group.deliveries.map((delivery) => (
-                  <div
-                    key={delivery.id}
-                    className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 hover:bg-gray-50/50 transition-colors"
-                  >
-                    {/* Left: Customer info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-gray-900 text-sm">
-                          {delivery.customer.name}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-sm font-semibold text-green-700 bg-green-50 rounded-md px-2 py-0.5">
-                          {formatQuantity(delivery.quantity)}
-                        </span>
-                        {getStatusBadge(delivery.status)}
+            <Collapsible
+              key={group.route}
+              open={collapsedRoutes[group.route] !== false}
+              onOpenChange={() => toggleRoute(group.route)}
+            >
+              <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm overflow-hidden">
+                {/* Route header - collapsible trigger */}
+                <CollapsibleTrigger asChild>
+                  <button className="w-full bg-gray-50 border-b border-gray-200 px-3 sm:px-4 py-3 sm:py-3 flex items-center justify-between hover:bg-gray-100/80 transition-colors active:bg-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-green-100">
+                        <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-gray-400">
-                          {delivery.customer.milkType || 'Full Cream'}
-                        </span>
-                        {delivery.customer.area && (
-                          <>
-                            <span className="text-xs text-gray-300">·</span>
-                            <span className="text-xs text-gray-400">{delivery.customer.area}</span>
-                          </>
+                      <span className="font-semibold text-gray-800 text-sm sm:text-base">{group.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[11px] sm:text-xs font-medium px-2 py-0.5">
+                        {group.deliveries.length} delivery{group.deliveries.length !== 1 ? 's' : ''}
+                      </Badge>
+                      <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${collapsedRoutes[group.route] === false ? '' : 'rotate-180'}`} />
+                    </div>
+                  </button>
+                </CollapsibleTrigger>
+
+                {/* Delivery items */}
+                <CollapsibleContent>
+                  <div className="divide-y divide-gray-100">
+                    {group.deliveries.map((delivery) => (
+                      <div
+                        key={delivery.id}
+                        className="px-3 sm:px-4 py-3 sm:py-3.5 flex flex-col gap-2 hover:bg-gray-50/50 transition-colors"
+                      >
+                        {/* Row 1: Name + Quantity + Status */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                              {delivery.customer.name}
+                            </span>
+                            <span className="inline-flex items-center gap-0.5 text-xs sm:text-sm font-semibold text-green-700 bg-green-50 rounded-md px-1.5 sm:px-2 py-0.5 shrink-0 border border-green-100">
+                              {formatQuantity(delivery.quantity)}
+                            </span>
+                          </div>
+                          <div className="shrink-0">
+                            {getStatusBadge(delivery.status, isMobile)}
+                          </div>
+                        </div>
+
+                        {/* Row 2: Meta info */}
+                        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-400">
+                          <span>{delivery.customer.milkType || 'Full Cream'}</span>
+                          {delivery.customer.area && (
+                            <>
+                              <span className="text-gray-300">·</span>
+                              <span>{delivery.customer.area}</span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Row 3: Notes (inline edit) */}
+                        {editingNotesId === delivery.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={notesValue}
+                              onChange={(e) => setNotesValue(e.target.value)}
+                              placeholder="Add notes..."
+                              className="h-9 text-xs flex-1"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveNotes(delivery.id, notesValue)
+                                if (e.key === 'Escape') setEditingNotesId(null)
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 text-xs px-3 shrink-0"
+                              onClick={() => saveNotes(delivery.id, notesValue)}
+                            >
+                              Save
+                            </Button>
+                          </div>
+                        ) : (
+                          <button
+                            className="text-[11px] sm:text-xs text-gray-400 hover:text-gray-600 cursor-pointer min-h-[28px] flex items-center"
+                            onClick={() => {
+                              setEditingNotesId(delivery.id)
+                              setNotesValue(delivery.notes || '')
+                            }}
+                          >
+                            {delivery.notes || '+ Add notes'}
+                          </button>
+                        )}
+
+                        {/* Row 4: Action buttons - full-width on mobile, compact on desktop */}
+                        {delivery.status === 'Pending' && (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-11 sm:h-9 flex-1 sm:flex-none sm:min-w-[120px] gap-1.5 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 font-medium text-sm"
+                              onClick={() => updateStatus(delivery.id, 'Delivered')}
+                              disabled={updatingId === delivery.id}
+                            >
+                              {updatingId === delivery.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                              <span className="sm:hidden">Delivered</span>
+                              <span className="hidden sm:inline">Mark Delivered</span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-11 sm:h-9 flex-1 sm:flex-none sm:min-w-[90px] gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium text-sm"
+                              onClick={() => updateStatus(delivery.id, 'Missed')}
+                              disabled={updatingId === delivery.id}
+                            >
+                              <XCircle className="h-4 w-4" />
+                              Missed
+                            </Button>
+                          </div>
+                        )}
+                        {delivery.status === 'Delivered' && (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50">
+                              <CheckCircle className="h-5 w-5 text-green-600" />
+                            </div>
+                            <span className="text-xs text-green-600 font-medium">Delivered</span>
+                          </div>
+                        )}
+                        {delivery.status === 'Missed' && (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
+                              <XCircle className="h-5 w-5 text-red-500" />
+                            </div>
+                            <span className="text-xs text-red-500 font-medium">Missed</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 sm:h-9 gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50 font-medium text-xs ml-auto"
+                              onClick={() => updateStatus(delivery.id, 'Pending')}
+                              disabled={updatingId === delivery.id}
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              Retry
+                            </Button>
+                          </div>
+                        )}
+                        {delivery.status === 'Cancelled' && (
+                          <div className="flex items-center mt-0.5">
+                            <span className="text-xs text-gray-400">Cancelled</span>
+                          </div>
                         )}
                       </div>
-                      {/* Notes */}
-                      {editingNotesId === delivery.id ? (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Input
-                            value={notesValue}
-                            onChange={(e) => setNotesValue(e.target.value)}
-                            placeholder="Add notes..."
-                            className="h-7 text-xs"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') saveNotes(delivery.id, notesValue)
-                              if (e.key === 'Escape') setEditingNotesId(null)
-                            }}
-                          />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs px-2"
-                            onClick={() => saveNotes(delivery.id, notesValue)}
-                          >
-                            Save
-                          </Button>
-                        </div>
-                      ) : (
-                        <button
-                          className="text-xs text-gray-400 hover:text-gray-600 mt-1 cursor-pointer"
-                          onClick={() => {
-                            setEditingNotesId(delivery.id)
-                            setNotesValue(delivery.notes || '')
-                          }}
-                        >
-                          {delivery.notes || '+ Add notes'}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Right: Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      {delivery.status === 'Pending' && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-9 min-w-[110px] gap-1.5 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 font-medium"
-                            onClick={() => updateStatus(delivery.id, 'Delivered')}
-                            disabled={updatingId === delivery.id}
-                          >
-                            {updatingId === delivery.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <CheckCircle className="h-4 w-4" />
-                            )}
-                            Mark Delivered
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-9 gap-1.5 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
-                            onClick={() => updateStatus(delivery.id, 'Missed')}
-                            disabled={updatingId === delivery.id}
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Missed
-                          </Button>
-                        </>
-                      )}
-                      {delivery.status === 'Delivered' && (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-50">
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        </div>
-                      )}
-                      {delivery.status === 'Missed' && (
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50">
-                            <XCircle className="h-5 w-5 text-red-500" />
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-9 gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50 font-medium"
-                            onClick={() => updateStatus(delivery.id, 'Pending')}
-                            disabled={updatingId === delivery.id}
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            Retry
-                          </Button>
-                        </div>
-                      )}
-                      {delivery.status === 'Cancelled' && (
-                        <span className="text-xs text-gray-400">Cancelled</span>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </CollapsibleContent>
             </Card>
+            </Collapsible>
           ))}
         </div>
       )}

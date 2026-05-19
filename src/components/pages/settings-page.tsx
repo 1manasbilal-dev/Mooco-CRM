@@ -48,8 +48,11 @@ import {
   BadgeCheck,
   Milk,
   MapPin,
+  Save,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 // ── Types ───────────────────────────────────────────────────────────────
 interface SettingsMap {
@@ -110,11 +113,14 @@ const SAMPLE_STAFF: StaffMember[] = [
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const isMobile = useIsMobile()
+
   // ── State ───────────────────────────────────────────────────────────
   const [settings, setSettings] = useState<SettingsMap>(DEFAULT_SETTINGS)
   const [savedSettings, setSavedSettings] = useState<SettingsMap>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   // Notifications (UI-only)
   const [notifications, setNotifications] = useState({
@@ -444,6 +450,23 @@ export default function SettingsPage() {
     }
   }
 
+  // ── Handle Reset ────────────────────────────────────────────────────
+  const handleReset = async () => {
+    setResetting(true)
+    try {
+      const res = await fetch('/api/reset', { method: 'POST' })
+      if (!res.ok) throw new Error()
+      toast.success('All data has been reset successfully')
+      setResetOpen(false)
+      // Refresh all data
+      await Promise.all([fetchSettings(), fetchAreas(), fetchMilkTypes(), fetchDeliveryTimes()])
+    } catch {
+      toast.error('Failed to reset data')
+    } finally {
+      setResetting(false)
+    }
+  }
+
   // ── Loading State ───────────────────────────────────────────────────
   if (loading) {
     return (
@@ -458,41 +481,74 @@ export default function SettingsPage() {
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 md:space-y-6 pb-28 md:pb-20">
       {/* ── Page Header ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-          <Settings className="h-5 w-5 text-green-600" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 md:gap-3">
+          <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-200">
+            <Settings className="h-4 w-4 md:h-5 md:w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900">Settings</h1>
+            <p className="text-xs md:text-sm text-gray-500 hidden sm:block">Configure your dairy shop</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500">Configure your dairy shop</p>
-        </div>
+
+        {/* Desktop save button */}
+        {!isMobile && isDirty && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setSettings(savedSettings)}
+              className="h-9 rounded-lg border-gray-200"
+              disabled={saving}
+            >
+              Discard
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="h-9 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm min-w-[120px]"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-1.5" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* ── Settings Grid ───────────────────────────────────────────── */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
 
         {/* ── Card 1: Shop Information ─────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl md:rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-green-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-green-100 shadow-sm">
                 <Store className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Shop Information
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Basic details about your shop
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="shopName" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="shopName" className="text-xs md:text-sm font-medium text-gray-700">
                 Shop Name
               </Label>
               <Input
@@ -500,11 +556,11 @@ export default function SettingsPage() {
                 placeholder="Enter shop name"
                 value={settings.shopName}
                 onChange={(e) => updateField('shopName', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="shopPhone" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="shopPhone" className="text-xs md:text-sm font-medium text-gray-700">
                 Phone Number
               </Label>
               <Input
@@ -512,11 +568,11 @@ export default function SettingsPage() {
                 placeholder="0300-1234567"
                 value={settings.shopPhone}
                 onChange={(e) => updateField('shopPhone', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="shopAddress" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="shopAddress" className="text-xs md:text-sm font-medium text-gray-700">
                 Address
               </Label>
               <Textarea
@@ -524,11 +580,11 @@ export default function SettingsPage() {
                 placeholder="Enter shop address"
                 value={settings.shopAddress}
                 onChange={(e) => updateField('shopAddress', e.target.value)}
-                className="rounded-lg border-gray-200 min-h-[80px] resize-none"
+                className="rounded-lg border-gray-200 min-h-[72px] md:min-h-[80px] resize-none"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="shopEmail" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="shopEmail" className="text-xs md:text-sm font-medium text-gray-700">
                 Email
               </Label>
               <Input
@@ -537,32 +593,32 @@ export default function SettingsPage() {
                 placeholder="shop@example.com"
                 value={settings.shopEmail}
                 onChange={(e) => updateField('shopEmail', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* ── Card 2: Delivery Settings ────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-blue-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-blue-100 shadow-sm">
                 <Truck className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Delivery Settings
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Configure delivery charges and cutoff times
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="deliveryCharge" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="deliveryCharge" className="text-xs md:text-sm font-medium text-gray-700">
                 Delivery Charge (PKR)
               </Label>
               <div className="relative">
@@ -575,12 +631,12 @@ export default function SettingsPage() {
                   placeholder="50"
                   value={settings.deliveryCharge}
                   onChange={(e) => updateField('deliveryCharge', e.target.value)}
-                  className="rounded-lg border-gray-200 pl-8"
+                  className="rounded-lg border-gray-200 pl-8 h-10 md:h-auto"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="morningCutoff" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="morningCutoff" className="text-xs md:text-sm font-medium text-gray-700">
                 Morning Delivery Cutoff
               </Label>
               <Input
@@ -588,12 +644,12 @@ export default function SettingsPage() {
                 placeholder="07:00 AM"
                 value={settings.morningCutoff}
                 onChange={(e) => updateField('morningCutoff', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
-              <p className="text-[11px] text-gray-400">Orders after this time go to evening delivery</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400">Orders after this time go to evening delivery</p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="eveningCutoff" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="eveningCutoff" className="text-xs md:text-sm font-medium text-gray-700">
                 Evening Delivery Cutoff
               </Label>
               <Input
@@ -601,33 +657,33 @@ export default function SettingsPage() {
                 placeholder="06:00 PM"
                 value={settings.eveningCutoff}
                 onChange={(e) => updateField('eveningCutoff', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
-              <p className="text-[11px] text-gray-400">Orders after this go to next day delivery</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400">Orders after this go to next day delivery</p>
             </div>
           </CardContent>
         </Card>
 
         {/* ── Card 3: Business Hours ───────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 shadow-sm">
                 <Clock className="h-4 w-4 text-amber-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Business Hours
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Your shop operating hours
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="businessHours" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="businessHours" className="text-xs md:text-sm font-medium text-gray-700">
                 Operating Hours
               </Label>
               <Input
@@ -635,33 +691,33 @@ export default function SettingsPage() {
                 placeholder="6:00 AM - 10:00 PM"
                 value={settings.businessHours}
                 onChange={(e) => updateField('businessHours', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
-              <p className="text-[11px] text-gray-400">Format: 6:00 AM - 10:00 PM</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400">Format: 6:00 AM - 10:00 PM</p>
             </div>
           </CardContent>
         </Card>
 
         {/* ── Card 4: Pricing ──────────────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-emerald-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-emerald-100 shadow-sm">
                 <IndianRupee className="h-4 w-4 text-emerald-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Pricing
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Default milk pricing and currency
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="defaultMilkPrice" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="defaultMilkPrice" className="text-xs md:text-sm font-medium text-gray-700">
                 Default Milk Price per Liter (PKR)
               </Label>
               <div className="relative">
@@ -674,12 +730,12 @@ export default function SettingsPage() {
                   placeholder="60"
                   value={settings.defaultMilkPrice}
                   onChange={(e) => updateField('defaultMilkPrice', e.target.value)}
-                  className="rounded-lg border-gray-200 pl-8"
+                  className="rounded-lg border-gray-200 pl-8 h-10 md:h-auto"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="currency" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="currency" className="text-xs md:text-sm font-medium text-gray-700">
                 Currency
               </Label>
               <Input
@@ -687,26 +743,268 @@ export default function SettingsPage() {
                 placeholder="PKR"
                 value={settings.currency}
                 onChange={(e) => updateField('currency', e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-10 md:h-auto"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* ── Card 5: Staff Management (UI Only) ───────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        {/* ── Card 5: Area Management ───────────────────────────────── */}
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-rose-50/50 to-transparent">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-rose-100 shadow-sm">
+                  <MapPin className="h-4 w-4 text-rose-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
+                    Areas
+                  </CardTitle>
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500">
+                    Manage delivery areas
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddArea}
+                className="h-8 md:h-9 text-xs border-rose-200 text-rose-600 hover:bg-rose-50 min-w-[44px] md:min-w-0"
+              >
+                <Plus className="h-3.5 w-3.5 md:mr-1" />
+                <span className="hidden md:inline">Add Area</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+            {areasLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-rose-500" />
+              </div>
+            ) : areas.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <MapPin className="h-8 w-8 mb-2" />
+                <p className="text-sm">No areas added yet</p>
+                <p className="text-xs">Tap &quot;+&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 md:space-y-2 max-h-72 md:max-h-96 overflow-y-auto">
+                {areas.map((area) => (
+                  <div
+                    key={area.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]"
+                  >
+                    <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-rose-100 shrink-0">
+                        <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5 text-rose-600" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {area.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditArea(area)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteArea(area.id)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 6: Milk Type Management ──────────────────────────── */}
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-sky-50/50 to-transparent">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-sky-100 shadow-sm">
+                  <Milk className="h-4 w-4 text-sky-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
+                    Milk Types
+                  </CardTitle>
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500">
+                    Manage milk types &amp; pricing
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddMilkType}
+                className="h-8 md:h-9 text-xs border-sky-200 text-sky-600 hover:bg-sky-50 min-w-[44px] md:min-w-0"
+              >
+                <Plus className="h-3.5 w-3.5 md:mr-1" />
+                <span className="hidden md:inline">Add Type</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+            {milkTypesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
+              </div>
+            ) : milkTypes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <Milk className="h-8 w-8 mb-2" />
+                <p className="text-sm">No milk types added yet</p>
+                <p className="text-xs">Tap &quot;+&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 md:space-y-2 max-h-72 md:max-h-96 overflow-y-auto">
+                {milkTypes.map((mt) => (
+                  <div
+                    key={mt.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]"
+                  >
+                    <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-sky-100 shrink-0">
+                        <Milk className="h-3 w-3 md:h-3.5 md:w-3.5 text-sky-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {mt.name}
+                        </p>
+                        <p className="text-[11px] md:text-xs text-gray-500">
+                          ₨ {mt.pricePerLiter.toLocaleString()} / liter
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditMilkType(mt)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteMilkType(mt.id)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 7: Delivery Time Management ──────────────────────── */}
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-teal-50/50 to-transparent">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-teal-100 shadow-sm">
+                  <Clock className="h-4 w-4 text-teal-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
+                    Delivery Times
+                  </CardTitle>
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500">
+                    Manage delivery time slots
+                  </CardDescription>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={openAddDeliveryTime}
+                className="h-8 md:h-9 text-xs border-teal-200 text-teal-600 hover:bg-teal-50 min-w-[44px] md:min-w-0"
+              >
+                <Plus className="h-3.5 w-3.5 md:mr-1" />
+                <span className="hidden md:inline">Add Time</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+            {deliveryTimesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
+              </div>
+            ) : deliveryTimes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                <Clock className="h-8 w-8 mb-2" />
+                <p className="text-sm">No delivery times added yet</p>
+                <p className="text-xs">Tap &quot;+&quot; to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 md:space-y-2 max-h-72 md:max-h-96 overflow-y-auto">
+                {deliveryTimes.map((dt) => (
+                  <div
+                    key={dt.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]"
+                  >
+                    <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-teal-100 shrink-0">
+                        <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 text-teal-600" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {dt.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDeliveryTime(dt)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteDeliveryTime(dt.id)}
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Card 8: Staff Management (UI Only) ───────────────────── */}
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-purple-50/50 to-transparent">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-purple-100 shadow-sm">
                   <Users className="h-4 w-4 text-purple-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    Staff Management
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
+                    Staff
                   </CardTitle>
-                  <CardDescription className="text-xs text-gray-500">
-                    Manage your delivery and warehouse staff
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500">
+                    Manage delivery &amp; warehouse staff
                   </CardDescription>
                 </div>
               </div>
@@ -714,21 +1012,21 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => toast.info('Feature coming soon')}
-                className="h-8 text-xs border-purple-200 text-purple-600 hover:bg-purple-50"
+                className="h-8 md:h-9 text-xs border-purple-200 text-purple-600 hover:bg-purple-50 min-w-[44px] md:min-w-0"
               >
-                <Plus className="h-3 w-3" />
-                Add Staff
+                <Plus className="h-3.5 w-3.5 md:mr-1" />
+                <span className="hidden md:inline">Add Staff</span>
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+            <div className="space-y-1.5 md:space-y-2">
               {SAMPLE_STAFF.map((staff, index) => (
                 <div key={staff.id}>
-                  <div className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-100 shrink-0">
-                        <span className="text-xs font-semibold text-purple-700">
+                  <div className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]">
+                    <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                      <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-purple-100 shrink-0">
+                        <span className="text-[10px] md:text-xs font-semibold text-purple-700">
                           {staff.name.split(' ').map(n => n[0]).join('')}
                         </span>
                       </div>
@@ -736,21 +1034,21 @@ export default function SettingsPage() {
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {staff.name}
                         </p>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-1.5 md:gap-2 mt-0.5">
                           <BadgeCheck className="h-3 w-3 text-gray-400 shrink-0" />
-                          <span className="text-xs text-gray-500 truncate">{staff.role}</span>
-                          <span className="text-gray-300">·</span>
-                          <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-                          <span className="text-xs text-gray-500 truncate">{staff.phone}</span>
+                          <span className="text-[11px] md:text-xs text-gray-500 truncate">{staff.role}</span>
+                          <span className="text-gray-300 hidden sm:inline">·</span>
+                          <Phone className="h-3 w-3 text-gray-400 shrink-0 hidden sm:block" />
+                          <span className="text-[11px] md:text-xs text-gray-500 truncate hidden sm:inline">{staff.phone}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toast.info('Feature coming soon')}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -758,7 +1056,7 @@ export default function SettingsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => toast.info('Feature coming soon')}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
+                        className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -771,382 +1069,147 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* ── Card 6: Notifications (UI Only) ──────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        {/* ── Card 9: Notifications (UI Only) ──────────────────────── */}
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-orange-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-orange-100 shadow-sm">
                 <Bell className="h-4 w-4 text-orange-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Notifications
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
-                  Configure your notification preferences
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
+                  Configure notification preferences
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
+          <CardContent className="space-y-0 px-4 md:px-6 pb-4 md:pb-6">
+            <div className="flex items-center justify-between py-3 md:py-4 min-h-[52px]">
+              <div className="pr-4">
                 <p className="text-sm font-medium text-gray-900">Daily delivery summary</p>
-                <p className="text-xs text-gray-500">Get a summary of deliveries each day</p>
+                <p className="text-[11px] md:text-xs text-gray-500">Get a summary of deliveries each day</p>
               </div>
               <Switch
                 checked={notifications.dailyDeliverySummary}
                 onCheckedChange={(checked) =>
                   setNotifications((prev) => ({ ...prev, dailyDeliverySummary: checked }))
                 }
+                className="scale-110 md:scale-100"
               />
             </div>
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between py-3 md:py-4 min-h-[52px]">
+              <div className="pr-4">
                 <p className="text-sm font-medium text-gray-900">Low stock alerts</p>
-                <p className="text-xs text-gray-500">Notify when inventory is running low</p>
+                <p className="text-[11px] md:text-xs text-gray-500">Notify when inventory is running low</p>
               </div>
               <Switch
                 checked={notifications.lowStockAlerts}
                 onCheckedChange={(checked) =>
                   setNotifications((prev) => ({ ...prev, lowStockAlerts: checked }))
                 }
+                className="scale-110 md:scale-100"
               />
             </div>
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between py-3 md:py-4 min-h-[52px]">
+              <div className="pr-4">
                 <p className="text-sm font-medium text-gray-900">Payment reminders</p>
-                <p className="text-xs text-gray-500">Remind customers about pending payments</p>
+                <p className="text-[11px] md:text-xs text-gray-500">Remind customers about pending payments</p>
               </div>
               <Switch
                 checked={notifications.paymentReminders}
                 onCheckedChange={(checked) =>
                   setNotifications((prev) => ({ ...prev, paymentReminders: checked }))
                 }
+                className="scale-110 md:scale-100"
               />
             </div>
             <Separator />
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between py-3 md:py-4 min-h-[52px]">
+              <div className="pr-4">
                 <p className="text-sm font-medium text-gray-900">New lead notifications</p>
-                <p className="text-xs text-gray-500">Get notified when a new lead is added</p>
+                <p className="text-[11px] md:text-xs text-gray-500">Get notified when a new lead is added</p>
               </div>
               <Switch
                 checked={notifications.newLeadNotifications}
                 onCheckedChange={(checked) =>
                   setNotifications((prev) => ({ ...prev, newLeadNotifications: checked }))
                 }
+                className="scale-110 md:scale-100"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* ── Card 7: Area Management ───────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50">
-                  <MapPin className="h-4 w-4 text-rose-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    Area Management
-                  </CardTitle>
-                  <CardDescription className="text-xs text-gray-500">
-                    Manage delivery areas
-                  </CardDescription>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openAddArea}
-                className="h-8 text-xs border-rose-200 text-rose-600 hover:bg-rose-50"
-              >
-                <Plus className="h-3 w-3" />
-                Add Area
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {areasLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-rose-500" />
-              </div>
-            ) : areas.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                <MapPin className="h-8 w-8 mb-2" />
-                <p className="text-sm">No areas added yet</p>
-                <p className="text-xs">Click &quot;Add Area&quot; to get started</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {areas.map((area) => (
-                  <div
-                    key={area.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 shrink-0">
-                        <MapPin className="h-3.5 w-3.5 text-rose-600" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {area.name}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditArea(area)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteArea(area.id)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* ── Card 8: Milk Type Management ──────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50">
-                  <Milk className="h-4 w-4 text-sky-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    Milk Type Management
-                  </CardTitle>
-                  <CardDescription className="text-xs text-gray-500">
-                    Manage milk types and pricing
-                  </CardDescription>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openAddMilkType}
-                className="h-8 text-xs border-sky-200 text-sky-600 hover:bg-sky-50"
-              >
-                <Plus className="h-3 w-3" />
-                Add Type
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {milkTypesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
-              </div>
-            ) : milkTypes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                <Milk className="h-8 w-8 mb-2" />
-                <p className="text-sm">No milk types added yet</p>
-                <p className="text-xs">Click &quot;Add Type&quot; to get started</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {milkTypes.map((mt) => (
-                  <div
-                    key={mt.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 shrink-0">
-                        <Milk className="h-3.5 w-3.5 text-sky-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {mt.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ₨ {mt.pricePerLiter.toLocaleString()} / liter
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditMilkType(mt)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteMilkType(mt.id)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* ── Card 9: Delivery Time Management ──────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
-                  <Clock className="h-4 w-4 text-teal-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-base font-semibold text-gray-900">
-                    Delivery Time Management
-                  </CardTitle>
-                  <CardDescription className="text-xs text-gray-500">
-                    Manage delivery time slots
-                  </CardDescription>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openAddDeliveryTime}
-                className="h-8 text-xs border-teal-200 text-teal-600 hover:bg-teal-50"
-              >
-                <Plus className="h-3 w-3" />
-                Add Time
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {deliveryTimesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
-              </div>
-            ) : deliveryTimes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                <Clock className="h-8 w-8 mb-2" />
-                <p className="text-sm">No delivery times added yet</p>
-                <p className="text-xs">Click &quot;Add Time&quot; to get started</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {deliveryTimes.map((dt) => (
-                  <div
-                    key={dt.id}
-                    className="flex items-center justify-between rounded-lg border border-gray-100 p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 shrink-0">
-                        <Clock className="h-3.5 w-3.5 text-teal-600" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {dt.name}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditDeliveryTime(dt)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteDeliveryTime(dt.id)}
-                        className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* ── Card 10: Data Management ──────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden md:col-span-2">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-cyan-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-cyan-100 shadow-sm">
                 <Database className="h-4 w-4 text-cyan-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Data Management
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Export, backup, and manage your data
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <CardContent className="space-y-4 px-4 md:px-6 pb-4 md:pb-6">
+            <div className="grid grid-cols-3 gap-2 md:gap-3">
               <Button
                 variant="outline"
                 onClick={() => toast.success('Export started')}
-                className="h-10 justify-start rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="h-11 md:h-10 justify-center rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 text-xs md:text-sm"
               >
-                <Download className="h-4 w-4 mr-2 text-gray-500" />
-                Export Data
+                <Download className="h-4 w-4 md:mr-2 text-gray-500" />
+                <span className="hidden md:inline">Export Data</span>
+                <span className="md:hidden">Export</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={() => toast.success('Backup created')}
-                className="h-10 justify-start rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="h-11 md:h-10 justify-center rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 text-xs md:text-sm"
               >
-                <Upload className="h-4 w-4 mr-2 text-gray-500" />
-                Backup
+                <Upload className="h-4 w-4 md:mr-2 text-gray-500" />
+                <span className="hidden md:inline">Backup</span>
+                <span className="md:hidden">Backup</span>
               </Button>
               <Button
                 variant="outline"
                 onClick={() => toast.info('Select backup file')}
-                className="h-10 justify-start rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="h-11 md:h-10 justify-center rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 text-xs md:text-sm"
               >
-                <RotateCcw className="h-4 w-4 mr-2 text-gray-500" />
-                Restore
+                <RotateCcw className="h-4 w-4 md:mr-2 text-gray-500" />
+                <span className="hidden md:inline">Restore</span>
+                <span className="md:hidden">Restore</span>
               </Button>
             </div>
 
             <Separator />
 
             {/* Danger Zone */}
-            <div className="rounded-lg border border-red-200 bg-red-50/50 p-4">
+            <div className="rounded-xl border border-red-200 bg-red-50/60 p-3 md:p-4">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-red-600" />
                 <p className="text-sm font-semibold text-red-700">Danger Zone</p>
               </div>
-              <p className="text-xs text-red-600 mb-3">
+              <p className="text-[11px] md:text-xs text-red-600 mb-3">
                 Resetting all data will permanently delete all your customers, deliveries, payments, and settings. This action cannot be undone.
               </p>
               <Button
                 variant="outline"
                 onClick={() => setResetOpen(true)}
-                className="h-8 text-xs border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="h-10 md:h-8 text-xs border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 min-w-[44px]"
               >
-                <AlertTriangle className="h-3 w-3 mr-1" />
+                <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
                 Reset All Data
               </Button>
             </div>
@@ -1154,26 +1217,26 @@ export default function SettingsPage() {
         </Card>
 
         {/* ── Card 11: Account ──────────────────────────────────────── */}
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardHeader className="pb-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-gray-50/50 to-transparent">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-gray-100 shadow-sm">
                 <User className="h-4 w-4 text-gray-600" />
               </div>
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">
                   Account
                 </CardTitle>
-                <CardDescription className="text-xs text-gray-500">
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">
                   Your profile and account settings
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 shrink-0">
-                <Milk className="h-6 w-6 text-green-600" />
+          <CardContent className="space-y-4 px-4 md:px-6 pb-4 md:pb-6">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-emerald-600 shrink-0 shadow-md">
+                <Milk className="h-5 w-5 md:h-6 md:w-6 text-white" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-900">
@@ -1188,7 +1251,7 @@ export default function SettingsPage() {
             <Button
               variant="outline"
               onClick={() => toast.success('Logged out')}
-              className="w-full h-10 rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50"
+              className="w-full h-11 md:h-10 rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 min-h-[44px]"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -1197,8 +1260,42 @@ export default function SettingsPage() {
         </Card>
       </div>
 
-      {/* ── Sticky Save Button ──────────────────────────────────────── */}
-      {isDirty && (
+      {/* ── Mobile Sticky Save Bar ──────────────────────────────────── */}
+      {isDirty && isMobile && (
+        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom))] left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-md px-4 py-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setSettings(savedSettings)}
+              className="h-11 rounded-lg border-gray-200 flex-1 text-sm"
+              disabled={saving}
+            >
+              <X className="h-4 w-4 mr-1.5" />
+              Discard
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm flex-[2] text-sm"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-1.5" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Desktop Sticky Save Bar (inline, simpler) ───────────────── */}
+      {isDirty && !isMobile && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-3 z-50">
           <div className="mx-auto flex max-w-5xl items-center justify-between">
             <p className="text-sm text-gray-500">
@@ -1207,9 +1304,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setSettings(savedSettings)
-                }}
+                onClick={() => setSettings(savedSettings)}
                 className="h-9 rounded-lg border-gray-200"
                 disabled={saving}
               >
@@ -1226,7 +1321,10 @@ export default function SettingsPage() {
                     Saving...
                   </>
                 ) : (
-                  'Save Changes'
+                  <>
+                    <Save className="h-4 w-4 mr-1.5" />
+                    Save Changes
+                  </>
                 )}
               </Button>
             </div>
@@ -1236,33 +1334,38 @@ export default function SettingsPage() {
 
       {/* ── Reset All Data Confirmation ─────────────────────────────── */}
       <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="mx-4 md:mx-auto max-w-[calc(100%-2rem)] md:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <AlertDialogTitle className="flex items-center gap-2 text-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
               Reset All Data
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all your customers, deliveries, payments, leads, inventory, and settings. This action cannot be undone.
+            <AlertDialogDescription className="text-sm leading-relaxed pt-1">
+              This will permanently delete all your customers, deliveries, payments, leads, inventory, and settings. Default areas, milk types, and delivery times will be restored. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="rounded-lg h-11 sm:h-auto" disabled={resetting}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/reset', { method: 'POST' })
-                  if (!res.ok) throw new Error()
-                  toast.success('All data has been reset successfully')
-                  setResetOpen(false)
-                  fetchSettings()
-                } catch {
-                  toast.error('Failed to reset data')
-                }
-              }}
-              className="rounded-lg bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleReset}
+              disabled={resetting}
+              className="rounded-lg bg-red-600 hover:bg-red-700 text-white h-11 sm:h-auto min-w-[140px]"
             >
-              Reset Everything
+              {resetting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="h-4 w-4 mr-1.5" />
+                  Reset Everything
+                </>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1270,10 +1373,12 @@ export default function SettingsPage() {
 
       {/* ── Area Add/Edit Dialog ─────────────────────────────────────── */}
       <Dialog open={areaDialogOpen} onOpenChange={setAreaDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
+        <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
+          <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-rose-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100">
+                <MapPin className="h-4 w-4 text-rose-600" />
+              </div>
               {editingArea ? 'Edit Area' : 'Add Area'}
             </DialogTitle>
           </DialogHeader>
@@ -1284,18 +1389,19 @@ export default function SettingsPage() {
                 placeholder="Enter area name"
                 value={areaName}
                 onChange={(e) => setAreaName(e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-11 md:h-auto"
+                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleAreaSubmit()
                 }}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setAreaDialogOpen(false)}
-              className="rounded-lg"
+              className="rounded-lg flex-1 sm:flex-none h-11 sm:h-auto"
               disabled={areaSubmitting}
             >
               Cancel
@@ -1303,7 +1409,7 @@ export default function SettingsPage() {
             <Button
               onClick={handleAreaSubmit}
               disabled={areaSubmitting}
-              className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white min-w-[100px]"
+              className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white min-w-[100px] flex-1 sm:flex-none h-11 sm:h-auto"
             >
               {areaSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1319,10 +1425,12 @@ export default function SettingsPage() {
 
       {/* ── Milk Type Add/Edit Dialog ────────────────────────────────── */}
       <Dialog open={milkTypeDialogOpen} onOpenChange={setMilkTypeDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
+        <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
+          <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <Milk className="h-5 w-5 text-sky-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100">
+                <Milk className="h-4 w-4 text-sky-600" />
+              </div>
               {editingMilkType ? 'Edit Milk Type' : 'Add Milk Type'}
             </DialogTitle>
           </DialogHeader>
@@ -1333,7 +1441,8 @@ export default function SettingsPage() {
                 placeholder="e.g. Fresh, Buffalo, Camel"
                 value={milkTypeName}
                 onChange={(e) => setMilkTypeName(e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-11 md:h-auto"
+                autoFocus
               />
             </div>
             <div className="space-y-1.5">
@@ -1347,7 +1456,7 @@ export default function SettingsPage() {
                   placeholder="60"
                   value={milkTypePrice}
                   onChange={(e) => setMilkTypePrice(e.target.value)}
-                  className="rounded-lg border-gray-200 pl-8"
+                  className="rounded-lg border-gray-200 pl-8 h-11 md:h-auto"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleMilkTypeSubmit()
                   }}
@@ -1355,11 +1464,11 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setMilkTypeDialogOpen(false)}
-              className="rounded-lg"
+              className="rounded-lg flex-1 sm:flex-none h-11 sm:h-auto"
               disabled={milkTypeSubmitting}
             >
               Cancel
@@ -1367,7 +1476,7 @@ export default function SettingsPage() {
             <Button
               onClick={handleMilkTypeSubmit}
               disabled={milkTypeSubmitting}
-              className="rounded-lg bg-sky-600 hover:bg-sky-700 text-white min-w-[100px]"
+              className="rounded-lg bg-sky-600 hover:bg-sky-700 text-white min-w-[100px] flex-1 sm:flex-none h-11 sm:h-auto"
             >
               {milkTypeSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1383,10 +1492,12 @@ export default function SettingsPage() {
 
       {/* ── Delivery Time Add/Edit Dialog ────────────────────────────── */}
       <Dialog open={deliveryTimeDialogOpen} onOpenChange={setDeliveryTimeDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
+        <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
+          <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-teal-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
+                <Clock className="h-4 w-4 text-teal-600" />
+              </div>
               {editingDeliveryTime ? 'Edit Delivery Time' : 'Add Delivery Time'}
             </DialogTitle>
           </DialogHeader>
@@ -1397,18 +1508,19 @@ export default function SettingsPage() {
                 placeholder="e.g. Morning 6-9 AM"
                 value={deliveryTimeName}
                 onChange={(e) => setDeliveryTimeName(e.target.value)}
-                className="rounded-lg border-gray-200"
+                className="rounded-lg border-gray-200 h-11 md:h-auto"
+                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleDeliveryTimeSubmit()
                 }}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setDeliveryTimeDialogOpen(false)}
-              className="rounded-lg"
+              className="rounded-lg flex-1 sm:flex-none h-11 sm:h-auto"
               disabled={deliveryTimeSubmitting}
             >
               Cancel
@@ -1416,7 +1528,7 @@ export default function SettingsPage() {
             <Button
               onClick={handleDeliveryTimeSubmit}
               disabled={deliveryTimeSubmitting}
-              className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white min-w-[100px]"
+              className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white min-w-[100px] flex-1 sm:flex-none h-11 sm:h-auto"
             >
               {deliveryTimeSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

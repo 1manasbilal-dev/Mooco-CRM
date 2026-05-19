@@ -42,6 +42,7 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -205,17 +206,18 @@ function SortableLeadCard({
   return (
     <div ref={setNodeRef} style={style}>
       <Card
-        className={`group border border-l-4 ${stage.borderClass} bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${stage.hoverBorder} cursor-default`}
+        className={`group border border-l-4 ${stage.borderClass} bg-white rounded-lg md:rounded-lg shadow-sm md:shadow-sm hover:shadow-md transition-all duration-200 ${stage.hoverBorder} cursor-default`}
       >
-        <CardContent className="p-3">
+        <CardContent className="p-2.5 md:p-3">
           {/* Top row: Drag handle + Name + Menu */}
-          <div className="flex items-start gap-1.5">
+          <div className="flex items-start gap-1 md:gap-1.5">
+            {/* Drag handle - larger on mobile for better touch target */}
             <button
-              className="mt-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0"
+              className="mt-0 md:mt-1 flex h-11 w-6 md:h-auto md:w-auto items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 active:text-gray-600 transition-colors shrink-0 rounded-md hover:bg-gray-50 active:bg-gray-100 md:rounded-none md:hover:bg-transparent md:active:bg-transparent touch-none"
               {...attributes}
               {...listeners}
             >
-              <GripVertical className="h-4 w-4" />
+              <GripVertical className="h-5 w-5 md:h-4 md:w-4" />
             </button>
 
             <div className="flex-1 min-w-0">
@@ -228,24 +230,24 @@ function SortableLeadCard({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-9 w-9 md:h-7 md:w-7 shrink-0 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <MoreHorizontal className="h-3.5 w-3.5" />
+                      <MoreHorizontal className="h-4 w-4 md:h-3.5 md:w-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => onEdit(lead)}>
+                    <DropdownMenuItem onClick={() => onEdit(lead)} className="min-h-[44px] md:min-h-0">
                       <Pencil className="h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
                     {lead.status !== 'Converted' && (
-                      <DropdownMenuItem onClick={() => onConvert(lead)}>
+                      <DropdownMenuItem onClick={() => onConvert(lead)} className="min-h-[44px] md:min-h-0">
                         <ArrowRightLeft className="h-4 w-4" />
                         Convert to Customer
                       </DropdownMenuItem>
                     )}
                     {lead.status !== 'Lost' && lead.status !== 'Converted' && (
-                      <DropdownMenuItem onClick={() => onMarkLost(lead)}>
+                      <DropdownMenuItem onClick={() => onMarkLost(lead)} className="min-h-[44px] md:min-h-0">
                         <XCircle className="h-4 w-4" />
                         Mark Lost
                       </DropdownMenuItem>
@@ -254,6 +256,7 @@ function SortableLeadCard({
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={() => onDelete(lead)}
+                      className="min-h-[44px] md:min-h-0"
                     >
                       <Trash2 className="h-4 w-4" />
                       Delete
@@ -271,7 +274,7 @@ function SortableLeadCard({
           </div>
 
           {/* Info row */}
-          <div className="mt-2.5 ml-[22px] flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
+          <div className="mt-2 ml-0 md:ml-[22px] flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3 text-gray-400" />
               <span>{lead.area}</span>
@@ -283,7 +286,7 @@ function SortableLeadCard({
           </div>
 
           {/* Source badge + date */}
-          <div className="mt-2 ml-[22px] flex items-center justify-between gap-2">
+          <div className="mt-2 ml-0 md:ml-[22px] flex items-center justify-between gap-2">
             <Badge
               variant="outline"
               className={`text-[10px] px-1.5 py-0 h-5 ${sourceBadgeClasses(lead.source)}`}
@@ -298,7 +301,7 @@ function SortableLeadCard({
 
           {/* Expandable details */}
           {expanded && (lead.address || lead.notes) && (
-            <div className="mt-2.5 ml-[22px] pt-2.5 border-t border-gray-100">
+            <div className="mt-2.5 ml-0 md:ml-[22px] pt-2.5 border-t border-gray-100">
               {lead.address && (
                 <p className="text-xs text-gray-500 mb-1">
                   <span className="font-medium text-gray-600">Address:</span>{' '}
@@ -314,11 +317,11 @@ function SortableLeadCard({
             </div>
           )}
 
-          {/* Expand toggle */}
+          {/* Expand toggle - larger touch target on mobile */}
           {(lead.address || lead.notes) && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="mt-1.5 ml-[22px] flex items-center gap-0.5 text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+              className="mt-1.5 ml-0 md:ml-[22px] flex items-center gap-0.5 text-[10px] md:text-[10px] text-gray-400 hover:text-gray-600 transition-colors min-h-[32px] md:min-h-0"
             >
               {expanded ? (
                 <>
@@ -332,25 +335,25 @@ function SortableLeadCard({
             </button>
           )}
 
-          {/* Quick action buttons (for non-Converted on hover) */}
+          {/* Quick action buttons - always visible on mobile, hover on desktop */}
           {lead.status !== 'Converted' && lead.status !== 'Lost' && (
-            <div className="mt-2 ml-[22px] flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="mt-2 ml-0 md:ml-[22px] flex gap-1.5 md:gap-1.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="outline"
                 size="sm"
-                className="h-6 text-[10px] px-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
+                className="h-8 md:h-6 text-[11px] md:text-[10px] px-3 md:px-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800 min-w-[44px] md:min-w-0"
                 onClick={() => onConvert(lead)}
               >
-                <ArrowRightLeft className="h-3 w-3 mr-1" />
+                <ArrowRightLeft className="h-3.5 w-3.5 md:h-3 md:w-3 mr-1 md:mr-1" />
                 Convert
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-6 text-[10px] px-2 bg-red-50 border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700"
+                className="h-8 md:h-6 text-[11px] md:text-[10px] px-3 md:px-2 bg-red-50 border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700 min-w-[44px] md:min-w-0"
                 onClick={() => onMarkLost(lead)}
               >
-                <XCircle className="h-3 w-3 mr-1" />
+                <XCircle className="h-3.5 w-3.5 md:h-3 md:w-3 mr-1 md:mr-1" />
                 Lost
               </Button>
             </div>
@@ -806,75 +809,76 @@ export default function LeadsPage() {
   // ── Render ───────────────────────────────────────────
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 md:space-y-5">
       {/* ── Page Header ──────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-green-100">
-            <UserPlus className="h-5 w-5 text-green-600" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+          <div className="flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm shrink-0">
+            <UserPlus className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Leads Pipeline</h1>
-            <p className="text-sm text-gray-500">Track and manage your sales pipeline</p>
+          <div className="min-w-0">
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">Leads Pipeline</h1>
+            <p className="text-xs md:text-sm text-gray-500 truncate">Track and manage your sales pipeline</p>
           </div>
         </div>
+        {/* Full-width on mobile, normal on desktop */}
         <Button
           onClick={openAddForm}
-          className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200/50 shrink-0 h-9 md:h-auto px-3 md:px-4"
         >
-          <Plus className="h-4 w-4" />
-          Add Lead
+          <Plus className="h-4 w-4 md:mr-1" />
+          <span className="hidden md:inline">Add Lead</span>
         </Button>
       </div>
 
       {/* ── Pipeline Statistics Bar ────────────────────── */}
       {!loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-gray-50/50">
-            <CardContent className="p-3.5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-100">
-                  <Users className="h-3.5 w-3.5 text-gray-600" />
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 md:gap-3">
+          <Card className="rounded-xl md:rounded-xl border-gray-200/80 shadow-sm bg-gradient-to-br from-white to-gray-50/50 hover:shadow-md transition-shadow">
+            <CardContent className="p-2.5 md:p-3.5">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gray-100">
+                  <Users className="h-3 w-3 md:h-3.5 md:w-3.5 text-gray-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500">Total Leads</span>
+                <span className="text-[10px] md:text-xs font-medium text-gray-500 truncate">Total Leads</span>
               </div>
-              <p className="text-xl font-bold text-gray-900 ml-9">{stats.total}</p>
+              <p className="text-lg md:text-xl font-bold text-gray-900 md:ml-9">{stats.total}</p>
             </CardContent>
           </Card>
-          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-green-50/30">
-            <CardContent className="p-3.5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
-                  <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+          <Card className="rounded-xl border-gray-200/80 shadow-sm bg-gradient-to-br from-white to-green-50/30 hover:shadow-md transition-shadow">
+            <CardContent className="p-2.5 md:p-3.5">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-green-100">
+                  <TrendingUp className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500">Conversion Rate</span>
+                <span className="text-[10px] md:text-xs font-medium text-gray-500 truncate">Conversion</span>
               </div>
-              <p className="text-xl font-bold text-green-700 ml-9">{stats.conversionRate}%</p>
+              <p className="text-lg md:text-xl font-bold text-green-700 md:ml-9">{stats.conversionRate}%</p>
             </CardContent>
           </Card>
-          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-blue-50/30">
-            <CardContent className="p-3.5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
-                  <Layers className="h-3.5 w-3.5 text-blue-600" />
+          <Card className="rounded-xl border-gray-200/80 shadow-sm bg-gradient-to-br from-white to-blue-50/30 hover:shadow-md transition-shadow">
+            <CardContent className="p-2.5 md:p-3.5">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-blue-100">
+                  <Layers className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500">Active Pipeline</span>
+                <span className="text-[10px] md:text-xs font-medium text-gray-500 truncate">Active</span>
               </div>
-              <p className="text-xl font-bold text-blue-700 ml-9">{stats.activeLeads}</p>
+              <p className="text-lg md:text-xl font-bold text-blue-700 md:ml-9">{stats.activeLeads}</p>
             </CardContent>
           </Card>
-          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-emerald-50/30">
-            <CardContent className="p-3.5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-100">
-                  <Droplets className="h-3.5 w-3.5 text-emerald-600" />
+          <Card className="rounded-xl border-gray-200/80 shadow-sm bg-gradient-to-br from-white to-emerald-50/30 hover:shadow-md transition-shadow">
+            <CardContent className="p-2.5 md:p-3.5">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-emerald-100">
+                  <Droplets className="h-3 w-3 md:h-3.5 md:w-3.5 text-emerald-600" />
                 </div>
-                <span className="text-xs font-medium text-gray-500">Expected Daily</span>
+                <span className="text-[10px] md:text-xs font-medium text-gray-500 truncate">Daily Qty</span>
               </div>
-              <p className="text-xl font-bold text-emerald-700 ml-9">{stats.totalQty}L</p>
+              <p className="text-lg md:text-xl font-bold text-emerald-700 md:ml-9">{stats.totalQty}L</p>
             </CardContent>
           </Card>
-          <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-green-50/30 col-span-2 sm:col-span-1 hidden lg:block">
+          <Card className="rounded-xl border-gray-200/80 shadow-sm bg-gradient-to-br from-white to-green-50/30 col-span-2 lg:col-span-1 hidden lg:block hover:shadow-md transition-shadow">
             <CardContent className="p-3.5">
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-green-100">
@@ -889,55 +893,60 @@ export default function LeadsPage() {
       )}
 
       {/* ── Filters & Search Bar ─────────────────────── */}
-      <Card className="rounded-xl border-gray-200 shadow-sm">
-        <CardContent className="p-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-            {/* Search */}
+      <Card className="rounded-xl border-gray-200/80 shadow-sm">
+        <CardContent className="p-2.5 md:p-3">
+          <div className="flex flex-col gap-2.5 md:gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+            {/* Search - full width on mobile */}
             <div className="relative flex-1 min-w-0 sm:max-w-[280px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Search name or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9"
+                className="pl-9 h-10 md:h-9 text-sm"
               />
             </div>
 
-            {/* Toggle filters */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-1.5"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-3.5 w-3.5" />
-              Filters
-              {(areaFilter !== 'all' || sourceFilter !== 'all') && (
-                <Badge className="h-4 min-w-[16px] px-1 text-[9px] bg-green-600 text-white border-0">
-                  {(areaFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0)}
-                </Badge>
-              )}
-            </Button>
+            <div className="flex items-center gap-2 md:gap-0">
+              {/* Toggle filters */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 md:h-9 gap-1.5 flex-1 md:flex-none min-w-[44px]"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5 md:hidden" />
+                <Filter className="h-3.5 w-3.5 hidden md:block" />
+                <span className="md:hidden">Filters</span>
+                <span className="hidden md:inline">Filters</span>
+                {(areaFilter !== 'all' || sourceFilter !== 'all') && (
+                  <Badge className="h-4 min-w-[16px] px-1 text-[9px] bg-green-600 text-white border-0">
+                    {(areaFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0)}
+                  </Badge>
+                )}
+              </Button>
 
-            {/* Count */}
-            <div className="flex items-center gap-1.5 text-sm text-gray-500 sm:ml-auto">
-              <Users className="h-4 w-4" />
-              <span className="font-medium text-gray-700">{filteredLeads.length}</span> leads
+              {/* Count */}
+              <div className="flex items-center gap-1.5 text-sm text-gray-500 sm:ml-auto md:ml-auto ml-0">
+                <Users className="h-4 w-4" />
+                <span className="font-medium text-gray-700">{filteredLeads.length}</span>
+                <span className="hidden sm:inline">leads</span>
+              </div>
             </div>
           </div>
 
           {/* Expanded filters */}
           {showFilters && (
             <>
-              <Separator className="my-3" />
+              <Separator className="my-2.5 md:my-3" />
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
                   <span className="text-xs font-medium text-gray-500 shrink-0">Area:</span>
                   <Select
                     value={areaFilter}
                     onValueChange={setAreaFilter}
                   >
-                    <SelectTrigger className="w-full sm:w-[180px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[180px] h-9 md:h-8 text-xs">
                       <SelectValue placeholder="All Areas" />
                     </SelectTrigger>
                     <SelectContent>
@@ -951,13 +960,13 @@ export default function LeadsPage() {
                   </Select>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
                   <span className="text-xs font-medium text-gray-500 shrink-0">Source:</span>
                   <Select
                     value={sourceFilter}
                     onValueChange={setSourceFilter}
                   >
-                    <SelectTrigger className="w-full sm:w-[160px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[160px] h-9 md:h-8 text-xs">
                       <SelectValue placeholder="All Sources" />
                     </SelectTrigger>
                     <SelectContent>
@@ -975,7 +984,7 @@ export default function LeadsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 text-xs text-gray-500"
+                    className="h-9 md:h-8 text-xs text-gray-500 min-w-[44px]"
                     onClick={() => {
                       setAreaFilter('all')
                       setSourceFilter('all')
@@ -992,7 +1001,7 @@ export default function LeadsPage() {
 
       {/* ── Loading State ────────────────────────────── */}
       {loading && (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm">
           <CardContent className="flex h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -1004,10 +1013,10 @@ export default function LeadsPage() {
 
       {/* ── Empty State ──────────────────────────────── */}
       {!loading && filteredLeads.length === 0 && (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="flex h-64 flex-col items-center justify-center gap-3 p-6">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-              <UserPlus className="h-7 w-7 text-gray-400" />
+        <Card className="rounded-xl border-gray-200/80 shadow-sm">
+          <CardContent className="flex h-56 md:h-64 flex-col items-center justify-center gap-3 p-6">
+            <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-gradient-to-br from-gray-50 to-gray-100">
+              <UserPlus className="h-6 w-6 md:h-7 md:w-7 text-gray-400" />
             </div>
             <div className="text-center">
               <p className="font-medium text-gray-900">No leads found</p>
@@ -1020,7 +1029,7 @@ export default function LeadsPage() {
             {!searchQuery && areaFilter === 'all' && sourceFilter === 'all' && (
               <Button
                 onClick={openAddForm}
-                className="mt-1 bg-green-600 hover:bg-green-700 text-white"
+                className="mt-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200/50 min-h-[44px]"
                 size="sm"
               >
                 <Plus className="h-4 w-4" />
@@ -1059,17 +1068,18 @@ export default function LeadsPage() {
           </div>
 
           {/* Mobile: vertical stacked columns */}
-          <div className="flex flex-col gap-4 md:hidden">
+          <div className="flex flex-col gap-3 md:hidden">
             {PIPELINE_STAGES.map((stage) => {
               const stageLeads = leadsByStatus[stage.id] || []
+              const totalQty = stageLeads.reduce((sum, l) => sum + l.expectedQty, 0)
               return (
-                <Card key={stage.id} className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+                <Card key={stage.id} className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
                   {/* Mobile column header */}
                   <div
-                    className={`px-4 py-3 flex items-center justify-between ${stage.lightBg} border-b border-gray-100`}
+                    className={`px-3 py-2.5 flex items-center justify-between ${stage.lightBg} border-b border-gray-100/80`}
                   >
                     <div className="flex items-center gap-2">
-                      <div className={`h-2.5 w-2.5 rounded-full ${stage.bgClass}`} />
+                      <div className={`h-2.5 w-2.5 rounded-full ${stage.bgClass} shadow-sm`} />
                       <h3 className="font-semibold text-sm text-gray-800">{stage.label}</h3>
                       <Badge
                         variant="secondary"
@@ -1078,9 +1088,14 @@ export default function LeadsPage() {
                         {stageLeads.length}
                       </Badge>
                     </div>
+                    {totalQty > 0 && (
+                      <span className="text-[10px] text-gray-400 font-medium">
+                        {totalQty}L/day
+                      </span>
+                    )}
                   </div>
                   {/* Mobile cards */}
-                  <div className="p-3 space-y-2.5">
+                  <div className="p-2 space-y-2">
                     {stageLeads.length === 0 && (
                       <div className="flex flex-col items-center justify-center py-6 px-4">
                         <p className="text-xs text-gray-400 text-center">No leads here</p>
@@ -1111,22 +1126,24 @@ export default function LeadsPage() {
 
       {/* ── Add/Edit Lead Dialog ─────────────────────── */}
       <Dialog open={formOpen} onOpenChange={(open) => !open && closeForm()}>
-        <DialogContent className="sm:max-w-[520px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingLead ? 'Edit Lead' : 'Add New Lead'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingLead
-                ? 'Update the lead information below.'
-                : 'Fill in the details for the new lead.'}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-[520px] p-0 md:p-6 gap-0 md:gap-4 max-h-[100dvh] md:max-h-[90vh] overflow-y-auto md:rounded-lg rounded-none inset-0 md:inset-auto translate-x-0 md:translate-x-[-50%] translate-y-0 md:translate-y-[-50%] fixed md:absolute w-full md:w-auto md:max-w-[calc(100%-2rem)]">
+          <div className="sticky top-0 bg-background z-10 px-4 pt-4 pb-2 md:p-0 border-b md:border-b-0">
+            <DialogHeader>
+              <DialogTitle className="text-lg md:text-lg">
+                {editingLead ? 'Edit Lead' : 'Add New Lead'}
+              </DialogTitle>
+              <DialogDescription className="text-xs md:text-sm">
+                {editingLead
+                  ? 'Update the lead information below.'
+                  : 'Fill in the details for the new lead.'}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <div className="grid gap-4 py-2">
+          <div className="grid gap-3 md:gap-4 px-4 py-3 md:p-0">
             {/* Name */}
-            <div className="grid gap-2">
-              <Label htmlFor="lead-name">
+            <div className="grid gap-1.5 md:gap-2">
+              <Label htmlFor="lead-name" className="text-sm">
                 Name <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -1134,12 +1151,13 @@ export default function LeadsPage() {
                 placeholder="Enter full name"
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                className="h-11 md:h-auto"
               />
             </div>
 
             {/* Phone */}
-            <div className="grid gap-2">
-              <Label htmlFor="lead-phone">
+            <div className="grid gap-1.5 md:gap-2">
+              <Label htmlFor="lead-phone" className="text-sm">
                 Phone <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -1147,12 +1165,13 @@ export default function LeadsPage() {
                 placeholder="Enter phone number"
                 value={formData.phone}
                 onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                className="h-11 md:h-auto"
               />
             </div>
 
             {/* Area */}
-            <div className="grid gap-2">
-              <Label htmlFor="lead-area">
+            <div className="grid gap-1.5 md:gap-2">
+              <Label htmlFor="lead-area" className="text-sm">
                 Area <span className="text-red-500">*</span>
               </Label>
               <Select
@@ -1161,7 +1180,7 @@ export default function LeadsPage() {
                   setFormData((prev) => ({ ...prev, area: value }))
                 }
               >
-                <SelectTrigger id="lead-area" className="w-full">
+                <SelectTrigger id="lead-area" className="w-full h-11 md:h-auto">
                   <SelectValue placeholder="Select area" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1175,20 +1194,21 @@ export default function LeadsPage() {
             </div>
 
             {/* Address */}
-            <div className="grid gap-2">
-              <Label htmlFor="lead-address">Address</Label>
+            <div className="grid gap-1.5 md:gap-2">
+              <Label htmlFor="lead-address" className="text-sm">Address</Label>
               <Input
                 id="lead-address"
                 placeholder="Enter delivery address"
                 value={formData.address}
                 onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+                className="h-11 md:h-auto"
               />
             </div>
 
             {/* Expected Qty + Source */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="lead-qty">Expected Daily Qty (L)</Label>
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="grid gap-1.5 md:gap-2">
+                <Label htmlFor="lead-qty" className="text-sm">Daily Qty (L)</Label>
                 <Input
                   id="lead-qty"
                   type="number"
@@ -1202,17 +1222,18 @@ export default function LeadsPage() {
                       expectedQty: parseFloat(e.target.value) || 0,
                     }))
                   }
+                  className="h-11 md:h-auto"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="lead-source">Source</Label>
+              <div className="grid gap-1.5 md:gap-2">
+                <Label htmlFor="lead-source" className="text-sm">Source</Label>
                 <Select
                   value={formData.source}
                   onValueChange={(value) =>
                     setFormData((prev) => ({ ...prev, source: value }))
                   }
                 >
-                  <SelectTrigger id="lead-source" className="w-full">
+                  <SelectTrigger id="lead-source" className="w-full h-11 md:h-auto">
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1227,8 +1248,8 @@ export default function LeadsPage() {
             </div>
 
             {/* Notes */}
-            <div className="grid gap-2">
-              <Label htmlFor="lead-notes">Notes</Label>
+            <div className="grid gap-1.5 md:gap-2">
+              <Label htmlFor="lead-notes" className="text-sm">Notes</Label>
               <Textarea
                 id="lead-notes"
                 placeholder="Additional notes about this lead..."
@@ -1239,47 +1260,50 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={closeForm} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {editingLead ? 'Update Lead' : 'Create Lead'}
-            </Button>
-          </DialogFooter>
+          <div className="sticky bottom-0 bg-background z-10 px-4 pb-4 pt-3 md:p-0 border-t md:border-t-0">
+            <DialogFooter className="flex-row gap-2 sm:flex-row">
+              <Button variant="outline" onClick={closeForm} disabled={submitting} className="flex-1 md:flex-none min-h-[44px] md:min-h-0">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="flex-1 md:flex-none min-h-[44px] md:min-h-0 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200/50"
+              >
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {editingLead ? 'Update Lead' : 'Create Lead'}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* ── Convert Confirmation Dialog ──────────────── */}
       <Dialog open={!!convertLead} onOpenChange={(open) => !open && setConvertLead(null)}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[420px] p-4 md:p-6 gap-0 md:gap-4 max-h-[100dvh] md:max-h-[90vh] overflow-y-auto md:rounded-lg rounded-none inset-0 md:inset-auto translate-x-0 md:translate-x-[-50%] translate-y-0 md:translate-y-[-50%] fixed md:absolute w-full md:w-auto md:max-w-[calc(100%-2rem)]">
+          <DialogHeader className="pb-2 md:pb-0">
             <DialogTitle>Convert to Customer</DialogTitle>
             <DialogDescription>
               Convert <span className="font-semibold text-gray-900">{convertLead?.name}</span> to a customer?
             </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 px-0 md:px-0">
             This will create a new customer with the lead&apos;s details. The lead status will be updated to
             &quot;Converted&quot;.
           </p>
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2 sm:flex-row pt-2 md:pt-0">
             <Button
               variant="outline"
               onClick={() => setConvertLead(null)}
               disabled={converting}
+              className="flex-1 md:flex-none min-h-[44px] md:min-h-0"
             >
               Cancel
             </Button>
             <Button
               onClick={handleConvert}
               disabled={converting}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 md:flex-none min-h-[44px] md:min-h-0 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200/50"
             >
               {converting && <Loader2 className="h-4 w-4 animate-spin" />}
               Convert
@@ -1293,19 +1317,19 @@ export default function LeadsPage() {
         open={!!deleteLead}
         onOpenChange={(open) => !open && setDeleteLead(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-none md:rounded-lg max-w-[calc(100%-2rem)] md:max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Lead</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this lead? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="flex-row gap-2 sm:flex-row">
+            <AlertDialogCancel disabled={deleting} className="flex-1 md:flex-none min-h-[44px] md:min-h-0">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="flex-1 md:flex-none min-h-[44px] md:min-h-0 bg-red-600 hover:bg-red-700 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
               Delete

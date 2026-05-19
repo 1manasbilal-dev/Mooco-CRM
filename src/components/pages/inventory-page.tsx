@@ -47,6 +47,7 @@ import {
   X,
   Power,
   PowerOff,
+  History,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -74,14 +75,14 @@ interface SaleRecord {
 
 const formatPKR = (amount: number) => `₨${amount.toLocaleString()}`
 
-const categoryConfig: Record<string, { color: string; bg: string }> = {
-  Milk: { color: 'text-green-700', bg: 'bg-green-50 border-green-200' },
-  Yogurt: { color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200' },
-  Butter: { color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
-  Cream: { color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200' },
-  Eggs: { color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200' },
-  Paneer: { color: 'text-pink-700', bg: 'bg-pink-50 border-pink-200' },
-  Other: { color: 'text-gray-700', bg: 'bg-gray-50 border-gray-200' },
+const categoryConfig: Record<string, { color: string; bg: string; dot: string }> = {
+  Milk: { color: 'text-green-700', bg: 'bg-green-50 border-green-200', dot: 'bg-green-500' },
+  Yogurt: { color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', dot: 'bg-blue-500' },
+  Butter: { color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', dot: 'bg-amber-500' },
+  Cream: { color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', dot: 'bg-purple-500' },
+  Eggs: { color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200', dot: 'bg-orange-500' },
+  Paneer: { color: 'text-pink-700', bg: 'bg-pink-50 border-pink-200', dot: 'bg-pink-500' },
+  Other: { color: 'text-gray-700', bg: 'bg-gray-50 border-gray-200', dot: 'bg-gray-500' },
 }
 
 const categories = ['all', 'Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
@@ -378,160 +379,168 @@ export default function InventoryPage() {
   const someFilteredSelected = filteredItems.some(i => selectedIds.has(i.id)) && !allFilteredSelected
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-            <Package className="h-5 w-5 text-green-600" />
+    <div className="space-y-4 sm:space-y-6 pb-28 sm:pb-24">
+      {/* ── Header ────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-emerald-100">
+            <Package className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-green-600" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
-            <p className="text-sm text-gray-500">Manage dairy products & daily sales</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">Inventory</h1>
+            <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Manage dairy products & daily sales</p>
           </div>
         </div>
         <Button
           onClick={() => { resetItemForm(); setShowAddItemDialog(true) }}
-          className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-10 sm:h-9 px-3 sm:px-4 shrink-0"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Add Product</span>
         </Button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-                <Package className="h-5 w-5 text-green-600" />
+      {/* ── Summary Cards ─────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-green-50/30">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Products</p>
-                <p className="text-xl font-bold text-gray-900">{loading ? '—' : totalItems}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Sold Today</p>
-                <p className="text-xl font-bold text-gray-900">{loading ? '—' : totalSoldToday.toFixed(1)}</p>
+              <div className="min-w-0">
+                <p className="text-[11px] sm:text-sm text-gray-500 leading-tight">Products</p>
+                <p className="text-base sm:text-xl font-bold text-gray-900">{loading ? '—' : totalItems}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <IndianRupee className="h-5 w-5 text-amber-600" />
+        <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-blue-50/30">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Today&apos;s Revenue</p>
-                <p className="text-xl font-bold text-gray-900">{loading ? '—' : formatPKR(totalRevenueToday)}</p>
+              <div className="min-w-0">
+                <p className="text-[11px] sm:text-sm text-gray-500 leading-tight">Sold Today</p>
+                <p className="text-base sm:text-xl font-bold text-gray-900">{loading ? '—' : totalSoldToday.toFixed(1)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-purple-600" />
+        <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-amber-50/30">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                <IndianRupee className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Categories Active</p>
-                <p className="text-xl font-bold text-gray-900">{loading ? '—' : categoriesSold}</p>
+              <div className="min-w-0">
+                <p className="text-[11px] sm:text-sm text-gray-500 leading-tight">Revenue</p>
+                <p className="text-base sm:text-xl font-bold text-gray-900">{loading ? '—' : formatPKR(totalRevenueToday)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-xl border-gray-200 shadow-sm bg-gradient-to-br from-white to-purple-50/30">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] sm:text-sm text-gray-500 leading-tight">Categories</p>
+                <p className="text-base sm:text-xl font-bold text-gray-900">{loading ? '—' : categoriesSold}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* ── Filter & Search Bar ───────────────────────────── */}
       <Card className="rounded-xl border-gray-200 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={allFilteredSelected}
-                ref={(el) => {
-                  if (el) {
-                    (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = someFilteredSelected
-                  }
-                }}
-                onCheckedChange={toggleSelectAll}
-                aria-label="Select all products"
-              />
-              <span className="text-sm text-gray-500 whitespace-nowrap">Select All</span>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3">
+            {/* Top row: Select All + Search + Count */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <Checkbox
+                  checked={allFilteredSelected}
+                  ref={(el) => {
+                    if (el) {
+                      (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = someFilteredSelected
+                    }
+                  }}
+                  onCheckedChange={toggleSelectAll}
+                  aria-label="Select all products"
+                  className="h-5 w-5 sm:h-4 sm:w-4"
+                />
+                <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">All</span>
+              </div>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search products..."
+                  className="pl-9 h-11 sm:h-9 bg-gray-50 border-gray-200 rounded-lg text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:block">
+                {filteredItems.length} items
+              </span>
             </div>
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search products..."
-                className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
+            {/* Bottom row: Status filters + count on mobile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
               {statusFilters.map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={`
-                    shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all
+                    shrink-0 rounded-full px-3 py-1.5 sm:py-1 text-xs font-medium transition-all min-h-[36px] sm:min-h-0
                     ${statusFilter === status
                       ? status === 'Active'
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-green-500 text-white shadow-sm'
                         : status === 'Inactive'
-                          ? 'bg-gray-500 text-white'
-                          : 'bg-green-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-gray-500 text-white shadow-sm'
+                          : 'bg-green-500 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300'
                     }
                   `}
                 >
                   {status === 'all' ? 'All Status' : status}
                 </button>
               ))}
+              <span className="text-xs text-gray-400 whitespace-nowrap ml-auto sm:hidden">
+                {filteredItems.length}
+              </span>
             </div>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
-              {filteredItems.length} products
-            </span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      {/* ── Category Tabs ─────────────────────────────────── */}
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategoryFilter(cat)}
             className={`
-              shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-all
+              shrink-0 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium transition-all min-h-[36px] sm:min-h-0
               ${categoryFilter === cat
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-green-500 text-white shadow-sm'
+                : 'bg-white text-gray-600 hover:bg-gray-50 active:bg-gray-100 border border-gray-200'
               }
             `}
           >
             {cat === 'all' ? 'All' : cat}
             {cat !== 'all' && categoryCounts[cat] ? (
-              <span className="ml-1.5 text-xs opacity-70">({categoryCounts[cat]})</span>
+              <span className="ml-1 text-[10px] sm:text-xs opacity-70">({categoryCounts[cat]})</span>
             ) : null}
           </button>
         ))}
       </div>
 
-      {/* Items Grid */}
+      {/* ── Items List ────────────────────────────────────── */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
@@ -539,12 +548,14 @@ export default function InventoryPage() {
       ) : filteredItems.length === 0 ? (
         <Card className="rounded-xl border-gray-200 shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Milk className="h-12 w-12 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg font-medium">No products found</p>
+            <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <Milk className="h-8 w-8 text-gray-300" />
+            </div>
+            <p className="text-gray-500 text-base font-medium">No products found</p>
             <p className="text-gray-400 text-sm mt-1">Add your first dairy product to get started</p>
             <Button
-              onClick={() => setShowAddItemDialog(true)}
-              className="mt-4 bg-green-500 hover:bg-green-600 text-white"
+              onClick={() => { resetItemForm(); setShowAddItemDialog(true) }}
+              className="mt-4 bg-green-500 hover:bg-green-600 text-white h-11"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Product
@@ -552,114 +563,217 @@ export default function InventoryPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredItems.map((item) => {
-            const catStyle = categoryConfig[item.category] || categoryConfig.Other
-            const isSelected = selectedIds.has(item.id)
-            const isInactive = item.status === 'Inactive'
-            return (
-              <Card
-                key={item.id}
-                className={`
-                  rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 relative
-                  ${isInactive ? 'opacity-60' : ''}
-                  ${isSelected ? 'ring-2 ring-green-500 ring-offset-1' : ''}
-                `}
-              >
-                <CardContent className="p-5">
-                  {/* Top row: Checkbox + Name + Status Badge */}
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="pt-0.5">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleSelect(item.id)}
+        <>
+          {/* Mobile: Compact list layout */}
+          <div className="flex flex-col gap-2 sm:hidden">
+            {filteredItems.map((item) => {
+              const catStyle = categoryConfig[item.category] || categoryConfig.Other
+              const isSelected = selectedIds.has(item.id)
+              const isInactive = item.status === 'Inactive'
+              return (
+                <Card
+                  key={item.id}
+                  className={`
+                    rounded-xl border-gray-200 shadow-sm transition-all duration-200 relative
+                    ${isInactive ? 'opacity-60' : ''}
+                    ${isSelected ? 'ring-2 ring-green-500 ring-offset-1 bg-green-50/30' : 'bg-white'}
+                  `}
+                >
+                  <CardContent className="p-3">
+                    {/* Row 1: Checkbox + Name + Category + Price */}
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        onClick={() => toggleSelect(item.id)}
+                        className="shrink-0 h-11 w-11 flex items-center justify-center rounded-lg active:bg-gray-100 -ml-1"
                         aria-label={`Select ${item.name}`}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                        <Badge variant="outline" className={`shrink-0 text-[10px] px-2 py-0 ${catStyle.bg} ${catStyle.color}`}>
-                          {item.category}
-                        </Badge>
-                        <Badge
-                          className={`shrink-0 text-[10px] px-2 py-0 border-0 ${
-                            item.status === 'Active'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {item.status === 'Active' ? '● Active' : '○ Inactive'}
-                        </Badge>
+                      >
+                        <div className={`
+                          h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all
+                          ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'}
+                        `}>
+                          {isSelected && (
+                            <svg className="h-3 w-3 text-white" viewBox="0 0 12 12" fill="none">
+                              <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-semibold text-gray-900 text-sm truncate">{item.name}</h3>
+                          <span className={`shrink-0 inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${catStyle.bg} ${catStyle.color}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${catStyle.dot}`}></span>
+                            {item.category}
+                          </span>
+                          {isInactive && (
+                            <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className="text-xs text-gray-500">₨{item.pricePerUnit}/{item.unit}</span>
+                          <span className="text-xs text-gray-300">·</span>
+                          <span className="text-xs text-green-700 font-medium">{item.todaySold.toFixed(1)} {item.unit} today</span>
+                          <span className="text-xs text-gray-300">·</span>
+                          <span className="text-xs font-semibold text-green-700">{formatPKR(item.todayRevenue)}</span>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-500">
-                        ₨{item.pricePerUnit} / {item.unit}
-                      </p>
                     </div>
-                  </div>
-
-                  {/* Today's Sales */}
-                  <div className="rounded-lg bg-gray-50 p-3 mb-4">
-                    <p className="text-xs text-gray-500 mb-1">Today&apos;s Sale</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-gray-900">
-                        {item.todaySold.toFixed(1)} <span className="text-sm font-normal text-gray-500">{item.unit}</span>
-                      </span>
-                      <span className="text-sm font-semibold text-green-700">
-                        {formatPKR(item.todayRevenue)}
-                      </span>
+                    {/* Row 2: Action buttons */}
+                    <div className="flex items-center gap-1.5 mt-2.5 ml-10">
+                      <Button
+                        onClick={() => openRecordSale(item)}
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white h-9 rounded-lg text-xs font-medium"
+                        disabled={isInactive}
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                        Record Sale
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openSalesHistory(item)}
+                        className="h-9 w-9 rounded-lg shrink-0"
+                        title="Sales History"
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openEditItem(item)}
+                        className="h-9 w-9 rounded-lg shrink-0"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => { setSelectedItem(item); setShowDeleteDialog(true) }}
+                        className="h-9 w-9 rounded-lg shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => openRecordSale(item)}
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white h-9 rounded-lg text-sm"
-                      disabled={isInactive}
-                    >
-                      <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                      Record Sale
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => openSalesHistory(item)}
-                      className="h-9 w-9 rounded-lg shrink-0"
-                      title="Sales History"
-                    >
-                      <TrendingUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => openEditItem(item)}
-                      className="h-9 w-9 rounded-lg shrink-0"
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => { setSelectedItem(item); setShowDeleteDialog(true) }}
-                      className="h-9 w-9 rounded-lg shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+          {/* Desktop: Card grid layout */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredItems.map((item) => {
+              const catStyle = categoryConfig[item.category] || categoryConfig.Other
+              const isSelected = selectedIds.has(item.id)
+              const isInactive = item.status === 'Inactive'
+              return (
+                <Card
+                  key={item.id}
+                  className={`
+                    rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 relative
+                    ${isInactive ? 'opacity-60' : ''}
+                    ${isSelected ? 'ring-2 ring-green-500 ring-offset-1' : ''}
+                  `}
+                >
+                  <CardContent className="p-5">
+                    {/* Top row: Checkbox + Name + Status Badge */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="pt-0.5">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleSelect(item.id)}
+                          aria-label={`Select ${item.name}`}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
+                          <Badge variant="outline" className={`shrink-0 text-[10px] px-2 py-0 ${catStyle.bg} ${catStyle.color}`}>
+                            {item.category}
+                          </Badge>
+                          <Badge
+                            className={`shrink-0 text-[10px] px-2 py-0 border-0 ${
+                              item.status === 'Active'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}
+                          >
+                            {item.status === 'Active' ? '● Active' : '○ Inactive'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          ₨{item.pricePerUnit} / {item.unit}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Today's Sales */}
+                    <div className="rounded-lg bg-gray-50 p-3 mb-4">
+                      <p className="text-xs text-gray-500 mb-1">Today&apos;s Sale</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold text-gray-900">
+                          {item.todaySold.toFixed(1)} <span className="text-sm font-normal text-gray-500">{item.unit}</span>
+                        </span>
+                        <span className="text-sm font-semibold text-green-700">
+                          {formatPKR(item.todayRevenue)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => openRecordSale(item)}
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white h-9 rounded-lg text-sm"
+                        disabled={isInactive}
+                      >
+                        <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                        Record Sale
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openSalesHistory(item)}
+                        className="h-9 w-9 rounded-lg shrink-0"
+                        title="Sales History"
+                      >
+                        <TrendingUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openEditItem(item)}
+                        className="h-9 w-9 rounded-lg shrink-0"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => { setSelectedItem(item); setShowDeleteDialog(true) }}
+                        className="h-9 w-9 rounded-lg shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </>
       )}
 
-      {/* Bulk Action Bar */}
+      {/* ── Bulk Action Bar ───────────────────────────────── */}
       <div
         className={`
-          fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out
+          fixed bottom-[64px] sm:bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out
           ${selectedIds.size > 0
             ? 'translate-y-0 opacity-100'
             : 'translate-y-full opacity-0 pointer-events-none'
@@ -667,26 +781,68 @@ export default function InventoryPage() {
         `}
       >
         <div className="bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16 gap-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
               {/* Left: Selection info */}
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 shrink-0">
                   <CheckSquare className="h-4 w-4 text-green-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                  {selectedIds.size} product{selectedIds.size !== 1 ? 's' : ''} selected
+                <span className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                  <span className="hidden sm:inline">{selectedIds.size} product{selectedIds.size !== 1 ? 's' : ''} selected</span>
+                  <span className="sm:hidden">{selectedIds.size} selected</span>
                 </span>
               </div>
 
               {/* Right: Actions */}
-              <div className="flex items-center gap-2 overflow-x-auto">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
+                {/* Mobile: icon-only buttons */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleBulkAction('Active')}
+                  disabled={bulkActionLoading}
+                  className="h-10 w-10 sm:hidden rounded-lg text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 shrink-0"
+                  title="Set Active"
+                >
+                  <Power className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleBulkAction('Inactive')}
+                  disabled={bulkActionLoading}
+                  className="h-10 w-10 sm:hidden rounded-lg text-gray-600 border-gray-200 hover:bg-gray-50 shrink-0"
+                  title="Set Inactive"
+                >
+                  <PowerOff className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleBulkAction('delete')}
+                  disabled={bulkActionLoading}
+                  className="h-10 w-10 sm:hidden rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 shrink-0"
+                  title="Delete"
+                >
+                  {bulkActionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={clearSelection}
+                  className="h-10 w-10 sm:hidden rounded-lg text-gray-500 hover:text-gray-700 shrink-0"
+                  title="Clear selection"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                {/* Desktop: buttons with labels */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleBulkAction('Active')}
                   disabled={bulkActionLoading}
-                  className="rounded-lg text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 whitespace-nowrap"
+                  className="hidden sm:flex rounded-lg text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 whitespace-nowrap"
                 >
                   <Power className="h-3.5 w-3.5 mr-1.5" />
                   Set Active
@@ -696,7 +852,7 @@ export default function InventoryPage() {
                   size="sm"
                   onClick={() => handleBulkAction('Inactive')}
                   disabled={bulkActionLoading}
-                  className="rounded-lg text-gray-600 border-gray-200 hover:bg-gray-50 whitespace-nowrap"
+                  className="hidden sm:flex rounded-lg text-gray-600 border-gray-200 hover:bg-gray-50 whitespace-nowrap"
                 >
                   <PowerOff className="h-3.5 w-3.5 mr-1.5" />
                   Set Inactive
@@ -706,7 +862,7 @@ export default function InventoryPage() {
                   size="sm"
                   onClick={() => handleBulkAction('delete')}
                   disabled={bulkActionLoading}
-                  className="rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 whitespace-nowrap"
+                  className="hidden sm:flex rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 whitespace-nowrap"
                 >
                   {bulkActionLoading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
                   Delete
@@ -716,7 +872,7 @@ export default function InventoryPage() {
                   variant="ghost"
                   size="sm"
                   onClick={clearSelection}
-                  className="rounded-lg text-gray-500 hover:text-gray-700 whitespace-nowrap"
+                  className="hidden sm:flex rounded-lg text-gray-500 hover:text-gray-700 whitespace-nowrap"
                 >
                   <X className="h-3.5 w-3.5 mr-1.5" />
                   Clear
@@ -727,30 +883,32 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Add Item Dialog */}
+      {/* ── Add Item Dialog ───────────────────────────────── */}
       <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="sm:max-w-md rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-green-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <Package className="h-4 w-4 text-green-600" />
+              </div>
               Add New Product
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label>Product Name *</Label>
+              <Label className="text-sm font-medium">Product Name *</Label>
               <Input
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="e.g., Full Cream Milk"
-                className="rounded-lg"
+                className="rounded-lg h-11 sm:h-9 mt-1.5"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Category</Label>
+                <Label className="text-sm font-medium">Category</Label>
                 <Select value={itemCategory} onValueChange={setItemCategory}>
-                  <SelectTrigger className="rounded-lg">
+                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -765,9 +923,9 @@ export default function InventoryPage() {
                 </Select>
               </div>
               <div>
-                <Label>Unit</Label>
+                <Label className="text-sm font-medium">Unit</Label>
                 <Select value={itemUnit} onValueChange={setItemUnit}>
-                  <SelectTrigger className="rounded-lg">
+                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -780,24 +938,24 @@ export default function InventoryPage() {
               </div>
             </div>
             <div>
-              <Label>Price per Unit (PKR) *</Label>
+              <Label className="text-sm font-medium">Price per Unit (PKR) *</Label>
               <Input
                 type="number"
                 value={itemPrice}
                 onChange={(e) => setItemPrice(e.target.value)}
                 placeholder="0"
-                className="rounded-lg"
+                className="rounded-lg h-11 sm:h-9 mt-1.5"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddItemDialog(false)} className="rounded-lg">
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setShowAddItemDialog(false)} className="rounded-lg h-11 sm:h-9 w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               onClick={handleAddItem}
               disabled={saving}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
+              className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 w-full sm:w-auto"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add Product
@@ -806,25 +964,27 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Item Dialog */}
+      {/* ── Edit Item Dialog ──────────────────────────────── */}
       <Dialog open={showEditItemDialog} onOpenChange={setShowEditItemDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="sm:max-w-md rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5 text-green-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <Edit className="h-4 w-4 text-green-600" />
+              </div>
               Edit Product
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label>Product Name *</Label>
-              <Input value={itemName} onChange={(e) => setItemName(e.target.value)} className="rounded-lg" />
+              <Label className="text-sm font-medium">Product Name *</Label>
+              <Input value={itemName} onChange={(e) => setItemName(e.target.value)} className="rounded-lg h-11 sm:h-9 mt-1.5" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Category</Label>
+                <Label className="text-sm font-medium">Category</Label>
                 <Select value={itemCategory} onValueChange={setItemCategory}>
-                  <SelectTrigger className="rounded-lg"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Milk">Milk</SelectItem>
                     <SelectItem value="Yogurt">Yogurt</SelectItem>
@@ -837,9 +997,9 @@ export default function InventoryPage() {
                 </Select>
               </div>
               <div>
-                <Label>Unit</Label>
+                <Label className="text-sm font-medium">Unit</Label>
                 <Select value={itemUnit} onValueChange={setItemUnit}>
-                  <SelectTrigger className="rounded-lg"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="liters">Liters</SelectItem>
                     <SelectItem value="kg">Kg</SelectItem>
@@ -850,13 +1010,13 @@ export default function InventoryPage() {
               </div>
             </div>
             <div>
-              <Label>Price per Unit (PKR) *</Label>
-              <Input type="number" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="rounded-lg" />
+              <Label className="text-sm font-medium">Price per Unit (PKR) *</Label>
+              <Input type="number" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="rounded-lg h-11 sm:h-9 mt-1.5" />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditItemDialog(false)} className="rounded-lg">Cancel</Button>
-            <Button onClick={handleEditItem} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg">
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setShowEditItemDialog(false)} className="rounded-lg h-11 sm:h-9 w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleEditItem} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 w-full sm:w-auto">
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Save Changes
             </Button>
@@ -864,16 +1024,19 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Record Sale Dialog */}
+      {/* ── Record Sale Dialog (Full-screen on mobile) ────── */}
       <Dialog open={showRecordSaleDialog} onOpenChange={setShowRecordSaleDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="sm:max-w-md rounded-xl sm:rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-green-600" />
-              Record Sale — {selectedItem?.name}
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <ShoppingCart className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="truncate">Record Sale — {selectedItem?.name}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            {/* Product info card */}
             <div className="rounded-lg bg-gray-50 p-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Product</span>
@@ -886,29 +1049,29 @@ export default function InventoryPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Quantity ({selectedItem?.unit}) *</Label>
+                <Label className="text-sm font-medium">Quantity ({selectedItem?.unit}) *</Label>
                 <Input
                   type="number"
                   step="0.5"
                   value={saleQty}
                   onChange={(e) => setSaleQty(e.target.value)}
                   placeholder="0"
-                  className="rounded-lg"
+                  className="rounded-lg h-11 sm:h-9 mt-1.5"
                 />
               </div>
               <div>
-                <Label>Date *</Label>
+                <Label className="text-sm font-medium">Date *</Label>
                 <Input
                   type="date"
                   value={saleDate}
                   onChange={(e) => setSaleDate(e.target.value)}
-                  className="rounded-lg"
+                  className="rounded-lg h-11 sm:h-9 mt-1.5"
                 />
               </div>
             </div>
             {saleQty && selectedItem && (
-              <div className="rounded-lg bg-green-50 p-3">
-                <div className="flex justify-between text-sm">
+              <div className="rounded-lg bg-green-50 p-3 border border-green-100">
+                <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Total Amount</span>
                   <span className="font-bold text-green-700 text-lg">
                     {formatPKR(parseFloat(saleQty) * selectedItem.pricePerUnit)}
@@ -917,19 +1080,19 @@ export default function InventoryPage() {
               </div>
             )}
             <div>
-              <Label>Notes</Label>
+              <Label className="text-sm font-medium">Notes</Label>
               <Textarea
                 value={saleNotes}
                 onChange={(e) => setSaleNotes(e.target.value)}
                 placeholder="Optional notes..."
-                className="rounded-lg"
+                className="rounded-lg mt-1.5"
                 rows={2}
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRecordSaleDialog(false)} className="rounded-lg">Cancel</Button>
-            <Button onClick={handleRecordSale} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg">
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setShowRecordSaleDialog(false)} className="rounded-lg h-11 sm:h-9 w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleRecordSale} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 w-full sm:w-auto">
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Record Sale
             </Button>
@@ -937,18 +1100,25 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Sales History Dialog */}
+      {/* ── Sales History Dialog ──────────────────────────── */}
       <Dialog open={showSalesHistoryDialog} onOpenChange={setShowSalesHistoryDialog}>
-        <DialogContent className="sm:max-w-lg rounded-xl">
+        <DialogContent className="sm:max-w-lg rounded-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              Sales History — {selectedItem?.name}
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <History className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="truncate">Sales History — {selectedItem?.name}</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-96 overflow-y-auto">
             {salesHistory.length === 0 ? (
-              <p className="text-center text-gray-400 py-8">No sales recorded yet</p>
+              <div className="flex flex-col items-center py-8">
+                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                  <TrendingUp className="h-5 w-5 text-gray-300" />
+                </div>
+                <p className="text-gray-400 text-sm text-center">No sales recorded yet</p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {salesHistory.map((sale) => (
@@ -956,14 +1126,14 @@ export default function InventoryPage() {
                     key={sale.id}
                     className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 p-3"
                   >
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-800">
                         {sale.quantity} {sale.item?.unit}
                       </p>
                       <p className="text-xs text-gray-400">{sale.date}</p>
-                      {sale.notes && <p className="text-xs text-gray-500 mt-0.5">{sale.notes}</p>}
+                      {sale.notes && <p className="text-xs text-gray-500 mt-0.5 truncate">{sale.notes}</p>}
                     </div>
-                    <span className="text-sm font-semibold text-green-700">
+                    <span className="text-sm font-semibold text-green-700 shrink-0 ml-3">
                       {formatPKR(sale.quantity * (sale.item?.pricePerUnit ?? 0))}
                     </span>
                   </div>
@@ -974,7 +1144,7 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
+      {/* ── Delete Dialog ─────────────────────────────────── */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="rounded-xl">
           <AlertDialogHeader>

@@ -15,16 +15,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -52,6 +42,9 @@ import {
   Receipt,
   ArrowUpRight,
   Loader2,
+  ChevronRight,
+  Users,
+  Banknote,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -92,17 +85,17 @@ interface PaymentSummary {
 
 const formatPKR = (amount: number) => `₨${amount.toLocaleString()}`
 
-const statusConfig: Record<string, { color: string; bg: string; icon: React.ElementType }> = {
-  Completed: { color: 'text-green-700', bg: 'bg-green-50 border-green-200', icon: CheckCircle },
-  Pending: { color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', icon: Clock },
-  Failed: { color: 'text-red-700', bg: 'bg-red-50 border-red-200', icon: XCircle },
+const statusConfig: Record<string, { color: string; bg: string; border: string; icon: React.ElementType; ring: string }> = {
+  Completed: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', icon: CheckCircle, ring: 'ring-emerald-500/20' },
+  Pending: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', icon: Clock, ring: 'ring-amber-500/20' },
+  Failed: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle, ring: 'ring-red-500/20' },
 }
 
-const methodConfig: Record<string, { color: string; bg: string }> = {
-  Cash: { color: 'text-green-700', bg: 'bg-green-50' },
-  UPI: { color: 'text-blue-700', bg: 'bg-blue-50' },
-  'Bank Transfer': { color: 'text-purple-700', bg: 'bg-purple-50' },
-  Cheque: { color: 'text-amber-700', bg: 'bg-amber-50' },
+const methodConfig: Record<string, { color: string; bg: string; icon: React.ElementType }> = {
+  Cash: { color: 'text-green-700', bg: 'bg-green-50', icon: Banknote },
+  UPI: { color: 'text-blue-700', bg: 'bg-blue-50', icon: ArrowUpRight },
+  'Bank Transfer': { color: 'text-purple-700', bg: 'bg-purple-50', icon: Receipt },
+  Cheque: { color: 'text-amber-700', bg: 'bg-amber-50', icon: Receipt },
 }
 
 export default function PaymentsPage() {
@@ -228,38 +221,38 @@ export default function PaymentsPage() {
   const selectedCustomer = customers.find((c) => c.id === formCustomerId)
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-            <Wallet className="h-5 w-5 text-green-600" />
+    <div className="space-y-4 sm:space-y-6">
+      {/* ─── Header ─── */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-200">
+            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-            <p className="text-sm text-gray-500">Track payments and pending dues</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight">Payments</h1>
+            <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Track payments and pending dues</p>
           </div>
         </div>
         <Button
           onClick={() => setShowAddDialog(true)}
-          className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-sm shadow-green-200 h-10 sm:h-10 px-3 sm:px-4"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Record Payment
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Record Payment</span>
         </Button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+      {/* ─── Summary Cards ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm ring-1 ring-emerald-100">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Received</p>
-                <p className="text-xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Received</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
                   {loading ? '—' : formatPKR(summary?.totalReceived || 0)}
                 </p>
               </div>
@@ -267,15 +260,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-amber-600" />
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm ring-1 ring-amber-100">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Pending</p>
-                <p className="text-xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Pending</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
                   {loading ? '—' : formatPKR(summary?.totalDue || 0)}
                 </p>
               </div>
@@ -283,15 +276,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center">
-                <XCircle className="h-5 w-5 text-red-600" />
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-red-50 to-rose-50 shadow-sm ring-1 ring-red-100">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shrink-0 shadow-sm">
+                <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Pending Count</p>
-                <p className="text-xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Pending #</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
                   {loading ? '—' : summary?.pendingCount || 0}
                 </p>
               </div>
@@ -299,15 +292,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Receipt className="h-5 w-5 text-blue-600" />
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm ring-1 ring-blue-100">
+          <CardContent className="p-3 sm:p-5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shrink-0 shadow-sm">
+                <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Total Transactions</p>
-                <p className="text-xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Transactions</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
                   {loading ? '—' : payments.length}
                 </p>
               </div>
@@ -316,27 +309,33 @@ export default function PaymentsPage() {
         </Card>
       </div>
 
-      {/* Customer Dues */}
+      {/* ─── Customer Dues (Horizontal scroll on mobile) ─── */}
       {summary && summary.customerDues.length > 0 && (
-        <Card className="rounded-xl border-amber-200 shadow-sm bg-amber-50/30">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <Card className="rounded-xl border-0 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 shadow-sm ring-1 ring-amber-200/60">
+          <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6 px-4 sm:px-6">
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
+              <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
+              </div>
               Customers with Pending Dues
+              <Badge className="ml-auto bg-amber-100 text-amber-700 border-amber-200 text-[10px] sm:text-xs">
+                {summary.customerDues.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CardContent className="pb-4 sm:pb-6 px-4 sm:px-6">
+            {/* Mobile: horizontal scroll | Desktop: grid */}
+            <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3 sm:overflow-visible scrollbar-none">
               {summary.customerDues.slice(0, 6).map((due) => (
                 <div
                   key={due.customerId}
-                  className="flex items-center justify-between rounded-lg bg-white p-3 border border-amber-100"
+                  className="flex items-center justify-between rounded-xl bg-white/80 backdrop-blur-sm p-3 border border-amber-100 shadow-sm shrink-0 w-[220px] sm:w-auto sm:shrink transition-all hover:shadow-md"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{due.customerName}</p>
-                    <p className="text-xs text-gray-500">{due.customerPhone}</p>
+                  <div className="min-w-0 mr-3">
+                    <p className="text-sm font-medium text-gray-900 truncate">{due.customerName}</p>
+                    <p className="text-[11px] text-gray-500">{due.customerPhone}</p>
                   </div>
-                  <span className="text-sm font-bold text-amber-700">
+                  <span className="text-sm font-bold text-amber-700 whitespace-nowrap bg-amber-50 px-2 py-0.5 rounded-lg">
                     {formatPKR(due.totalDue)}
                   </span>
                 </div>
@@ -346,21 +345,23 @@ export default function PaymentsPage() {
         </Card>
       )}
 
-      {/* Filters */}
-      <Card className="rounded-xl border-gray-200 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by customer or invoice..."
-                className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      {/* ─── Filters ─── */}
+      <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-200/60 p-3 sm:p-4">
+        <div className="flex flex-col gap-2.5 sm:gap-3">
+          {/* Search - full width on all sizes */}
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by customer or invoice..."
+              className="pl-9 h-11 sm:h-10 bg-gray-50/80 border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:bg-white"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          {/* Filters row: stack on mobile, inline on desktop */}
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[140px] h-9 rounded-lg">
+              <SelectTrigger className="w-full sm:w-[150px] h-11 sm:h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -371,7 +372,7 @@ export default function PaymentsPage() {
               </SelectContent>
             </Select>
             <Select value={methodFilter} onValueChange={setMethodFilter}>
-              <SelectTrigger className="w-full sm:w-[140px] h-9 rounded-lg">
+              <SelectTrigger className="w-full sm:w-[150px] h-11 sm:h-10 rounded-xl text-sm">
                 <SelectValue placeholder="Method" />
               </SelectTrigger>
               <SelectContent>
@@ -382,27 +383,32 @@ export default function PaymentsPage() {
                 <SelectItem value="Cheque">Cheque</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-gray-500 whitespace-nowrap">
-              Showing {payments.length} payments
+            <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap self-center sm:ml-auto">
+              Showing {payments.length} payment{payments.length !== 1 ? 's' : ''}
             </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Payments List */}
+      {/* ─── Payments List ─── */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+          </div>
+          <p className="text-sm text-gray-500">Loading payments...</p>
         </div>
       ) : payments.length === 0 ? (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <CreditCard className="h-12 w-12 text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg font-medium">No payments found</p>
+        <Card className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60">
+          <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+            <div className="h-16 w-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+              <CreditCard className="h-8 w-8 text-gray-300" />
+            </div>
+            <p className="text-gray-600 text-base font-semibold">No payments found</p>
             <p className="text-gray-400 text-sm mt-1">Record a payment to get started</p>
             <Button
               onClick={() => setShowAddDialog(true)}
-              className="mt-4 bg-green-500 hover:bg-green-600 text-white"
+              className="mt-5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-11 px-5 shadow-sm shadow-green-200"
             >
               <Plus className="h-4 w-4 mr-2" />
               Record Payment
@@ -410,78 +416,94 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {payments.map((payment) => {
             const sc = statusConfig[payment.status] || statusConfig.Pending
             const mc = methodConfig[payment.method] || methodConfig.Cash
             const StatusIcon = sc.icon
+            const MethodIcon = mc.icon
             return (
-              <Card key={payment.id} className="rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${sc.bg}`}>
-                        <StatusIcon className={`h-5 w-5 ${sc.color}`} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+              <Card
+                key={payment.id}
+                className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60 hover:ring-gray-300 hover:shadow-md transition-all cursor-pointer"
+                onClick={() => { setSelectedPayment(payment); setShowDetailDialog(true) }}
+              >
+                <CardContent className="p-3 sm:p-4">
+                  {/* Mobile layout: stacked, compact */}
+                  <div className="flex items-start sm:items-center gap-3">
+                    {/* Status icon */}
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ring-1 ${sc.border} ${sc.bg}`}>
+                      <StatusIcon className={`h-5 w-5 ${sc.color}`} />
+                    </div>
+
+                    {/* Main info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                           {payment.customer?.name || 'Unknown'}
                         </p>
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          <span className="text-xs text-gray-500">{payment.date}</span>
+                        {/* Amount - prominent on mobile */}
+                        <p className="font-bold text-gray-900 text-sm sm:text-base whitespace-nowrap">
+                          {formatPKR(payment.amount)}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-1 gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-[11px] sm:text-xs text-gray-500">{payment.date}</span>
+                          {/* Period & invoice hidden on mobile */}
                           {payment.period && (
-                            <span className="text-xs text-gray-400">• {payment.period}</span>
+                            <span className="text-[11px] sm:text-xs text-gray-400 hidden sm:inline">• {payment.period}</span>
                           )}
                           {payment.invoiceNumber && (
-                            <span className="text-xs text-gray-400">• {payment.invoiceNumber}</span>
+                            <span className="text-[11px] sm:text-xs text-gray-400 hidden sm:inline">• {payment.invoiceNumber}</span>
                           )}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                          {/* Method badge - hidden on mobile */}
+                          <Badge variant="outline" className={`text-[10px] ${mc.color} ${mc.bg} border-0 hidden sm:inline-flex`}>
+                            <MethodIcon className="h-3 w-3 mr-0.5" />
+                            {payment.method}
+                          </Badge>
+                          {/* Status badge - always prominent */}
+                          <Badge className={`${sc.bg} ${sc.color} ${sc.border} border text-[10px] sm:text-xs font-semibold ring-1 ${sc.ring}`}>
+                            {payment.status}
+                          </Badge>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-right hidden sm:block">
-                        <p className="font-bold text-gray-900">{formatPKR(payment.amount)}</p>
-                        <Badge variant="outline" className={`text-[10px] ${mc.color} ${mc.bg} border-0`}>
-                          {payment.method}
-                        </Badge>
-                      </div>
-                      <Badge className={`${sc.bg} ${sc.color} border-0 text-xs`}>
-                        {payment.status}
-                      </Badge>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setSelectedPayment(payment); setShowDetailDialog(true) }}>
-                            View Details
+                    {/* Dropdown menu - larger touch target on mobile */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 sm:h-8 sm:w-8 shrink-0 rounded-lg hover:bg-gray-100 -mr-1.5 sm:mr-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl">
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedPayment(payment); setShowDetailDialog(true) }}>
+                          View Details
+                        </DropdownMenuItem>
+                        {payment.status === 'Pending' && (
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleUpdateStatus(payment.id, 'Completed') }}>
+                            <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                            Mark Completed
                           </DropdownMenuItem>
-                          {payment.status === 'Pending' && (
-                            <DropdownMenuItem onClick={() => handleUpdateStatus(payment.id, 'Completed')}>
-                              <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                              Mark Completed
-                            </DropdownMenuItem>
-                          )}
-                          {payment.status !== 'Failed' && (
-                            <DropdownMenuItem onClick={() => handleUpdateStatus(payment.id, 'Failed')}>
-                              <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                              Mark Failed
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-
-                  {/* Mobile amount/method */}
-                  <div className="flex items-center justify-between mt-2 sm:hidden">
-                    <span className="font-bold text-gray-900">{formatPKR(payment.amount)}</span>
-                    <Badge variant="outline" className={`text-[10px] ${mc.color} ${mc.bg} border-0`}>
-                      {payment.method}
-                    </Badge>
+                        )}
+                        {payment.status !== 'Failed' && (
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleUpdateStatus(payment.id, 'Failed') }}>
+                            <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                            Mark Failed
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardContent>
               </Card>
@@ -490,20 +512,28 @@ export default function PaymentsPage() {
         </div>
       )}
 
-      {/* Record Payment Dialog */}
+      {/* ─── Record Payment Dialog (Full-screen on mobile) ─── */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <IndianRupee className="h-5 w-5 text-green-600" />
+        <DialogContent className="
+          sm:max-w-md sm:rounded-xl sm:top-[50%] sm:translate-y-[-50%]
+          max-sm:fixed max-sm:inset-0 max-sm:top-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0
+          max-sm:translate-x-0 max-sm:translate-y-0 max-sm:max-w-none max-sm:h-full max-sm:w-full
+          max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
+          max-sm:p-0 max-sm:gap-0
+        ">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                <IndianRupee className="h-4 w-4 text-white" />
+              </div>
               Record Payment
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-4 px-4 sm:px-0 overflow-y-auto flex-1 max-sm:pb-4">
             <div>
-              <Label>Customer *</Label>
+              <Label className="text-sm font-medium mb-1.5 block">Customer *</Label>
               <Select value={formCustomerId} onValueChange={setFormCustomerId}>
-                <SelectTrigger className="rounded-lg">
+                <SelectTrigger className="rounded-xl h-11 sm:h-10">
                   <SelectValue placeholder="Select customer" />
                 </SelectTrigger>
                 <SelectContent>
@@ -516,38 +546,38 @@ export default function PaymentsPage() {
               </Select>
             </div>
             {selectedCustomer && (
-              <div className="rounded-lg bg-gray-50 p-3 text-sm">
+              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-3 text-sm ring-1 ring-gray-100">
                 <p className="text-gray-600">
-                  Monthly Bill: <span className="font-semibold">{formatPKR(selectedCustomer.monthlyBill)}</span>
+                  Monthly Bill: <span className="font-bold text-gray-900">{formatPKR(selectedCustomer.monthlyBill)}</span>
                 </p>
               </div>
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Amount (PKR) *</Label>
+                <Label className="text-sm font-medium mb-1.5 block">Amount (PKR) *</Label>
                 <Input
                   type="number"
                   value={formAmount}
                   onChange={(e) => setFormAmount(e.target.value)}
                   placeholder="0"
-                  className="rounded-lg"
+                  className="rounded-xl h-11 sm:h-10"
                 />
               </div>
               <div>
-                <Label>Date *</Label>
+                <Label className="text-sm font-medium mb-1.5 block">Date *</Label>
                 <Input
                   type="date"
                   value={formDate}
                   onChange={(e) => setFormDate(e.target.value)}
-                  className="rounded-lg"
+                  className="rounded-xl h-11 sm:h-10"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Payment Method</Label>
+                <Label className="text-sm font-medium mb-1.5 block">Payment Method</Label>
                 <Select value={formMethod} onValueChange={setFormMethod}>
-                  <SelectTrigger className="rounded-lg">
+                  <SelectTrigger className="rounded-xl h-11 sm:h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -559,34 +589,38 @@ export default function PaymentsPage() {
                 </Select>
               </div>
               <div>
-                <Label>Period</Label>
+                <Label className="text-sm font-medium mb-1.5 block">Period</Label>
                 <Input
                   type="month"
                   value={formPeriod}
                   onChange={(e) => setFormPeriod(e.target.value)}
-                  className="rounded-lg"
+                  className="rounded-xl h-11 sm:h-10"
                 />
               </div>
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
               <Textarea
                 value={formNotes}
                 onChange={(e) => setFormNotes(e.target.value)}
                 placeholder="Optional notes..."
-                className="rounded-lg"
-                rows={2}
+                className="rounded-xl min-h-[80px]"
+                rows={3}
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)} className="rounded-lg">
+          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 max-sm:sticky max-sm:bottom-0 max-sm:bg-white max-sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowAddDialog(false)}
+              className="rounded-xl h-11 sm:h-10 flex-1 sm:flex-none"
+            >
               Cancel
             </Button>
             <Button
               onClick={handleRecordPayment}
               disabled={saving}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-lg"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-11 sm:h-10 flex-1 sm:flex-none shadow-sm shadow-green-200"
             >
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Record Payment
@@ -595,69 +629,96 @@ export default function PaymentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Payment Detail Dialog */}
+      {/* ─── Payment Detail Dialog (Full-screen on mobile) ─── */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-green-600" />
+        <DialogContent className="
+          sm:max-w-md sm:rounded-xl sm:top-[50%] sm:translate-y-[-50%]
+          max-sm:fixed max-sm:inset-0 max-sm:top-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0
+          max-sm:translate-x-0 max-sm:translate-y-0 max-sm:max-w-none max-sm:h-full max-sm:w-full
+          max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
+          max-sm:p-0 max-sm:gap-0
+        ">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                <Receipt className="h-4 w-4 text-white" />
+              </div>
               Payment Details
             </DialogTitle>
           </DialogHeader>
-          {selectedPayment && (
-            <div className="space-y-4 py-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Status</span>
-                <Badge className={`${statusConfig[selectedPayment.status]?.bg} ${statusConfig[selectedPayment.status]?.color} border-0`}>
-                  {selectedPayment.status}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Customer</span>
-                <span className="font-medium">{selectedPayment.customer?.name}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Amount</span>
-                <span className="text-lg font-bold">{formatPKR(selectedPayment.amount)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Date</span>
-                <span>{selectedPayment.date}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Method</span>
-                <Badge variant="outline" className={`${methodConfig[selectedPayment.method]?.color} ${methodConfig[selectedPayment.method]?.bg} border-0`}>
-                  {selectedPayment.method}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Period</span>
-                <span>{selectedPayment.period || '—'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">Invoice #</span>
-                <span className="text-sm font-mono">{selectedPayment.invoiceNumber || '—'}</span>
-              </div>
-              {selectedPayment.notes && (
-                <div>
-                  <span className="text-sm text-gray-500">Notes</span>
-                  <p className="mt-1 text-sm bg-gray-50 rounded-lg p-3">{selectedPayment.notes}</p>
+          {selectedPayment && (() => {
+            const dsc = statusConfig[selectedPayment.status] || statusConfig.Pending
+            const dmc = methodConfig[selectedPayment.method] || methodConfig.Cash
+            const DStatusIcon = dsc.icon
+            const DMethodIcon = dmc.icon
+            return (
+              <div className="space-y-1 overflow-y-auto flex-1 px-4 sm:px-0 py-4 max-sm:pb-4">
+                {/* Status hero */}
+                <div className={`rounded-xl ${dsc.bg} ring-1 ${dsc.border} p-4 mb-3`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <DStatusIcon className={`h-5 w-5 ${dsc.color}`} />
+                      <span className={`font-semibold text-sm ${dsc.color}`}>{selectedPayment.status}</span>
+                    </div>
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900">{formatPKR(selectedPayment.amount)}</span>
+                  </div>
                 </div>
-              )}
-              {selectedPayment.status === 'Pending' && (
-                <Button
-                  onClick={() => {
-                    handleUpdateStatus(selectedPayment.id, 'Completed')
-                    setShowDetailDialog(false)
-                  }}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white rounded-lg"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Mark as Completed
-                </Button>
-              )}
-            </div>
-          )}
+
+                {/* Detail rows */}
+                <div className="divide-y divide-gray-100 rounded-xl ring-1 ring-gray-200/60 bg-white overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-500">Customer</span>
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                        <Users className="h-3.5 w-3.5 text-gray-500" />
+                      </div>
+                      <span className="font-medium text-sm">{selectedPayment.customer?.name}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-500">Date</span>
+                    <span className="text-sm font-medium">{selectedPayment.date}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-500">Method</span>
+                    <Badge variant="outline" className={`${dmc.color} ${dmc.bg} border-0 text-xs`}>
+                      <DMethodIcon className="h-3 w-3 mr-1" />
+                      {selectedPayment.method}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-500">Period</span>
+                    <span className="text-sm font-medium">{selectedPayment.period || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm text-gray-500">Invoice #</span>
+                    <span className="text-sm font-mono bg-gray-50 px-2 py-0.5 rounded-md">{selectedPayment.invoiceNumber || '—'}</span>
+                  </div>
+                  {selectedPayment.notes && (
+                    <div className="px-4 py-3">
+                      <span className="text-sm text-gray-500 block mb-1">Notes</span>
+                      <p className="text-sm bg-gray-50 rounded-xl p-3 ring-1 ring-gray-100">{selectedPayment.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                {selectedPayment.status === 'Pending' && (
+                  <div className="pt-3 px-1">
+                    <Button
+                      onClick={() => {
+                        handleUpdateStatus(selectedPayment.id, 'Completed')
+                        setShowDetailDialog(false)
+                      }}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-12 shadow-sm shadow-green-200"
+                    >
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      Mark as Completed
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </DialogContent>
       </Dialog>
     </div>

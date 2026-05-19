@@ -45,6 +45,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip'
+import {
   Users,
   Plus,
   Search,
@@ -76,6 +81,7 @@ import {
   BarChart3,
   Wallet,
   Activity,
+  ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -520,77 +526,81 @@ export default function CustomersPage() {
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
       {/* ── Page Header ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-            <Users className="h-5 w-5 text-green-600" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-200">
+            <Users className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-            <p className="text-sm text-gray-500">Manage your active dairy customers</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Customers</h1>
+            <p className="text-xs sm:text-sm text-gray-500 hidden xs:block">Manage your active dairy customers</p>
           </div>
         </div>
         <Button
           onClick={openAddForm}
-          className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200 h-10 sm:h-auto"
         >
           <Plus className="size-4" />
-          Add Customer
+          <span className="hidden sm:inline ml-1">Add Customer</span>
         </Button>
       </div>
 
       {/* ── Summary Stats ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                <Users className="h-4 w-4 text-gray-600" />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-300 to-gray-400" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gray-100">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Total Customers</p>
-                <p className="text-xl font-bold text-gray-900">{customers.length}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500">Total</p>
+                <p className="text-lg sm:text-xl font-bold text-gray-900">{customers.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-50">
-                <UserCheck className="h-4 w-4 text-green-600" />
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400 to-emerald-500" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-50">
+                <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Active</p>
-                <p className="text-xl font-bold text-green-600">{activeCount}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500">Active</p>
+                <p className="text-lg sm:text-xl font-bold text-green-600">{activeCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50">
-                <UserX className="h-4 w-4 text-amber-600" />
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-amber-50">
+                <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Paused</p>
-                <p className="text-xl font-bold text-amber-600">{pausedCount}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500">Paused</p>
+                <p className="text-lg sm:text-xl font-bold text-amber-600">{pausedCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
-                <TrendingUp className="h-4 w-4 text-emerald-600" />
+        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-emerald-50">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Monthly Revenue</p>
-                <p className="text-xl font-bold text-emerald-600">
+                <p className="text-[11px] sm:text-xs text-gray-500">Revenue/mo</p>
+                <p className="text-lg sm:text-xl font-bold text-emerald-600">
                   {formatPKR(totalRevenue)}
                 </p>
               </div>
@@ -600,11 +610,65 @@ export default function CustomersPage() {
       </div>
 
       {/* ── Filter Bar ──────────────────────────────────────────────── */}
-      <Card className="rounded-xl border-gray-200 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-1">
-              {/* Select All Checkbox */}
+      <Card className="rounded-xl border-gray-200/80 shadow-sm">
+        <CardContent className="p-3 sm:p-4">
+          {/* Mobile Layout */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={toggleSelectAll}
+                  className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                />
+                <span className="text-xs text-gray-500">All</span>
+              </div>
+              <p className="text-xs text-gray-400 ml-auto">
+                {customers.length} result{customers.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search name, phone, area..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-11 rounded-lg border-gray-200 w-full"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-11 rounded-lg border-gray-200 w-full">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Status</SelectItem>
+                  {STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={milkFilter} onValueChange={setMilkFilter}>
+                <SelectTrigger className="h-11 rounded-lg border-gray-200 w-full">
+                  <SelectValue placeholder="Milk Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Types</SelectItem>
+                  {milkTypes.map((m) => (
+                    <SelectItem key={m.id} value={m.name}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-row sm:items-center sm:flex-1 gap-3">
               <div className="flex items-center gap-2 shrink-0">
                 <Checkbox
                   checked={allSelected}
@@ -656,13 +720,13 @@ export default function CustomersPage() {
         </CardContent>
       </Card>
 
-      {/* ── Customer Cards Grid ─────────────────────────────────────── */}
+      {/* ── Customer List / Cards ──────────────────────────────────── */}
       {loading ? (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         </div>
       ) : customers.length === 0 ? (
-        <Card className="rounded-xl border-gray-200 shadow-sm">
+        <Card className="rounded-xl border-gray-200/80 shadow-sm">
           <CardContent className="flex h-64 flex-col items-center justify-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
               <Users className="h-7 w-7 text-gray-400" />
@@ -677,7 +741,7 @@ export default function CustomersPage() {
               <Button
                 onClick={openAddForm}
                 variant="outline"
-                className="mt-2 border-green-200 text-green-600 hover:bg-green-50"
+                className="mt-2 border-green-200 text-green-600 hover:bg-green-50 min-h-[44px]"
               >
                 <Plus className="size-4" />
                 Add Customer
@@ -686,180 +750,307 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {customers.map((customer) => {
-            const isSelected = selectedIds.has(customer.id)
-            return (
-              <Card
-                key={customer.id}
-                className={`rounded-xl border-gray-200 shadow-sm hover:shadow-md transition-all py-0 relative ${
-                  isSelected ? 'ring-2 ring-green-500/40 border-green-300 bg-green-50/30' : ''
-                }`}
-              >
-                <CardContent className="p-5">
-                  {/* Checkbox + Header */}
-                  <div className="flex items-start gap-2 mb-3">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleSelect(customer.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="mt-1 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-gray-900 truncate">
-                          {customer.name}
-                        </h3>
-                        <Badge
-                          className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${
-                            customer.status === 'Active'
-                              ? 'bg-green-50 text-green-700 border-green-200'
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}
-                          variant="outline"
+        <>
+          {/* ── Mobile: Compact List ──────────────────────────────── */}
+          <div className="flex flex-col gap-1 sm:hidden">
+            {customers.map((customer) => {
+              const isSelected = selectedIds.has(customer.id)
+              return (
+                <div
+                  key={customer.id}
+                  onClick={() => fetchDetail(customer.id)}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-xl border cursor-pointer transition-all active:scale-[0.99] min-h-[44px] ${
+                    isSelected
+                      ? 'border-green-300 bg-green-50/60 ring-1 ring-green-500/30'
+                      : 'border-gray-100 bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelect(customer.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm text-gray-900 truncate">{customer.name}</span>
+                      <Badge
+                        className={`shrink-0 text-[10px] px-1.5 py-0 rounded-md font-semibold ${
+                          customer.status === 'Active'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}
+                        variant="outline"
+                      >
+                        {customer.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500">
+                      <span className="flex items-center gap-0.5">
+                        <Phone className="h-2.5 w-2.5" />
+                        {customer.phone}
+                      </span>
+                      <span className="text-gray-300">|</span>
+                      <span className="flex items-center gap-0.5">
+                        <MapPin className="h-2.5 w-2.5" />
+                        {customer.area}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 gap-0.5">
+                    <span className="text-xs font-bold text-gray-900">{formatPKR(customer.monthlyBill)}</span>
+                    <span className="text-[10px] text-gray-400">{customer.dailyQty}L/day</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-gray-300 shrink-0" />
+                </div>
+              )
+            })}
+          </div>
+
+          {/* ── Desktop: Card Grid ───────────────────────────────── */}
+          <div className="hidden sm:grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {customers.map((customer) => {
+              const isSelected = selectedIds.has(customer.id)
+              return (
+                <Card
+                  key={customer.id}
+                  className={`rounded-xl border-gray-200/80 shadow-sm hover:shadow-md transition-all py-0 relative overflow-hidden ${
+                    isSelected ? 'ring-2 ring-green-500/40 border-green-300 bg-green-50/30' : ''
+                  }`}
+                >
+                  {/* Gradient accent top */}
+                  <div className={`h-0.5 ${isSelected ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-gray-100 to-gray-200'}`} />
+                  <CardContent className="p-5">
+                    {/* Checkbox + Header */}
+                    <div className="flex items-start gap-2 mb-3">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelect(customer.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {customer.name}
+                          </h3>
+                          <Badge
+                            className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${
+                              customer.status === 'Active'
+                                ? 'bg-green-50 text-green-700 border-green-200'
+                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}
+                            variant="outline"
+                          >
+                            {customer.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Phone className="h-3 w-3 text-gray-400 shrink-0" />
+                          <span className="text-xs text-gray-500 truncate">
+                            {customer.phone}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Area */}
+                    <div className="flex items-center gap-1.5 mb-3 pl-7">
+                      <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
+                      <span className="text-xs text-gray-500 truncate">
+                        {customer.area}
+                      </span>
+                    </div>
+
+                    {/* Badges Row */}
+                    <div className="flex flex-wrap gap-1.5 mb-3 pl-7">
+                      <Badge
+                        variant="secondary"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0"
+                      >
+                        <Package className="h-3 w-3 mr-0.5" />
+                        {customer.dailyQty}L/day
+                      </Badge>
+                      <Badge
+                        variant="secondary"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0"
+                      >
+                        <Milk className="h-3 w-3 mr-0.5" />
+                        {customer.milkType}
+                      </Badge>
+                      <Badge
+                        variant="secondary"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0"
+                      >
+                        <Clock className="h-3 w-3 mr-0.5" />
+                        {customer.deliveryTime}
+                      </Badge>
+                    </div>
+
+                    {/* Monthly Bill + Actions */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 pl-7">
+                      <div>
+                        <p className="text-[11px] text-gray-400">Monthly Bill</p>
+                        <p className="text-sm font-bold text-gray-900">
+                          {formatPKR(customer.monthlyBill)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => fetchDetail(customer.id)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 min-h-[44px] min-w-[44px]"
                         >
-                          {customer.status}
-                        </Badge>
+                          <Eye className="h-3.5 w-3.5 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => fetchDetail(customer.id, 'ledger')}
+                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 min-h-[44px] min-w-[44px]"
+                        >
+                          <BookOpen className="h-3.5 w-3.5 mr-1" />
+                          Ledger
+                        </Button>
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-                        <span className="text-xs text-gray-500 truncate">
-                          {customer.phone}
-                        </span>
-                      </div>
                     </div>
-                  </div>
-
-                  {/* Area */}
-                  <div className="flex items-center gap-1.5 mb-3 pl-7">
-                    <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
-                    <span className="text-xs text-gray-500 truncate">
-                      {customer.area}
-                    </span>
-                  </div>
-
-                  {/* Badges Row */}
-                  <div className="flex flex-wrap gap-1.5 mb-3 pl-7">
-                    <Badge
-                      variant="secondary"
-                      className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0"
-                    >
-                      <Package className="h-3 w-3 mr-0.5" />
-                      {customer.dailyQty}L/day
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0"
-                    >
-                      <Milk className="h-3 w-3 mr-0.5" />
-                      {customer.milkType}
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0"
-                    >
-                      <Clock className="h-3 w-3 mr-0.5" />
-                      {customer.deliveryTime}
-                    </Badge>
-                  </div>
-
-                  {/* Monthly Bill + Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 pl-7">
-                    <div>
-                      <p className="text-[11px] text-gray-400">Monthly Bill</p>
-                      <p className="text-sm font-bold text-gray-900">
-                        {formatPKR(customer.monthlyBill)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => fetchDetail(customer.id)}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8"
-                      >
-                        <Eye className="h-3.5 w-3.5 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => fetchDetail(customer.id, 'ledger')}
-                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8"
-                      >
-                        <BookOpen className="h-3.5 w-3.5 mr-1" />
-                        Ledger
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {/* ── Bulk Action Bar ─────────────────────────────────────────── */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
-          <div className="mx-auto max-w-5xl px-4 pb-4">
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white/90 backdrop-blur-xl shadow-2xl px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100">
-                  <CheckSquare className="h-4 w-4 text-green-600" />
+        <div className="fixed bottom-16 sm:bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="mx-auto max-w-5xl px-3 sm:px-4 pb-2 sm:pb-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-xl shadow-2xl px-3 sm:px-6 py-3 sm:py-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gradient-to-br from-green-400 to-emerald-500">
+                  <CheckSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {selectedIds.size} customer{selectedIds.size !== 1 ? 's' : ''} selected
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900">
+                    {selectedIds.size} selected
                   </p>
-                  <p className="text-xs text-gray-500">Choose an action below</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Choose an action</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkAction('Active')}
-                  disabled={bulkLoading}
-                  className="h-8 text-xs border-green-200 text-green-600 hover:bg-green-50"
-                >
-                  <UserCheck className="h-3 w-3" />
-                  Set Active
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkAction('Paused')}
-                  disabled={bulkLoading}
-                  className="h-8 text-xs border-amber-200 text-amber-600 hover:bg-amber-50"
-                >
-                  <Pause className="h-3 w-3" />
-                  Set Paused
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkAction('delete')}
-                  disabled={bulkLoading}
-                  className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50"
-                >
-                  {bulkLoading ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-3 w-3" />
-                  )}
-                  Delete
-                </Button>
-                <Separator orientation="vertical" className="h-6" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearSelection}
-                  className="h-8 text-xs text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-3 w-3" />
-                  Clear
-                </Button>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Mobile: icon-only buttons with tooltips */}
+                <div className="flex sm:hidden items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAction('Active')}
+                        disabled={bulkLoading}
+                        className="h-10 w-10 p-0 border-green-200 text-green-600 hover:bg-green-50"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Set Active</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAction('Paused')}
+                        disabled={bulkLoading}
+                        className="h-10 w-10 p-0 border-amber-200 text-amber-600 hover:bg-amber-50"
+                      >
+                        <Pause className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Set Paused</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleBulkAction('delete')}
+                        disabled={bulkLoading}
+                        className="h-10 w-10 p-0 border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        {bulkLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Delete</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearSelection}
+                        className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Clear</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Desktop: full buttons */}
+                <div className="hidden sm:flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('Active')}
+                    disabled={bulkLoading}
+                    className="h-8 text-xs border-green-200 text-green-600 hover:bg-green-50"
+                  >
+                    <UserCheck className="h-3 w-3" />
+                    Set Active
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('Paused')}
+                    disabled={bulkLoading}
+                    className="h-8 text-xs border-amber-200 text-amber-600 hover:bg-amber-50"
+                  >
+                    <Pause className="h-3 w-3" />
+                    Set Paused
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('delete')}
+                    disabled={bulkLoading}
+                    className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                  >
+                    {bulkLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3 w-3" />
+                    )}
+                    Delete
+                  </Button>
+                  <Separator orientation="vertical" className="h-6" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSelection}
+                    className="h-8 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-3 w-3" />
+                    Clear
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -868,25 +1059,25 @@ export default function CustomersPage() {
 
       {/* ── Customer Detail Dialog ──────────────────────────────────── */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[92vh] p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-3xl w-[100vw] h-[100dvh] sm:h-auto sm:max-h-[92vh] p-0 overflow-hidden sm:rounded-lg rounded-none">
           {detailLoading ? (
             <div className="flex h-64 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-green-600" />
             </div>
           ) : selectedCustomer ? (
-            <div className="flex flex-col max-h-[92vh]">
+            <div className="flex flex-col h-full sm:max-h-[92vh]">
               {/* Header */}
-              <div className="p-6 pb-4 border-b border-gray-100">
+              <div className="p-4 sm:p-6 sm:pb-4 border-b border-gray-100 shrink-0">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-100 shrink-0">
-                      <Users className="h-5 w-5 text-green-600" />
+                    <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 shrink-0">
+                      <Users className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <DialogTitle className="text-lg font-bold text-gray-900 truncate">
+                      <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 truncate">
                         {selectedCustomer.name}
                       </DialogTitle>
-                      <DialogDescription className="text-sm text-gray-500 mt-0.5">
+                      <DialogDescription className="text-xs sm:text-sm text-gray-500 mt-0.5">
                         Customer details and transaction history
                       </DialogDescription>
                     </div>
@@ -904,7 +1095,7 @@ export default function CustomersPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="flex flex-wrap gap-2 mt-3 sm:mt-4">
                   <Button
                     variant="outline"
                     size="sm"
@@ -912,7 +1103,7 @@ export default function CustomersPage() {
                       setDetailOpen(false)
                       openEditForm(selectedCustomer)
                     }}
-                    className="h-8 text-xs"
+                    className="min-h-[44px] text-xs"
                   >
                     <Pencil className="h-3 w-3" />
                     Edit
@@ -921,7 +1112,7 @@ export default function CustomersPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => toggleStatus(selectedCustomer)}
-                    className={`h-8 text-xs ${
+                    className={`min-h-[44px] text-xs ${
                       selectedCustomer.status === 'Active'
                         ? 'border-amber-200 text-amber-600 hover:bg-amber-50'
                         : 'border-green-200 text-green-600 hover:bg-green-50'
@@ -946,7 +1137,7 @@ export default function CustomersPage() {
                       setDeletingId(selectedCustomer.id)
                       setDeleteOpen(true)
                     }}
-                    className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                    className="min-h-[44px] text-xs border-red-200 text-red-600 hover:bg-red-50"
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete
@@ -956,29 +1147,32 @@ export default function CustomersPage() {
 
               {/* Scrollable Content with Tabs */}
               <ScrollArea className="flex-1">
-                <div className="p-6 pt-4">
+                <div className="p-4 sm:p-6 sm:pt-4">
                   <Tabs value={detailTab} onValueChange={setDetailTab} className="w-full">
-                    <TabsList className="w-full grid grid-cols-4">
-                      <TabsTrigger value="overview" className="text-xs">
-                        <Activity className="h-3.5 w-3.5 mr-1" />
-                        Overview
+                    <TabsList className="w-full grid grid-cols-4 h-11">
+                      <TabsTrigger value="overview" className="text-[11px] sm:text-xs">
+                        <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                        <span className="hidden sm:inline">Overview</span>
+                        <span className="sm:hidden">Info</span>
                       </TabsTrigger>
-                      <TabsTrigger value="ledger" className="text-xs">
-                        <BookOpen className="h-3.5 w-3.5 mr-1" />
+                      <TabsTrigger value="ledger" className="text-[11px] sm:text-xs">
+                        <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
                         Ledger
                       </TabsTrigger>
-                      <TabsTrigger value="deliveries" className="text-xs">
-                        <Package className="h-3.5 w-3.5 mr-1" />
-                        Deliveries
+                      <TabsTrigger value="deliveries" className="text-[11px] sm:text-xs">
+                        <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                        <span className="hidden sm:inline">Deliveries</span>
+                        <span className="sm:hidden">Del.</span>
                       </TabsTrigger>
-                      <TabsTrigger value="payments" className="text-xs">
-                        <CreditCard className="h-3.5 w-3.5 mr-1" />
-                        Payments
+                      <TabsTrigger value="payments" className="text-[11px] sm:text-xs">
+                        <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                        <span className="hidden sm:inline">Payments</span>
+                        <span className="sm:hidden">Pay</span>
                       </TabsTrigger>
                     </TabsList>
 
                     {/* ── Overview Tab ─────────────────────────────── */}
-                    <TabsContent value="overview" className="mt-4 space-y-5">
+                    <TabsContent value="overview" className="mt-3 sm:mt-4 space-y-4 sm:space-y-5">
                       {/* Profile Info */}
                       <div>
                         <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -1037,7 +1231,7 @@ export default function CustomersPage() {
                               {formatPKR(selectedCustomer.pricePerLiter)}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-green-50 p-3">
+                          <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 p-3 border border-green-100">
                             <p className="text-[11px] text-green-600">Monthly Bill</p>
                             <p className="text-sm font-bold text-green-700">
                               {formatPKR(selectedCustomer.monthlyBill)}
@@ -1054,27 +1248,27 @@ export default function CustomersPage() {
                           Current Month Summary
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="rounded-xl border border-green-100 bg-green-50/50 p-4">
+                          <div className="rounded-xl border border-green-100 bg-gradient-to-br from-green-50/80 to-emerald-50/50 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Package className="h-4 w-4 text-green-600" />
                               <p className="text-xs font-medium text-green-700">Deliveries</p>
                             </div>
-                            <p className="text-2xl font-bold text-green-800">
+                            <p className="text-xl sm:text-2xl font-bold text-green-800">
                               {currentMonthStats.deliveries}
                             </p>
-                            <p className="text-xs text-green-600 mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-green-600 mt-0.5">
                               {currentMonthStats.deliveredLiters.toFixed(1)}L delivered
                             </p>
                           </div>
-                          <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                          <div className="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <CreditCard className="h-4 w-4 text-emerald-600" />
                               <p className="text-xs font-medium text-emerald-700">Payments</p>
                             </div>
-                            <p className="text-2xl font-bold text-emerald-800">
+                            <p className="text-xl sm:text-2xl font-bold text-emerald-800">
                               {currentMonthStats.paymentsCount}
                             </p>
-                            <p className="text-xs text-emerald-600 mt-0.5">
+                            <p className="text-[11px] sm:text-xs text-emerald-600 mt-0.5">
                               {formatPKR(currentMonthStats.paymentsTotal)} received
                             </p>
                           </div>
@@ -1088,33 +1282,33 @@ export default function CustomersPage() {
                         <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                           Quick Stats
                         </h4>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="rounded-lg bg-gray-50 p-3 text-center">
-                            <Wallet className="h-4 w-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-lg font-bold text-gray-900">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                          <div className="rounded-lg bg-gray-50 p-2.5 sm:p-3 text-center">
+                            <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 mx-auto mb-1" />
+                            <p className="text-base sm:text-lg font-bold text-gray-900">
                               {selectedCustomer.deliveries.filter((d) => d.status === 'Delivered').length}
                             </p>
-                            <p className="text-[10px] text-gray-400">Total Deliveries</p>
+                            <p className="text-[9px] sm:text-[10px] text-gray-400">Total Deliveries</p>
                           </div>
-                          <div className="rounded-lg bg-gray-50 p-3 text-center">
-                            <BarChart3 className="h-4 w-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-lg font-bold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 p-2.5 sm:p-3 text-center">
+                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 mx-auto mb-1" />
+                            <p className="text-base sm:text-lg font-bold text-gray-900">
                               {selectedCustomer.payments.filter((p) => p.status === 'Completed').length}
                             </p>
-                            <p className="text-[10px] text-gray-400">Total Payments</p>
+                            <p className="text-[9px] sm:text-[10px] text-gray-400">Total Payments</p>
                           </div>
-                          <div className={`rounded-lg p-3 text-center ${
-                            ledgerSummary.balance > 0 ? 'bg-red-50' : 'bg-green-50'
+                          <div className={`rounded-lg p-2.5 sm:p-3 text-center ${
+                            ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-red-50 to-rose-50' : 'bg-gradient-to-br from-green-50 to-emerald-50'
                           }`}>
-                            <IndianRupee className={`h-4 w-4 mx-auto mb-1 ${
+                            <IndianRupee className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mx-auto mb-1 ${
                               ledgerSummary.balance > 0 ? 'text-red-400' : 'text-green-400'
                             }`} />
-                            <p className={`text-lg font-bold ${
+                            <p className={`text-base sm:text-lg font-bold ${
                               ledgerSummary.balance > 0 ? 'text-red-700' : 'text-green-700'
                             }`}>
                               {formatPKR(Math.abs(ledgerSummary.balance))}
                             </p>
-                            <p className="text-[10px] text-gray-400">
+                            <p className="text-[9px] sm:text-[10px] text-gray-400">
                               {ledgerSummary.balance > 0 ? 'Outstanding' : ledgerSummary.balance < 0 ? 'Overpaid' : 'Settled'}
                             </p>
                           </div>
@@ -1134,7 +1328,7 @@ export default function CustomersPage() {
                     </TabsContent>
 
                     {/* ── Ledger Tab ───────────────────────────────── */}
-                    <TabsContent value="ledger" className="mt-4">
+                    <TabsContent value="ledger" className="mt-3 sm:mt-4">
                       {ledger.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                           <BookOpen className="h-10 w-10 mb-3" />
@@ -1144,33 +1338,33 @@ export default function CustomersPage() {
                       ) : (
                         <div className="space-y-4">
                           {/* Ledger Summary Cards */}
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="rounded-lg bg-red-50 p-3 text-center">
-                              <ArrowUpRight className="h-4 w-4 text-red-500 mx-auto mb-1" />
-                              <p className="text-xs text-red-600">Total Debit</p>
-                              <p className="text-base font-bold text-red-700">
+                          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                            <div className="rounded-lg bg-gradient-to-br from-red-50 to-rose-50 p-2.5 sm:p-3 text-center">
+                              <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 mx-auto mb-1" />
+                              <p className="text-[10px] sm:text-xs text-red-600">Debit</p>
+                              <p className="text-sm sm:text-base font-bold text-red-700">
                                 {formatPKR(ledgerSummary.totalDebit)}
                               </p>
                             </div>
-                            <div className="rounded-lg bg-green-50 p-3 text-center">
-                              <ArrowDownRight className="h-4 w-4 text-green-500 mx-auto mb-1" />
-                              <p className="text-xs text-green-600">Total Credit</p>
-                              <p className="text-base font-bold text-green-700">
+                            <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 p-2.5 sm:p-3 text-center">
+                              <ArrowDownRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 mx-auto mb-1" />
+                              <p className="text-[10px] sm:text-xs text-green-600">Credit</p>
+                              <p className="text-sm sm:text-base font-bold text-green-700">
                                 {formatPKR(ledgerSummary.totalCredit)}
                               </p>
                             </div>
-                            <div className={`rounded-lg p-3 text-center ${
-                              ledgerSummary.balance > 0 ? 'bg-amber-50' : ledgerSummary.balance < 0 ? 'bg-green-50' : 'bg-gray-50'
+                            <div className={`rounded-lg p-2.5 sm:p-3 text-center ${
+                              ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-amber-50 to-yellow-50' : ledgerSummary.balance < 0 ? 'bg-gradient-to-br from-green-50 to-emerald-50' : 'bg-gray-50'
                             }`}>
-                              <Wallet className={`h-4 w-4 mx-auto mb-1 ${
+                              <Wallet className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mx-auto mb-1 ${
                                 ledgerSummary.balance > 0 ? 'text-amber-500' : 'text-green-500'
                               }`} />
-                              <p className={`text-xs ${
+                              <p className={`text-[10px] sm:text-xs ${
                                 ledgerSummary.balance > 0 ? 'text-amber-600' : 'text-green-600'
                               }`}>
-                                {ledgerSummary.balance > 0 ? 'Balance Due' : 'Balance'}
+                                {ledgerSummary.balance > 0 ? 'Due' : 'Bal.'}
                               </p>
-                              <p className={`text-base font-bold ${
+                              <p className={`text-sm sm:text-base font-bold ${
                                 ledgerSummary.balance > 0 ? 'text-amber-700' : 'text-green-700'
                               }`}>
                                 {formatPKR(Math.abs(ledgerSummary.balance))}
@@ -1178,8 +1372,57 @@ export default function CustomersPage() {
                             </div>
                           </div>
 
-                          {/* Ledger Table */}
-                          <div className="rounded-xl border border-gray-200 overflow-hidden">
+                          {/* Mobile: Card layout for ledger entries */}
+                          <div className="flex flex-col gap-2 sm:hidden">
+                            {ledger.map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="rounded-xl border border-gray-100 p-3 bg-white"
+                              >
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                    {entry.type === 'delivery' ? (
+                                      <ArrowUpRight className="h-3 w-3 text-red-400" />
+                                    ) : (
+                                      <ArrowDownRight className="h-3 w-3 text-green-400" />
+                                    )}
+                                    <span className="text-[11px] text-gray-500 font-mono">{entry.date}</span>
+                                  </div>
+                                  <span className={`text-xs font-bold font-mono ${
+                                    entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400'
+                                  }`}>
+                                    Bal: {entry.balance !== 0 ? formatPKR(Math.abs(entry.balance)) : '—'}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-700 mb-2 truncate">{entry.description}</p>
+                                <div className="flex items-center gap-3">
+                                  {entry.debit > 0 ? (
+                                    <span className="text-xs font-semibold text-red-600 font-mono">Dr: {formatPKR(entry.debit)}</span>
+                                  ) : (
+                                    <span className="text-xs text-gray-300 font-mono">Dr: —</span>
+                                  )}
+                                  {entry.credit > 0 ? (
+                                    <span className="text-xs font-semibold text-green-600 font-mono">Cr: {formatPKR(entry.credit)}</span>
+                                  ) : (
+                                    <span className="text-xs text-gray-300 font-mono">Cr: —</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {/* Ledger totals on mobile */}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                              <div className="flex items-center justify-between text-xs font-bold">
+                                <span className="text-gray-700">Total</span>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-red-600 font-mono">{formatPKR(ledgerSummary.totalDebit)}</span>
+                                  <span className="text-green-600 font-mono">{formatPKR(ledgerSummary.totalCredit)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Desktop: Ledger Table */}
+                          <div className="hidden sm:block rounded-xl border border-gray-200 overflow-hidden">
                             <Table>
                               <TableHeader>
                                 <TableRow className="bg-gray-50 hover:bg-gray-50">
@@ -1273,11 +1516,11 @@ export default function CustomersPage() {
                           {selectedCustomer.deliveries.map((d) => (
                             <div
                               key={d.id}
-                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
+                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3 min-h-[44px]"
                             >
                               <div className="flex items-center gap-3">
                                 <div
-                                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                  className={`flex h-8 w-8 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${
                                     d.status === 'Delivered'
                                       ? 'bg-green-50'
                                       : d.status === 'Missed'
@@ -1346,11 +1589,11 @@ export default function CustomersPage() {
                           {selectedCustomer.payments.map((p) => (
                             <div
                               key={p.id}
-                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
+                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3 min-h-[44px]"
                             >
                               <div className="flex items-center gap-3">
                                 <div
-                                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                  className={`flex h-8 w-8 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${
                                     p.status === 'Completed'
                                       ? 'bg-green-50'
                                       : p.status === 'Failed'
@@ -1410,204 +1653,206 @@ export default function CustomersPage() {
 
       {/* ── Add/Edit Customer Dialog ────────────────────────────────── */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingCustomer
-                ? 'Update customer information below'
-                : 'Fill in the details to add a new customer'}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-lg w-[100vw] h-[100dvh] sm:h-auto sm:max-h-[92vh] p-0 overflow-hidden sm:rounded-lg rounded-none">
+          <div className="flex flex-col h-full sm:h-auto">
+            <DialogHeader className="p-4 sm:p-6 pb-0 sm:pb-0 shrink-0">
+              <DialogTitle className="text-lg">
+                {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingCustomer
+                  ? 'Update customer information below'
+                  : 'Fill in the details to add a new customer'}
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-            {/* Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm font-medium">
-                Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                placeholder="Customer name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="rounded-lg border-gray-200"
-              />
-            </div>
-
-            {/* Phone + Area */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+              {/* Name */}
               <div className="space-y-1.5">
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  Phone <span className="text-red-500">*</span>
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Name <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id="phone"
-                  placeholder="0300-1234567"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="rounded-lg border-gray-200"
+                  id="name"
+                  placeholder="Customer name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="rounded-lg border-gray-200 min-h-[44px]"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">
-                  Area <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={form.area}
-                  onValueChange={(v) => setForm({ ...form, area: v })}
-                >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue placeholder="Select area" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {areas.map((a) => (
-                      <SelectItem key={a.id} value={a.name}>
-                        {a.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
 
-            {/* Address */}
-            <div className="space-y-1.5">
-              <Label htmlFor="address" className="text-sm font-medium">
-                Address
-              </Label>
-              <Input
-                id="address"
-                placeholder="Street, building, landmark..."
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                className="rounded-lg border-gray-200"
-              />
-            </div>
-
-            {/* Daily Qty + Milk Type */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="dailyQty" className="text-sm font-medium">
-                  Daily Qty (Liters)
-                </Label>
-                <Input
-                  id="dailyQty"
-                  type="number"
-                  min={0.5}
-                  step={0.5}
-                  value={form.dailyQty}
-                  onChange={(e) =>
-                    setForm({ ...form, dailyQty: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
-                />
+              {/* Phone + Area */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Phone <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="phone"
+                    placeholder="0300-1234567"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="rounded-lg border-gray-200 min-h-[44px]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">
+                    Area <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={form.area}
+                    onValueChange={(v) => setForm({ ...form, area: v })}
+                  >
+                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                      <SelectValue placeholder="Select area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas.map((a) => (
+                        <SelectItem key={a.id} value={a.name}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Milk Type</Label>
-                <Select
-                  value={form.milkType}
-                  onValueChange={(v) => {
-                    const selected = milkTypes.find((m) => m.name === v)
-                    setForm({
-                      ...form,
-                      milkType: v,
-                      pricePerLiter: selected ? selected.pricePerLiter : form.pricePerLiter,
-                    })
-                  }}
-                >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {milkTypes.map((m) => (
-                      <SelectItem key={m.id} value={m.name}>
-                        {m.name} (₨{m.pricePerLiter}/L)
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
 
-            {/* Price + Delivery Time */}
-            <div className="grid grid-cols-2 gap-3">
+              {/* Address */}
               <div className="space-y-1.5">
-                <Label htmlFor="pricePerLiter" className="text-sm font-medium">
-                  Price per Liter (₨)
+                <Label htmlFor="address" className="text-sm font-medium">
+                  Address
                 </Label>
                 <Input
-                  id="pricePerLiter"
-                  type="number"
-                  min={0}
-                  value={form.pricePerLiter}
-                  onChange={(e) =>
-                    setForm({ ...form, pricePerLiter: parseFloat(e.target.value) || 0 })
-                  }
-                  className="rounded-lg border-gray-200"
+                  id="address"
+                  placeholder="Street, building, landmark..."
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  className="rounded-lg border-gray-200 min-h-[44px]"
                 />
               </div>
+
+              {/* Daily Qty + Milk Type */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="dailyQty" className="text-sm font-medium">
+                    Daily Qty (Liters)
+                  </Label>
+                  <Input
+                    id="dailyQty"
+                    type="number"
+                    min={0.5}
+                    step={0.5}
+                    value={form.dailyQty}
+                    onChange={(e) =>
+                      setForm({ ...form, dailyQty: parseFloat(e.target.value) || 0 })
+                    }
+                    className="rounded-lg border-gray-200 min-h-[44px]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Milk Type</Label>
+                  <Select
+                    value={form.milkType}
+                    onValueChange={(v) => {
+                      const selected = milkTypes.find((m) => m.name === v)
+                      setForm({
+                        ...form,
+                        milkType: v,
+                        pricePerLiter: selected ? selected.pricePerLiter : form.pricePerLiter,
+                      })
+                    }}
+                  >
+                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {milkTypes.map((m) => (
+                        <SelectItem key={m.id} value={m.name}>
+                          {m.name} (₨{m.pricePerLiter}/L)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Price + Delivery Time */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pricePerLiter" className="text-sm font-medium">
+                    Price per Liter (₨)
+                  </Label>
+                  <Input
+                    id="pricePerLiter"
+                    type="number"
+                    min={0}
+                    value={form.pricePerLiter}
+                    onChange={(e) =>
+                      setForm({ ...form, pricePerLiter: parseFloat(e.target.value) || 0 })
+                    }
+                    className="rounded-lg border-gray-200 min-h-[44px]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Delivery Time</Label>
+                  <Select
+                    value={form.deliveryTime}
+                    onValueChange={(v) => setForm({ ...form, deliveryTime: v })}
+                  >
+                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deliveryTimes.map((t) => (
+                        <SelectItem key={t.id} value={t.name}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Monthly Bill Preview */}
+              <div className="rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 p-3 flex items-center justify-between">
+                <p className="text-sm text-green-700 font-medium">Estimated Monthly Bill</p>
+                <p className="text-lg font-bold text-green-800">
+                  {formatPKR(calcMonthlyBill(form.dailyQty, form.pricePerLiter))}
+                </p>
+              </div>
+
+              {/* Notes */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Delivery Time</Label>
-                <Select
-                  value={form.deliveryTime}
-                  onValueChange={(v) => setForm({ ...form, deliveryTime: v })}
-                >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full">
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {deliveryTimes.map((t) => (
-                      <SelectItem key={t.id} value={t.name}>
-                        {t.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="notes" className="text-sm font-medium">
+                  Notes
+                </Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Additional notes..."
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  className="rounded-lg border-gray-200 min-h-[60px]"
+                />
               </div>
             </div>
 
-            {/* Monthly Bill Preview */}
-            <div className="rounded-lg bg-green-50 p-3 flex items-center justify-between">
-              <p className="text-sm text-green-700 font-medium">Estimated Monthly Bill</p>
-              <p className="text-lg font-bold text-green-800">
-                {formatPKR(calcMonthlyBill(form.dailyQty, form.pricePerLiter))}
-              </p>
+            <div className="flex items-center justify-end gap-3 p-4 sm:px-6 sm:py-4 border-t border-gray-100 shrink-0 bg-white safe-bottom">
+              <Button
+                variant="outline"
+                onClick={() => setFormOpen(false)}
+                className="rounded-lg min-h-[44px]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={formLoading}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg min-h-[44px]"
+              >
+                {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                {editingCustomer ? 'Update Customer' : 'Add Customer'}
+              </Button>
             </div>
-
-            {/* Notes */}
-            <div className="space-y-1.5">
-              <Label htmlFor="notes" className="text-sm font-medium">
-                Notes
-              </Label>
-              <Textarea
-                id="notes"
-                placeholder="Additional notes..."
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="rounded-lg border-gray-200 min-h-[60px]"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <Button
-              variant="outline"
-              onClick={() => setFormOpen(false)}
-              className="rounded-lg"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={formLoading}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-lg"
-            >
-              {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-              {editingCustomer ? 'Update Customer' : 'Add Customer'}
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1622,10 +1867,10 @@ export default function CustomersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="min-h-[44px]">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white min-h-[44px]"
             >
               Delete
             </AlertDialogAction>
