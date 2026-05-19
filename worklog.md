@@ -431,3 +431,30 @@ Stage Summary:
 - Each sub-module shows only its relevant content, making management much easier
 - All existing CRUD functionality preserved (Areas, Milk Types, Delivery Times)
 - Products tab uses card grid layout with hover edit/delete for desktop, always-visible buttons for mobile
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Redesign Leads module with world-class mobile-first UX/UI
+
+Work Log:
+- Read current leads-page.tsx (1342 lines) — Kanban-only approach with vertical stacked columns on mobile
+- Identified mobile UX problems: cramped cards, drag handles on touch, no detail view, excessive scrolling, confusing actions
+- Designed completely separate mobile experience inspired by top CRMs (HubSpot, Pipedrive, Salesforce Mobile)
+- Mobile: List-first approach with stage filter pills, tap-to-detail bottom sheet, quick advance button
+- Desktop: Improved Kanban with avatar initials, stage icons, cleaner card design
+- Implemented MobileLeadCard component with avatar, key info, and chevron for tap
+- Implemented PipelineProgressBar for visual pipeline overview on mobile
+- Implemented bottom Sheet for lead detail with: info cards grid, move-to-stage buttons, quick advance, full actions
+- Added stage filter tabs (horizontal scrollable) replacing stacked Kanban columns on mobile
+- Compact inline stats on mobile replacing 5-card grid
+- Added useIsMobile hook for proper responsive detection
+- Form dialog now uses 2-column layout on mobile for name/phone and area/source
+- Lint passed, no errors, dev server running fine
+
+Stage Summary:
+- Complete mobile-first redesign of Leads module
+- Mobile uses: compact stats → pipeline progress bar → stage filter tabs → lead list → tap for detail sheet
+- Desktop uses: stats cards → filters → Kanban board with improved cards
+- Lead detail sheet has: avatar header, info grid, move-to-stage buttons, quick advance button, edit/convert/lost/delete actions
+- All existing CRUD and drag-drop functionality preserved for desktop
