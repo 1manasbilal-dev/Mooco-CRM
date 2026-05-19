@@ -120,6 +120,15 @@
   background: oklch(0.70 0.01 250);
 }
 
+/* Hide scrollbar utility */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Mobile-optimized horizontal scrollbar */
 .custom-scrollbar-horizontal::-webkit-scrollbar {
   height: 3px;
