@@ -1653,13 +1653,13 @@ export default function CustomersPage() {
 
       {/* ── Add/Edit Customer Dialog ────────────────────────────────── */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="sm:max-w-lg w-[100vw] h-[100dvh] sm:h-auto sm:max-h-[92vh] p-0 overflow-hidden sm:rounded-lg rounded-none">
-          <div className="flex flex-col h-full sm:h-auto">
-            <DialogHeader className="p-4 sm:p-6 pb-0 sm:pb-0 shrink-0">
+        <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden sm:rounded-lg !top-0 !left-0 !translate-x-0 !translate-y-0 sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] w-screen h-[100dvh] sm:w-full sm:h-auto sm:max-h-[92vh] rounded-none">
+          <div className="flex flex-col h-full sm:max-h-[92vh]">
+            <DialogHeader className="shrink-0 px-4 sm:px-6 pt-5 sm:pt-6 pb-3 border-b border-gray-100">
               <DialogTitle className="text-lg">
                 {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-xs sm:text-sm">
                 {editingCustomer
                   ? 'Update customer information below'
                   : 'Fill in the details to add a new customer'}
@@ -1836,22 +1836,24 @@ export default function CustomersPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 p-4 sm:px-6 sm:py-4 border-t border-gray-100 shrink-0 bg-white safe-bottom">
-              <Button
-                variant="outline"
-                onClick={() => setFormOpen(false)}
-                className="rounded-lg min-h-[44px]"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={formLoading}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg min-h-[44px]"
-              >
-                {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-                {editingCustomer ? 'Update Customer' : 'Add Customer'}
-              </Button>
+            <div className="shrink-0 px-4 sm:px-6 pb-5 sm:pb-6 pt-3 border-t border-gray-100 bg-white">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setFormOpen(false)}
+                  className="rounded-xl min-h-[44px] flex-1 sm:flex-none"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={formLoading}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl min-h-[44px] flex-1 sm:flex-none"
+                >
+                  {formLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                  {editingCustomer ? 'Update Customer' : 'Save Customer'}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

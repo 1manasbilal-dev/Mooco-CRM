@@ -1218,65 +1218,72 @@ export default function LeadsPage() {
 
       {/* ── Add/Edit Lead Dialog ─────────────────────── */}
       <Dialog open={formOpen} onOpenChange={(open) => !open && closeForm()}>
-        <DialogContent className={`sm:max-w-[520px] p-0 md:p-6 gap-0 md:gap-4 max-h-[100dvh] md:max-h-[90vh] overflow-y-auto ${isMobile ? 'rounded-none inset-0 translate-x-0 translate-y-0 fixed w-full max-w-full h-full' : 'md:rounded-lg rounded-none inset-0 md:inset-auto translate-x-0 md:translate-x-[-50%] translate-y-0 md:translate-y-[-50%] fixed md:absolute w-full md:w-auto md:max-w-[calc(100%-2rem)]'}`}>
-          <div className="sticky top-0 bg-background z-10 px-5 pt-5 pb-3 md:p-0 border-b md:border-b-0">
-            <DialogHeader>
-              <DialogTitle className="text-lg">{editingLead ? 'Edit Lead' : 'New Lead'}</DialogTitle>
-              <DialogDescription className="text-xs md:text-sm">
-                {editingLead ? 'Update the lead information' : 'Fill in the details for the new lead'}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
+        <DialogContent className={`sm:max-w-[520px] p-0 gap-0 overflow-hidden ${isMobile ? '!top-0 !left-0 !translate-x-0 !translate-y-0 w-screen h-[100dvh] max-w-none rounded-none' : 'max-h-[90vh] rounded-xl'}`}>
+          <div className={`flex flex-col ${isMobile ? 'h-full' : 'max-h-[90vh]'}`}>
+            {/* Header - always visible */}
+            <div className="shrink-0 px-5 pt-5 pb-3 sm:px-6 sm:pt-6 border-b border-gray-100">
+              <DialogHeader>
+                <DialogTitle className="text-lg">{editingLead ? 'Edit Lead' : 'New Lead'}</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
+                  {editingLead ? 'Update the lead information' : 'Fill in the details for the new lead'}
+                </DialogDescription>
+              </DialogHeader>
+            </div>
 
-          <div className="grid gap-3.5 px-5 py-4 md:p-0">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-name" className="text-sm">Name <span className="text-red-500">*</span></Label>
-                <Input id="lead-name" placeholder="Full name" value={formData.name} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} className="h-11 rounded-xl" />
+            {/* Scrollable form content */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+              <div className="grid gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-name" className="text-sm">Name <span className="text-red-500">*</span></Label>
+                    <Input id="lead-name" placeholder="Full name" value={formData.name} onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))} className="h-11 rounded-xl" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-phone" className="text-sm">Phone <span className="text-red-500">*</span></Label>
+                    <Input id="lead-phone" placeholder="Phone number" value={formData.phone} onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))} className="h-11 rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-area" className="text-sm">Area <span className="text-red-500">*</span></Label>
+                    <Select value={formData.area} onValueChange={(v) => setFormData((p) => ({ ...p, area: v }))}>
+                      <SelectTrigger id="lead-area" className="w-full h-11 rounded-xl"><SelectValue placeholder="Select area" /></SelectTrigger>
+                      <SelectContent>{areas.map((a) => <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-source" className="text-sm">Source</Label>
+                    <Select value={formData.source} onValueChange={(v) => setFormData((p) => ({ ...p, source: v }))}>
+                      <SelectTrigger id="lead-source" className="w-full h-11 rounded-xl"><SelectValue placeholder="Select source" /></SelectTrigger>
+                      <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-address" className="text-sm">Address</Label>
+                  <Input id="lead-address" placeholder="Delivery address" value={formData.address} onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))} className="h-11 rounded-xl" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-qty" className="text-sm">Daily Qty (L)</Label>
+                  <Input id="lead-qty" type="number" min={0} step={0.5} placeholder="0" value={formData.expectedQty || ''} onChange={(e) => setFormData((p) => ({ ...p, expectedQty: parseFloat(e.target.value) || 0 }))} className="h-11 rounded-xl max-w-[160px]" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-notes" className="text-sm">Notes</Label>
+                  <Textarea id="lead-notes" placeholder="Additional notes..." rows={3} value={formData.notes} onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))} className="rounded-xl" />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-phone" className="text-sm">Phone <span className="text-red-500">*</span></Label>
-                <Input id="lead-phone" placeholder="Phone number" value={formData.phone} onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))} className="h-11 rounded-xl" />
-              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-area" className="text-sm">Area <span className="text-red-500">*</span></Label>
-                <Select value={formData.area} onValueChange={(v) => setFormData((p) => ({ ...p, area: v }))}>
-                  <SelectTrigger id="lead-area" className="w-full h-11 rounded-xl"><SelectValue placeholder="Select area" /></SelectTrigger>
-                  <SelectContent>{areas.map((a) => <SelectItem key={a.id} value={a.name}>{a.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-source" className="text-sm">Source</Label>
-                <Select value={formData.source} onValueChange={(v) => setFormData((p) => ({ ...p, source: v }))}>
-                  <SelectTrigger id="lead-source" className="w-full h-11 rounded-xl"><SelectValue placeholder="Select source" /></SelectTrigger>
-                  <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lead-address" className="text-sm">Address</Label>
-              <Input id="lead-address" placeholder="Delivery address" value={formData.address} onChange={(e) => setFormData((p) => ({ ...p, address: e.target.value }))} className="h-11 rounded-xl" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lead-qty" className="text-sm">Daily Qty (L)</Label>
-              <Input id="lead-qty" type="number" min={0} step={0.5} placeholder="0" value={formData.expectedQty || ''} onChange={(e) => setFormData((p) => ({ ...p, expectedQty: parseFloat(e.target.value) || 0 }))} className="h-11 rounded-xl max-w-[160px]" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lead-notes" className="text-sm">Notes</Label>
-              <Textarea id="lead-notes" placeholder="Additional notes..." rows={3} value={formData.notes} onChange={(e) => setFormData((p) => ({ ...p, notes: e.target.value }))} className="rounded-xl" />
-            </div>
-          </div>
 
-          <div className="sticky bottom-0 bg-background z-10 px-5 pb-5 pt-3 md:p-0 border-t md:border-t-0">
-            <DialogFooter className="flex-row gap-2.5">
-              <Button variant="outline" onClick={closeForm} disabled={submitting} className="flex-1 h-12 rounded-xl">Cancel</Button>
-              <Button onClick={handleSubmit} disabled={submitting} className="flex-1 h-12 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm">
-                {submitting && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                {editingLead ? 'Update Lead' : 'Create Lead'}
-              </Button>
-            </DialogFooter>
+            {/* Footer - always visible */}
+            <div className="shrink-0 px-5 pb-5 pt-3 sm:px-6 sm:pb-6 border-t border-gray-100 bg-white">
+              <DialogFooter className="flex-row gap-2.5">
+                <Button variant="outline" onClick={closeForm} disabled={submitting} className="flex-1 h-12 rounded-xl">Cancel</Button>
+                <Button onClick={handleSubmit} disabled={submitting} className="flex-1 h-12 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
+                  {editingLead ? 'Update Lead' : 'Create Lead'}
+                </Button>
+              </DialogFooter>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
