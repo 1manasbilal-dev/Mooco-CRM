@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -88,6 +88,11 @@ interface DeliveryTime {
   name: string
 }
 
+interface Category {
+  id: string
+  name: string
+}
+
 // ── Default Values ──────────────────────────────────────────────────────
 const DEFAULT_SETTINGS: SettingsMap = {
   shopName: '',
@@ -125,7 +130,7 @@ interface TabDef {
 const SETTINGS_TABS: TabDef[] = [
   { id: 'general', label: 'General', mobileLabel: 'General', icon: Store, color: 'text-green-600', bgLight: 'bg-green-100', description: 'Shop info, hours & account' },
   { id: 'delivery', label: 'Delivery', mobileLabel: 'Delivery', icon: Truck, color: 'text-amber-600', bgLight: 'bg-amber-100', description: 'Routes, areas & schedules' },
-  { id: 'products', label: 'Products & Pricing', mobileLabel: 'Products', icon: Milk, color: 'text-sky-600', bgLight: 'bg-sky-100', description: 'Milk types & pricing' },
+  { id: 'products', label: 'Products & Pricing', mobileLabel: 'Products', icon: Milk, color: 'text-sky-600', bgLight: 'bg-sky-100', description: 'Milk types, categories & pricing' },
   { id: 'staff', label: 'Staff', mobileLabel: 'Staff', icon: Users, color: 'text-purple-600', bgLight: 'bg-purple-100', description: 'Manage team members' },
   { id: 'notifications', label: 'Notifications', mobileLabel: 'Alerts', icon: Bell, color: 'text-orange-600', bgLight: 'bg-orange-100', description: 'Alert preferences' },
   { id: 'data', label: 'Data & Backup', mobileLabel: 'Data', icon: Database, color: 'text-cyan-600', bgLight: 'bg-cyan-100', description: 'Export, backup & reset' },
@@ -180,6 +185,14 @@ export default function SettingsPage() {
   const [editingDeliveryTime, setEditingDeliveryTime] = useState<DeliveryTime | null>(null)
   const [deliveryTimeName, setDeliveryTimeName] = useState('')
   const [deliveryTimeSubmitting, setDeliveryTimeSubmitting] = useState(false)
+
+  // ── Category Management State ─────────────────────────────────────
+  const [categories, setCategories] = useState<Category[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(false)
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [categoryName, setCategoryName] = useState('')
+  const [categorySubmitting, setCategorySubmitting] = useState(false)
 
   // ── Dirty check ─────────────────────────────────────────────────────
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings)
@@ -251,11 +264,27 @@ export default function SettingsPage() {
     }
   }, [])
 
+  // ── Fetch Categories ──────────────────────────────────────────────
+  const fetchCategories = useCallback(async () => {
+    setCategoriesLoading(true)
+    try {
+      const res = await fetch('/api/categories')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setCategories(Array.isArray(data) ? data : [])
+    } catch {
+      toast.error('Failed to load categories')
+    } finally {
+      setCategoriesLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchSettings()
     fetchAreas()
     fetchMilkTypes()
     fetchDeliveryTimes()
+    fetchCategories()
   }, [fetchSettings, fetchAreas, fetchMilkTypes, fetchDeliveryTimes])
 
   // ── Area CRUD ────────────────────────────────────────────────────
@@ -441,6 +470,63 @@ export default function SettingsPage() {
     }
   }
 
+  // ── Category CRUD ──────────────────────────────────────────────────
+  const openAddCategory = () => {
+    setEditingCategory(null)
+    setCategoryName('')
+    setCategoryDialogOpen(true)
+  }
+
+  const openEditCategory = (cat: Category) => {
+    setEditingCategory(cat)
+    setCategoryName(cat.name)
+    setCategoryDialogOpen(true)
+  }
+
+  const handleCategorySubmit = async () => {
+    if (!categoryName.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+    setCategorySubmitting(true)
+    try {
+      if (editingCategory) {
+        const res = await fetch(`/api/categories/${editingCategory.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: categoryName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Category updated successfully')
+      } else {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: categoryName.trim() }),
+        })
+        if (!res.ok) throw new Error()
+        toast.success('Category added successfully')
+      }
+      setCategoryDialogOpen(false)
+      fetchCategories()
+    } catch {
+      toast.error(editingCategory ? 'Failed to update category' : 'Failed to add category')
+    } finally {
+      setCategorySubmitting(false)
+    }
+  }
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Category deleted successfully')
+      fetchCategories()
+    } catch {
+      toast.error('Failed to delete category')
+    }
+  }
+
   // ── Update field ────────────────────────────────────────────────────
   const updateField = (key: keyof SettingsMap, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -481,7 +567,7 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error()
       toast.success('All data has been reset successfully')
       setResetOpen(false)
-      await Promise.all([fetchSettings(), fetchAreas(), fetchMilkTypes(), fetchDeliveryTimes()])
+      await Promise.all([fetchSettings(), fetchAreas(), fetchMilkTypes(), fetchDeliveryTimes(), fetchCategories()])
     } catch {
       toast.error('Failed to reset data')
     } finally {
@@ -842,6 +928,74 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Categories - Full Width */}
+      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 shadow-sm">
+                <Package className="h-4 w-4 text-violet-600" />
+              </div>
+              <div>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Categories</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500">{categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} · Organize your products</CardDescription>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={openAddCategory} className="h-8 md:h-9 text-xs border-violet-200 text-violet-600 hover:bg-violet-50 min-w-[44px] md:min-w-0">
+              <Plus className="h-3.5 w-3.5 md:mr-1" />
+              <span className="hidden md:inline">Add Category</span>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+          {categoriesLoading ? (
+            <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-violet-500" /></div>
+          ) : categories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50 mb-3">
+                <Package className="h-8 w-8 text-violet-300" />
+              </div>
+              <p className="text-sm font-medium text-gray-500">No categories added yet</p>
+              <p className="text-xs text-gray-400 mt-1">Add your first category to organize products</p>
+              <Button variant="outline" size="sm" onClick={openAddCategory} className="mt-4 h-9 text-xs border-violet-200 text-violet-600 hover:bg-violet-50">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />Add Category
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {categories.map((cat) => (
+                <div key={cat.id} className="group relative flex flex-col rounded-xl border border-gray-100 p-4 hover:border-violet-200 hover:bg-violet-50/30 transition-all min-h-[100px]">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 shrink-0">
+                      <Package className="h-5 w-5 text-violet-600" />
+                    </div>
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="sm" onClick={() => openEditCategory(cat)} className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-white">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteCategory(cat.id)} className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                  <p className="text-xs text-violet-500 mt-1">Product category</p>
+                  {/* Mobile edit/delete always visible */}
+                  <div className="flex items-center gap-1 mt-3 sm:hidden">
+                    <Button variant="outline" size="sm" onClick={() => openEditCategory(cat)} className="h-8 flex-1 text-xs border-gray-200">
+                      <Pencil className="h-3 w-3 mr-1" />Edit
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDeleteCategory(cat.id)} className="h-8 flex-1 text-xs border-red-200 text-red-600">
+                      <Trash2 className="h-3 w-3 mr-1" />Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 
@@ -1018,7 +1172,7 @@ export default function SettingsPage() {
     </div>
   )
 
-  const tabContentMap: Record<SettingsTab, () => JSX.Element> = {
+  const tabContentMap: Record<SettingsTab, () => React.ReactElement> = {
     general: renderGeneralTab,
     delivery: renderDeliveryTab,
     products: renderProductsTab,
@@ -1074,8 +1228,8 @@ export default function SettingsPage() {
               >
                 <Icon className={"h-3.5 w-3.5 " + (isActive ? "text-green-600" : "text-gray-400")} />
                 {tab.mobileLabel}
-                {tab.id === 'products' && milkTypes.length > 0 && (
-                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-sky-100 text-sky-700 border-0 rounded-full">{milkTypes.length}</Badge>
+                {tab.id === 'products' && (milkTypes.length + categories.length) > 0 && (
+                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-sky-100 text-sky-700 border-0 rounded-full">{milkTypes.length + categories.length}</Badge>
                 )}
                 {tab.id === 'delivery' && areas.length > 0 && (
                   <Badge className="h-4 min-w-4 px-1 text-[9px] bg-rose-100 text-rose-700 border-0 rounded-full">{areas.length}</Badge>
@@ -1106,8 +1260,8 @@ export default function SettingsPage() {
                       <p className="truncate">{tab.label}</p>
                       {isActive && <p className="text-[10px] text-green-600/70 truncate leading-tight mt-0.5">{tab.description}</p>}
                     </div>
-                    {tab.id === 'products' && milkTypes.length > 0 && (
-                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-sky-100 text-sky-700 border-0 rounded-full shrink-0">{milkTypes.length}</Badge>
+                    {tab.id === 'products' && (milkTypes.length + categories.length) > 0 && (
+                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-sky-100 text-sky-700 border-0 rounded-full shrink-0">{milkTypes.length + categories.length}</Badge>
                     )}
                     {tab.id === 'delivery' && areas.length > 0 && (
                       <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-rose-100 text-rose-700 border-0 rounded-full shrink-0">{areas.length}</Badge>
@@ -1275,6 +1429,32 @@ export default function SettingsPage() {
             <Button variant="outline" onClick={() => setDeliveryTimeDialogOpen(false)} className="rounded-lg flex-1 sm:flex-none h-11 sm:h-auto" disabled={deliveryTimeSubmitting}>Cancel</Button>
             <Button onClick={handleDeliveryTimeSubmit} disabled={deliveryTimeSubmitting} className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white min-w-[100px] flex-1 sm:flex-none h-11 sm:h-auto">
               {deliveryTimeSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingDeliveryTime ? 'Update' : 'Add Time'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Category Add/Edit Dialog ──────────────────────────────────── */}
+      <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
+        <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
+          <DialogHeader className={isMobile ? 'px-1' : ''}>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100">
+                <Package className="h-4 w-4 text-violet-600" />
+              </div>
+              {editingCategory ? 'Edit Category' : 'Add Category'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-gray-700">Category Name</Label>
+              <Input placeholder="e.g. Milk, Yogurt, Butter" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} className="rounded-lg border-gray-200 h-11 md:h-auto" autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleCategorySubmit() }} />
+            </div>
+          </div>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setCategoryDialogOpen(false)} className="rounded-lg flex-1 sm:flex-none h-11 sm:h-auto" disabled={categorySubmitting}>Cancel</Button>
+            <Button onClick={handleCategorySubmit} disabled={categorySubmitting} className="rounded-lg bg-violet-600 hover:bg-violet-700 text-white min-w-[100px] flex-1 sm:flex-none h-11 sm:h-auto">
+              {categorySubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : editingCategory ? 'Update' : 'Add Category'}
             </Button>
           </DialogFooter>
         </DialogContent>

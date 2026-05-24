@@ -4,8 +4,29 @@ import { db } from '@/lib/db'
 export async function GET(request: NextRequest) {
   try {
     const customerId = request.nextUrl.searchParams.get('customerId')
+    const date = request.nextUrl.searchParams.get('date')
+
+    // If date parameter is provided, return all vacations overlapping with that date
+    if (date) {
+      const vacations = await db.vacation.findMany({
+        where: {
+          startDate: { lte: date },
+          endDate: { gte: date },
+        },
+        include: {
+          customer: {
+            select: { name: true, area: true },
+          },
+        },
+        orderBy: { startDate: 'desc' },
+      })
+
+      return NextResponse.json(vacations)
+    }
+
+    // Otherwise, require customerId
     if (!customerId) {
-      return NextResponse.json({ error: 'customerId is required' }, { status: 400 })
+      return NextResponse.json({ error: 'customerId or date is required' }, { status: 400 })
     }
 
     const vacations = await db.vacation.findMany({

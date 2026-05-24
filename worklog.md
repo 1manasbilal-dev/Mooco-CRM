@@ -848,3 +848,100 @@ Stage Summary:
 - Seed data added for Areas, MilkTypes, DeliveryTimes (auto-creates on first load if empty)
 - Notification badge cleaned up (no fake "3")
 - All existing features verified working: auto-generate deliveries, vacation skip, category CRUD, multi-product delivery, ad-hoc extra sale
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Add Category Management CRUD to Settings page
+
+Work Log:
+- Read worklog.md to understand previous agent work (API routes and Prisma schema already exist from Task 3)
+- Read settings-page.tsx (1434 lines) to understand existing code structure
+- Added Category interface after DeliveryTime interface (line 91)
+- Added Category Management State variables (categories, categoriesLoading, categoryDialogOpen, editingCategory, categoryName, categorySubmitting) after delivery time state
+- Added fetchCategories useCallback function after fetchDeliveryTimes
+- Added fetchCategories() call to useEffect (and to dependency array)
+- Added Category CRUD functions (openAddCategory, openEditCategory, handleCategorySubmit, handleDeleteCategory) after Delivery Time CRUD
+- Added fetchCategories to handleReset Promise.all
+- Added Categories Card UI in renderProductsTab below Milk Types card, with violet/purple theme (bg-violet-100, text-violet-600, border-violet-200)
+- Card uses same pattern as Milk Types: grid layout, hover actions on desktop, always-visible buttons on mobile, empty state
+- Added Category Add/Edit Dialog at bottom of component, matching existing dialog patterns (full-screen on mobile, normal on desktop)
+- Updated SETTINGS_TABS products tab description from 'Milk types & pricing' to 'Milk types, categories & pricing'
+- Updated products tab badge count to include both milkTypes.length + categories.length
+- Verified API routes already exist: /api/categories (GET+POST) and /api/categories/[id] (PUT+DELETE) with auto-seeding
+- Verified Prisma schema already has Category model with id, name (@unique), createdAt, updatedAt
+- Lint passes clean
+
+Stage Summary:
+- Category CRUD fully integrated into Settings page Products & Pricing tab
+- Categories card appears below Milk Types with violet/purple accent colors
+- Full CRUD: Add, Edit, Delete categories via dialog
+- Navigation badge counts both milk types and categories
+- Reset data also refreshes categories
+- All existing functionality preserved
+- Lint passes clean
+
+---
+Task ID: 9
+Agent: Main Agent
+Task: Add Edit and Delete payment functionality to the Payments page
+
+Work Log:
+- Read worklog.md to understand previous agent work and project context
+- Read current payments-page.tsx (727 lines) and analyzed all components, state, and API calls
+- Read existing API route `/api/payments/[id]/route.ts` — had PUT handler passing raw body to Prisma (no validation), missing DELETE handler
+- Read alert-dialog.tsx UI component to confirm availability
+- Updated `/api/payments/[id]/route.ts`:
+  - Enhanced PUT handler with proper validation: amount (positive number), date (required), method (valid enum), status (valid enum), notes, period
+  - Only updates fields that are provided in the request body
+  - Added DELETE handler that deletes payment by ID and returns { success: true }
+  - Both handlers include proper error handling with appropriate HTTP status codes
+- Updated `payments-page.tsx` with the following changes:
+  - Added imports: AlertDialog components, DropdownMenuSeparator, Pencil, Trash2 icons
+  - Added state: showEditDialog, showDeleteDialog, deleting, editAmount, editDate, editMethod, editStatus, editPeriod, editNotes
+  - Added openEditDialog(payment) function: sets selectedPayment, populates edit form state with current payment data, opens edit dialog
+  - Added openDeleteDialog(payment) function: sets selectedPayment, opens delete confirmation dialog
+  - Added handleEditPayment(): validates required fields, sends PUT to /api/payments/[id], shows toast, refreshes list
+  - Added handleDeletePayment(): sends DELETE to /api/payments/[id], shows toast, refreshes list
+  - Updated dropdown menu: added "Edit Payment" with Pencil icon, added DropdownMenuSeparator, added "Delete Payment" with Trash2 icon (red styling)
+  - Added mobile edit/delete buttons below each payment card (visible only on sm:hidden, with border-t separator)
+  - Added Edit Payment dialog: full-screen on mobile (same pattern as Record Payment dialog), amber/orange gradient icon, read-only customer info card, editable fields (Amount, Date, Method, Status, Period, Notes), Save Changes button with loading state
+  - Added Delete Payment AlertDialog: confirmation dialog with red Trash2 icon, shows payment amount and customer name in description, Cancel and Delete buttons with loading state
+  - Updated Payment Detail dialog: added action buttons row (Edit, Complete for Pending, Delete with Trash2 icon)
+  - Detail dialog Edit button closes detail dialog and opens edit dialog with setTimeout to prevent dialog collision
+  - Detail dialog Delete button closes detail dialog and opens delete confirmation with setTimeout
+- All existing functionality preserved: Record Payment, Payment list, Payment detail, Status updates, Summary cards, Customer dues
+- Lint passes clean
+
+Stage Summary:
+- Edit Payment: dialog with pre-filled fields (Amount, Date, Method, Status, Period, Notes), PUT /api/payments/[id]
+- Delete Payment: AlertDialog confirmation with amount/customer name, DELETE /api/payments/[id]
+- UI: Edit/Delete in dropdown menu (desktop), visible buttons below card (mobile), action buttons in detail dialog
+- Backend: Enhanced PUT with validation, new DELETE handler
+- Loading states on save/delete, toast notifications, data refresh after operations
+
+---
+Task ID: session-continue
+Agent: Main Agent
+Task: Fix app not running and implement remaining features
+
+Work Log:
+- Diagnosed app not running: dev server process kept dying after being backgrounded
+- Fixed TypeScript error in settings-page.tsx (JSX.Element → React.ReactElement)
+- Started dev server with `nohup setsid bun x next dev -p 3000` for persistent backgrounding
+- Verified app running through Caddy gateway (port 81)
+- Ran full audit of existing features using Explore agent
+- Found most requested features already implemented from previous sessions
+- Added Category Management CRUD to Settings page (Products & Pricing tab)
+- Added per-customer vacation indicators to Deliveries page (inline "On Vacation" section per route)
+- Updated vacations API to support date-based queries
+- Added Edit/Delete payment functionality to Payments page
+- Added PUT and DELETE handlers to /api/payments/[id]
+- All lint checks pass clean
+
+Stage Summary:
+- App running successfully on port 3000 (accessible through Caddy on port 81)
+- Category CRUD now available in Settings → Products & Pricing tab
+- Vacation indicators shown inline in delivery route groups
+- Payments can now be edited and deleted
+- All previously requested features confirmed working: auto-generate deliveries, vacation mode, multi-product subscriptions, customer-required sales, customer ledger

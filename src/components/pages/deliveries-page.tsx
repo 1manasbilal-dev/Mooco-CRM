@@ -52,6 +52,7 @@ import {
   X,
   PackagePlus,
   Ban,
+  Umbrella,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -210,6 +211,7 @@ export default function DeliveriesPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [areas, setAreas] = useState<Area[]>([])
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
+  const [vacations, setVacations] = useState<Array<{ id: string; customerId: string; startDate: string; endDate: string; notes: string; customer: { name: string; area: string } }>>([])
 
   // Auto-generate state
   const [generating, setGenerating] = useState(false)
@@ -228,6 +230,16 @@ export default function DeliveriesPage() {
 
   // Derived routes from dynamic areas
   const routes = useMemo(() => buildRoutes(areas), [areas])
+
+  // Build area-to-route mapping for vacation matching
+  const areaRouteMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    const routeLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    areas.forEach((area, i) => {
+      map[area.name] = `Route ${routeLetters[i % 26]}`
+    })
+    return map
+  }, [areas])
 
   // Add delivery dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false)
@@ -351,11 +363,24 @@ export default function DeliveriesPage() {
     }
   }, [])
 
+  // Fetch vacations overlapping with the selected date
+  const fetchVacations = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/vacations?date=${selectedDate}`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setVacations(Array.isArray(data) ? data : [])
+    } catch {
+      // silently fail
+    }
+  }, [selectedDate])
+
   // On mount: auto-generate for today, then fetch
   useEffect(() => {
     const init = async () => {
       await generateDeliveries(selectedDate, true)
       await fetchDeliveries()
+      fetchVacations()
     }
     init()
   }, [selectedDate])
@@ -1451,6 +1476,28 @@ export default function DeliveriesPage() {
                           </div>
                         </div>
                       ))}
+                      {/* Customers on vacation in this route */}
+                      {(() => {
+                        const routeVacations = vacations.filter(v => {
+                          const vacationRoute = areaRouteMap[v.customer.area] || 'Route A'
+                          return vacationRoute === group.route
+                        })
+                        return routeVacations.length > 0 ? (
+                          <div className="px-3 sm:px-4 py-2 bg-amber-50/50 border-t border-amber-100">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Umbrella className="h-3.5 w-3.5 text-amber-500" />
+                              <span className="text-xs font-medium text-amber-600">On Vacation</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {routeVacations.map((v) => (
+                                <Badge key={v.id} variant="outline" className="text-[10px] bg-amber-50/80 text-amber-600 border-amber-200 px-2 py-0.5">
+                                  {v.customer.name} ({v.startDate} → {v.endDate})
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null
+                      })()}
                     </div>
                   </CollapsibleContent>
                 </Card>

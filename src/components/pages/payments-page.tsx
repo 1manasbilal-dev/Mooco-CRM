@@ -25,8 +25,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   Wallet,
   Plus,
@@ -45,6 +56,8 @@ import {
   ChevronRight,
   Users,
   Banknote,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -108,16 +121,27 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showDetailDialog, setShowDetailDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
-  // Form state
+  // Form state (Record Payment)
   const [formCustomerId, setFormCustomerId] = useState('')
   const [formAmount, setFormAmount] = useState('')
   const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0])
   const [formMethod, setFormMethod] = useState('Cash')
   const [formPeriod, setFormPeriod] = useState(new Date().toISOString().slice(0, 7))
   const [formNotes, setFormNotes] = useState('')
+
+  // Edit form state
+  const [editAmount, setEditAmount] = useState('')
+  const [editDate, setEditDate] = useState('')
+  const [editMethod, setEditMethod] = useState('')
+  const [editStatus, setEditStatus] = useState('')
+  const [editPeriod, setEditPeriod] = useState('')
+  const [editNotes, setEditNotes] = useState('')
 
   const fetchData = useCallback(async () => {
     try {
@@ -207,6 +231,80 @@ export default function PaymentsPage() {
     } catch {
       toast.error('Failed to update payment')
     }
+  }
+
+  const handleEditPayment = async () => {
+    if (!selectedPayment) return
+    if (!editAmount || !editDate || !editMethod) {
+      toast.error('Please fill in required fields (Amount, Date, Method)')
+      return
+    }
+    try {
+      setSaving(true)
+      const res = await fetch(`/api/payments/${selectedPayment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parseFloat(editAmount),
+          date: editDate,
+          method: editMethod,
+          status: editStatus,
+          period: editPeriod,
+          notes: editNotes,
+        }),
+      })
+      if (res.ok) {
+        toast.success('Payment updated successfully')
+        setShowEditDialog(false)
+        setSelectedPayment(null)
+        fetchData()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to update payment')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDeletePayment = async () => {
+    if (!selectedPayment) return
+    try {
+      setDeleting(true)
+      const res = await fetch(`/api/payments/${selectedPayment.id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        toast.success('Payment deleted successfully')
+        setShowDeleteDialog(false)
+        setSelectedPayment(null)
+        fetchData()
+      } else {
+        toast.error('Failed to delete payment')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const openEditDialog = (payment: Payment) => {
+    setSelectedPayment(payment)
+    setEditAmount(String(payment.amount))
+    setEditDate(payment.date)
+    setEditMethod(payment.method)
+    setEditStatus(payment.status)
+    setEditPeriod(payment.period || '')
+    setEditNotes(payment.notes || '')
+    setShowEditDialog(true)
+  }
+
+  const openDeleteDialog = (payment: Payment) => {
+    setSelectedPayment(payment)
+    setShowDeleteDialog(true)
   }
 
   const resetForm = () => {
@@ -488,7 +586,12 @@ export default function PaymentsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-xl">
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedPayment(payment); setShowDetailDialog(true) }}>
+                          <Receipt className="h-4 w-4 mr-2 text-gray-500" />
                           View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(payment) }}>
+                          <Pencil className="h-4 w-4 mr-2 text-gray-500" />
+                          Edit Payment
                         </DropdownMenuItem>
                         {payment.status === 'Pending' && (
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleUpdateStatus(payment.id, 'Completed') }}>
@@ -502,8 +605,38 @@ export default function PaymentsPage() {
                             Mark Failed
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => { e.stopPropagation(); openDeleteDialog(payment) }}
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Payment
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                  </div>
+
+                  {/* Mobile: Edit/Delete action buttons below card */}
+                  <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-gray-100 sm:hidden">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-9 text-xs rounded-lg"
+                      onClick={(e) => { e.stopPropagation(); openEditDialog(payment) }}
+                    >
+                      <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-9 text-xs rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      onClick={(e) => { e.stopPropagation(); openDeleteDialog(payment) }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                      Delete
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -629,6 +762,161 @@ export default function PaymentsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* ─── Edit Payment Dialog (Full-screen on mobile) ─── */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="
+          sm:max-w-md sm:rounded-xl sm:top-[50%] sm:translate-y-[-50%]
+          max-sm:fixed max-sm:inset-0 max-sm:top-0 max-sm:left-0 max-sm:right-0 max-sm:bottom-0
+          max-sm:translate-x-0 max-sm:translate-y-0 max-sm:max-w-none max-sm:h-full max-sm:w-full
+          max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
+          max-sm:p-0 max-sm:gap-0
+        ">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                <Pencil className="h-4 w-4 text-white" />
+              </div>
+              Edit Payment
+            </DialogTitle>
+          </DialogHeader>
+          {selectedPayment && (
+            <div className="space-y-4 py-4 px-4 sm:px-0 overflow-y-auto flex-1 max-sm:pb-4">
+              {/* Customer info (read-only) */}
+              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-3 text-sm ring-1 ring-gray-100">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-600">
+                    Customer: <span className="font-bold text-gray-900">{selectedPayment.customer?.name || 'Unknown'}</span>
+                  </span>
+                </div>
+                {selectedPayment.invoiceNumber && (
+                  <p className="text-gray-400 text-xs mt-1">Invoice: {selectedPayment.invoiceNumber}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm font-medium mb-1.5 block">Amount (PKR) *</Label>
+                  <Input
+                    type="number"
+                    value={editAmount}
+                    onChange={(e) => setEditAmount(e.target.value)}
+                    placeholder="0"
+                    className="rounded-xl h-11 sm:h-10"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-1.5 block">Date *</Label>
+                  <Input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="rounded-xl h-11 sm:h-10"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm font-medium mb-1.5 block">Payment Method *</Label>
+                  <Select value={editMethod} onValueChange={setEditMethod}>
+                    <SelectTrigger className="rounded-xl h-11 sm:h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                      <SelectItem value="UPI">UPI</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cheque">Cheque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-1.5 block">Status</Label>
+                  <Select value={editStatus} onValueChange={setEditStatus}>
+                    <SelectTrigger className="rounded-xl h-11 sm:h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Period</Label>
+                <Input
+                  type="month"
+                  value={editPeriod}
+                  onChange={(e) => setEditPeriod(e.target.value)}
+                  className="rounded-xl h-11 sm:h-10"
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-1.5 block">Notes</Label>
+                <Textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Optional notes..."
+                  className="rounded-xl min-h-[80px]"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 max-sm:sticky max-sm:bottom-0 max-sm:bg-white max-sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              className="rounded-xl h-11 sm:h-10 flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditPayment}
+              disabled={saving}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl h-11 sm:h-10 flex-1 sm:flex-none shadow-sm shadow-amber-200"
+            >
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Delete Payment Confirmation ─── */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="rounded-xl max-sm:mx-4 max-sm:max-w-[calc(100vw-2rem)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </div>
+              Delete Payment
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this payment of <strong>{selectedPayment ? formatPKR(selectedPayment.amount) : ''}</strong> for <strong>{selectedPayment?.customer?.name || 'Unknown'}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleting}
+              className="rounded-xl h-11 sm:h-10"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePayment}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl h-11 sm:h-10 min-w-[100px]"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* ─── Payment Detail Dialog (Full-screen on mobile) ─── */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
         <DialogContent className="
@@ -702,20 +990,42 @@ export default function PaymentsPage() {
                   )}
                 </div>
 
-                {selectedPayment.status === 'Pending' && (
-                  <div className="pt-3 px-1">
+                {/* Action buttons in detail dialog */}
+                <div className="flex gap-2 pt-3 px-1">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowDetailDialog(false)
+                      setTimeout(() => openEditDialog(selectedPayment), 150)
+                    }}
+                    className="flex-1 rounded-xl h-11 sm:h-10"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  {selectedPayment.status === 'Pending' && (
                     <Button
                       onClick={() => {
                         handleUpdateStatus(selectedPayment.id, 'Completed')
                         setShowDetailDialog(false)
                       }}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-12 shadow-sm shadow-green-200"
+                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-11 sm:h-10 shadow-sm shadow-green-200"
                     >
-                      <CheckCircle className="h-5 w-5 mr-2" />
-                      Mark as Completed
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Complete
                     </Button>
-                  </div>
-                )}
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowDetailDialog(false)
+                      setTimeout(() => openDeleteDialog(selectedPayment), 150)
+                    }}
+                    className="rounded-xl h-11 sm:h-10 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 px-3"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )
           })()}
