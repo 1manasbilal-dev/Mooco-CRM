@@ -782,17 +782,17 @@ export default function CustomersPage() {
       {/* ── Page Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-200">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm shadow-green-200 dark:shadow-green-900/30">
             <Users className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Customers</h1>
-            <p className="text-xs sm:text-sm text-gray-500 hidden xs:block">Manage your active dairy customers</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Customers</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden xs:block">Manage your active dairy customers</p>
           </div>
         </div>
         <Button
           onClick={openAddForm}
-          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200 h-10 sm:h-auto"
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shadow-green-200 dark:shadow-green-900/30 h-10 sm:h-auto"
         >
           <Plus className="size-4" />
           <span className="hidden sm:inline ml-1">Add Customer</span>
@@ -801,57 +801,57 @@ export default function CustomersPage() {
 
       {/* ── Summary Stats ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-300 to-gray-400" />
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gray-100">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-600" />
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
-                <p className="text-[11px] sm:text-xs text-gray-500">Total</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-900">{customers.length}</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Total</p>
+                <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">{customers.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400 to-emerald-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-50">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/50">
                 <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
               </div>
               <div>
-                <p className="text-[11px] sm:text-xs text-gray-500">Active</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Active</p>
                 <p className="text-lg sm:text-xl font-bold text-green-600">{activeCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-amber-50">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/50">
                 <UserX className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
               </div>
               <div>
-                <p className="text-[11px] sm:text-xs text-gray-500">Paused</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Paused</p>
                 <p className="text-lg sm:text-xl font-bold text-amber-600">{pausedCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden relative">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-emerald-50">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/50">
                 <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
               </div>
               <div>
-                <p className="text-[11px] sm:text-xs text-gray-500">Revenue/mo</p>
+                <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">Revenue/mo</p>
                 <p className="text-lg sm:text-xl font-bold text-emerald-600">
                   {formatPKR(totalRevenue)}
                 </p>
@@ -862,7 +862,7 @@ export default function CustomersPage() {
       </div>
 
       {/* ── Filter Bar ──────────────────────────────────────────────── */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
         <CardContent className="p-3 sm:p-4">
           {/* Mobile Layout */}
           <div className="flex flex-col gap-3 sm:hidden">
@@ -873,24 +873,24 @@ export default function CustomersPage() {
                   onCheckedChange={toggleSelectAll}
                   className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                 />
-                <span className="text-xs text-gray-500">All</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">All</span>
               </div>
-              <p className="text-xs text-gray-400 ml-auto">
+              <p className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                 {customers.length} result{customers.length !== 1 ? 's' : ''}
               </p>
             </div>
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               <Input
                 placeholder="Search name, phone, area..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-11 rounded-lg border-gray-200 w-full"
+                className="pl-9 h-11 rounded-lg border-gray-200 dark:border-gray-700 w-full"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-11 rounded-lg border-gray-200 w-full">
+                <SelectTrigger className="h-11 rounded-lg border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -903,7 +903,7 @@ export default function CustomersPage() {
                 </SelectContent>
               </Select>
               <Select value={milkFilter} onValueChange={setMilkFilter}>
-                <SelectTrigger className="h-11 rounded-lg border-gray-200 w-full">
+                <SelectTrigger className="h-11 rounded-lg border-gray-200 dark:border-gray-700 w-full">
                   <SelectValue placeholder="Milk Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -927,19 +927,19 @@ export default function CustomersPage() {
                   onCheckedChange={toggleSelectAll}
                   className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
                 />
-                <span className="text-xs text-gray-500 whitespace-nowrap">Select All</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Select All</span>
               </div>
               <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input
                   placeholder="Search name, phone, area..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 rounded-lg border-gray-200"
+                  className="pl-9 h-9 rounded-lg border-gray-200 dark:border-gray-700"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9 w-[140px] rounded-lg border-gray-200">
+                <SelectTrigger className="h-9 w-[140px] rounded-lg border-gray-200 dark:border-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -952,7 +952,7 @@ export default function CustomersPage() {
                 </SelectContent>
               </Select>
               <Select value={milkFilter} onValueChange={setMilkFilter}>
-                <SelectTrigger className="h-9 w-[160px] rounded-lg border-gray-200">
+                <SelectTrigger className="h-9 w-[160px] rounded-lg border-gray-200 dark:border-gray-700">
                   <SelectValue placeholder="Milk Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -965,7 +965,7 @@ export default function CustomersPage() {
                 </SelectContent>
               </Select>
             </div>
-            <p className="text-sm text-gray-500 whitespace-nowrap">
+            <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
               Showing {customers.length} customer{customers.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -978,13 +978,13 @@ export default function CustomersPage() {
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         </div>
       ) : customers.length === 0 ? (
-        <Card className="rounded-xl border-gray-200/80 shadow-sm">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
           <CardContent className="flex h-64 flex-col items-center justify-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-              <Users className="h-7 w-7 text-gray-400" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+              <Users className="h-7 w-7 text-gray-400 dark:text-gray-500" />
             </div>
-            <p className="text-gray-500 font-medium">No customers found</p>
-            <p className="text-sm text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 font-medium">No customers found</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">
               {search || statusFilter !== 'All' || milkFilter !== 'All'
                 ? 'Try adjusting your filters'
                 : 'Add your first customer to get started'}
@@ -993,7 +993,7 @@ export default function CustomersPage() {
               <Button
                 onClick={openAddForm}
                 variant="outline"
-                className="mt-2 border-green-200 text-green-600 hover:bg-green-50 min-h-[44px]"
+                className="mt-2 border-green-200 dark:border-green-800 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/50 min-h-[44px]"
               >
                 <Plus className="size-4" />
                 Add Customer
@@ -1013,8 +1013,8 @@ export default function CustomersPage() {
                   onClick={() => fetchDetail(customer.id)}
                   className={`flex items-center gap-3 px-3 py-3 rounded-xl border cursor-pointer transition-all active:scale-[0.99] min-h-[44px] ${
                     isSelected
-                      ? 'border-green-300 bg-green-50/60 ring-1 ring-green-500/30'
-                      : 'border-gray-100 bg-white hover:bg-gray-50'
+                      ? 'border-green-300 dark:border-green-700 bg-green-50/60 dark:bg-green-950/60 ring-1 ring-green-500/30'
+                      : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
                   <Checkbox
@@ -1025,24 +1025,24 @@ export default function CustomersPage() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-gray-900 truncate">{customer.name}</span>
+                      <span className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{customer.name}</span>
                       <Badge
                         className={`shrink-0 text-[10px] px-1.5 py-0 rounded-md font-semibold ${
                           customer.status === 'Active'
-                            ? 'bg-green-50 text-green-700 border-green-200'
-                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                            ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800'
+                            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800'
                         }`}
                         variant="outline"
                       >
                         {customer.status}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500">
+                    <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-0.5">
                         <Phone className="h-2.5 w-2.5" />
                         {customer.phone}
                       </span>
-                      <span className="text-gray-300">|</span>
+                      <span className="text-gray-300 dark:text-gray-600">|</span>
                       <span className="flex items-center gap-0.5">
                         <MapPin className="h-2.5 w-2.5" />
                         {customer.area}
@@ -1050,10 +1050,10 @@ export default function CustomersPage() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end shrink-0 gap-0.5">
-                    <span className="text-xs font-bold text-gray-900">{formatPKR(customer.monthlyBill)}</span>
-                    <span className="text-[10px] text-gray-400">{customer.dailyQty}L/day</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-gray-100">{formatPKR(customer.monthlyBill)}</span>
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500">{customer.dailyQty}L/day</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-gray-300 shrink-0" />
+                  <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600 shrink-0" />
                 </div>
               )
             })}
@@ -1066,11 +1066,11 @@ export default function CustomersPage() {
               return (
                 <Card
                   key={customer.id}
-                  className={`rounded-xl border-gray-200/80 shadow-sm hover:shadow-md transition-all py-0 relative overflow-hidden ${
-                    isSelected ? 'ring-2 ring-green-500/40 border-green-300 bg-green-50/30' : ''
+                  className={`rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-md transition-all py-0 relative overflow-hidden ${
+                    isSelected ? 'ring-2 ring-green-500/40 border-green-300 dark:border-green-700 bg-green-50/30 dark:bg-green-950/30' : ''
                   }`}
                 >
-                  <div className={`h-0.5 ${isSelected ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-gray-100 to-gray-200'}`} />
+                  <div className={`h-0.5 ${isSelected ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700'}`} />
                   <CardContent className="p-5">
                     <div className="flex items-start gap-2 mb-3">
                       <Checkbox
@@ -1081,14 +1081,14 @@ export default function CustomersPage() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-gray-900 truncate">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                             {customer.name}
                           </h3>
                           <Badge
                             className={`shrink-0 text-[11px] px-2 py-0.5 rounded-md font-medium ${
                               customer.status === 'Active'
-                                ? 'bg-green-50 text-green-700 border-green-200'
-                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800'
+                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800'
                             }`}
                             variant="outline"
                           >
@@ -1096,8 +1096,8 @@ export default function CustomersPage() {
                           </Badge>
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-                          <span className="text-xs text-gray-500 truncate">
+                          <Phone className="h-3 w-3 text-gray-400 dark:text-gray-500 shrink-0" />
+                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {customer.phone}
                           </span>
                         </div>
@@ -1105,8 +1105,8 @@ export default function CustomersPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5 mb-3 pl-7">
-                      <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
-                      <span className="text-xs text-gray-500 truncate">
+                      <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500 shrink-0" />
+                      <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {customer.area}
                       </span>
                     </div>
@@ -1114,31 +1114,31 @@ export default function CustomersPage() {
                     <div className="flex flex-wrap gap-1.5 mb-3 pl-7">
                       <Badge
                         variant="secondary"
-                        className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border-0 dark:bg-blue-950 dark:text-blue-300"
                       >
                         <Package className="h-3 w-3 mr-0.5" />
                         {customer.dailyQty}L/day
                       </Badge>
                       <Badge
                         variant="secondary"
-                        className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border-0 dark:bg-purple-950 dark:text-purple-300"
                       >
                         <Milk className="h-3 w-3 mr-0.5" />
                         {customer.milkType}
                       </Badge>
                       <Badge
                         variant="secondary"
-                        className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0"
+                        className="text-[11px] px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border-0 dark:bg-orange-950 dark:text-orange-300"
                       >
                         <Clock className="h-3 w-3 mr-0.5" />
                         {customer.deliveryTime}
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 pl-7">
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800 pl-7">
                       <div>
-                        <p className="text-[11px] text-gray-400">Monthly Bill</p>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500">Monthly Bill</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                           {formatPKR(customer.monthlyBill)}
                         </p>
                       </div>
@@ -1147,7 +1147,7 @@ export default function CustomersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => fetchDetail(customer.id)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50 min-h-[44px] min-w-[44px]"
+                          className="text-green-600 hover:text-green-700 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/50 min-h-[44px] min-w-[44px]"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1" />
                           View
@@ -1156,7 +1156,7 @@ export default function CustomersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => fetchDetail(customer.id, 'ledger')}
-                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 min-h-[44px] min-w-[44px]"
+                          className="text-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 min-h-[44px] min-w-[44px]"
                         >
                           <BookOpen className="h-3.5 w-3.5 mr-1" />
                           Ledger
@@ -1175,16 +1175,16 @@ export default function CustomersPage() {
       {selectedIds.size > 0 && (
         <div className="fixed bottom-16 sm:bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-4 duration-300">
           <div className="mx-auto max-w-5xl px-3 sm:px-4 pb-2 sm:pb-4">
-            <div className="flex items-center justify-between gap-2 sm:gap-4 rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-xl shadow-2xl px-3 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl px-3 sm:px-6 py-3 sm:py-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-gradient-to-br from-green-400 to-emerald-500">
                   <CheckSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm font-semibold text-gray-900">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {selectedIds.size} selected
                   </p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 hidden sm:block">Choose an action</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Choose an action</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1196,7 +1196,7 @@ export default function CustomersPage() {
                         size="sm"
                         onClick={() => handleBulkAction('Active')}
                         disabled={bulkLoading}
-                        className="h-10 w-10 p-0 border-green-200 text-green-600 hover:bg-green-50"
+                        className="h-10 w-10 p-0 border-green-200 dark:border-green-800 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/50"
                       >
                         <UserCheck className="h-4 w-4" />
                       </Button>
@@ -1210,7 +1210,7 @@ export default function CustomersPage() {
                         size="sm"
                         onClick={() => handleBulkAction('Paused')}
                         disabled={bulkLoading}
-                        className="h-10 w-10 p-0 border-amber-200 text-amber-600 hover:bg-amber-50"
+                        className="h-10 w-10 p-0 border-amber-200 dark:border-amber-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50"
                       >
                         <Pause className="h-4 w-4" />
                       </Button>
@@ -1224,7 +1224,7 @@ export default function CustomersPage() {
                         size="sm"
                         onClick={() => handleBulkAction('delete')}
                         disabled={bulkLoading}
-                        className="h-10 w-10 p-0 border-red-200 text-red-600 hover:bg-red-50"
+                        className="h-10 w-10 p-0 border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                       >
                         {bulkLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -1241,7 +1241,7 @@ export default function CustomersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={clearSelection}
-                        className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700"
+                        className="h-10 w-10 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -1256,7 +1256,7 @@ export default function CustomersPage() {
                     size="sm"
                     onClick={() => handleBulkAction('Active')}
                     disabled={bulkLoading}
-                    className="h-8 text-xs border-green-200 text-green-600 hover:bg-green-50"
+                    className="h-8 text-xs border-green-200 dark:border-green-800 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/50"
                   >
                     <UserCheck className="h-3 w-3" />
                     Set Active
@@ -1266,7 +1266,7 @@ export default function CustomersPage() {
                     size="sm"
                     onClick={() => handleBulkAction('Paused')}
                     disabled={bulkLoading}
-                    className="h-8 text-xs border-amber-200 text-amber-600 hover:bg-amber-50"
+                    className="h-8 text-xs border-amber-200 dark:border-amber-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50"
                   >
                     <Pause className="h-3 w-3" />
                     Set Paused
@@ -1276,7 +1276,7 @@ export default function CustomersPage() {
                     size="sm"
                     onClick={() => handleBulkAction('delete')}
                     disabled={bulkLoading}
-                    className="h-8 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                    className="h-8 text-xs border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                   >
                     {bulkLoading ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -1290,7 +1290,7 @@ export default function CustomersPage() {
                     variant="ghost"
                     size="sm"
                     onClick={clearSelection}
-                    className="h-8 text-xs text-gray-500 hover:text-gray-700"
+                    className="h-8 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   >
                     <X className="h-3 w-3" />
                     Clear
@@ -1312,17 +1312,17 @@ export default function CustomersPage() {
           ) : selectedCustomer ? (
             <div className="flex flex-col h-full sm:max-h-[92vh]">
               {/* Header */}
-              <div className="p-4 sm:p-6 sm:pb-4 border-b border-gray-100 shrink-0">
+              <div className="p-4 sm:p-6 sm:pb-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 shrink-0">
                       <Users className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <div className="min-w-0">
-                      <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 truncate">
+                      <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
                         {selectedCustomer.name}
                       </DialogTitle>
-                      <DialogDescription className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                      <DialogDescription className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                         Customer details and transaction history
                       </DialogDescription>
                     </div>
@@ -1330,8 +1330,8 @@ export default function CustomersPage() {
                   <Badge
                     className={`shrink-0 text-xs px-2.5 py-1 rounded-md font-medium ${
                       selectedCustomer.status === 'Active'
-                        ? 'bg-green-50 text-green-700 border-green-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                        ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800'
+                        : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800'
                     }`}
                     variant="outline"
                   >
@@ -1359,8 +1359,8 @@ export default function CustomersPage() {
                     onClick={() => toggleStatus(selectedCustomer)}
                     className={`min-h-[44px] text-xs ${
                       selectedCustomer.status === 'Active'
-                        ? 'border-amber-200 text-amber-600 hover:bg-amber-50'
-                        : 'border-green-200 text-green-600 hover:bg-green-50'
+                        ? 'border-amber-200 dark:border-amber-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50'
+                        : 'border-green-200 dark:border-green-800 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/50'
                     }`}
                   >
                     {selectedCustomer.status === 'Active' ? (
@@ -1382,7 +1382,7 @@ export default function CustomersPage() {
                       setDeletingId(selectedCustomer.id)
                       setDeleteOpen(true)
                     }}
-                    className="min-h-[44px] text-xs border-red-200 text-red-600 hover:bg-red-50"
+                    className="min-h-[44px] text-xs border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete
@@ -1423,29 +1423,29 @@ export default function CustomersPage() {
                     <TabsContent value="overview" className="mt-3 sm:mt-4 space-y-4 sm:space-y-5">
                       {/* Profile Info */}
                       <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                           Profile Information
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex items-center gap-2">
-                            <Phone className="h-3.5 w-3.5 text-gray-400" />
+                            <Phone className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                             <div>
-                              <p className="text-[11px] text-gray-400">Phone</p>
-                              <p className="text-sm text-gray-900">{selectedCustomer.phone}</p>
+                              <p className="text-[11px] text-gray-400 dark:text-gray-500">Phone</p>
+                              <p className="text-sm text-gray-900 dark:text-gray-100">{selectedCustomer.phone}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                            <MapPin className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                             <div>
-                              <p className="text-[11px] text-gray-400">Area</p>
-                              <p className="text-sm text-gray-900">{selectedCustomer.area}</p>
+                              <p className="text-[11px] text-gray-400 dark:text-gray-500">Area</p>
+                              <p className="text-sm text-gray-900 dark:text-gray-100">{selectedCustomer.area}</p>
                             </div>
                           </div>
                           <div className="col-span-2 flex items-start gap-2">
-                            <MapPin className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                            <MapPin className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 mt-0.5" />
                             <div>
-                              <p className="text-[11px] text-gray-400">Address</p>
-                              <p className="text-sm text-gray-900">
+                              <p className="text-[11px] text-gray-400 dark:text-gray-500">Address</p>
+                              <p className="text-sm text-gray-900 dark:text-gray-100">
                                 {selectedCustomer.address || '—'}
                               </p>
                             </div>
@@ -1457,31 +1457,31 @@ export default function CustomersPage() {
 
                       {/* Milk Details */}
                       <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                           Milk Plan
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="rounded-lg bg-gray-50 p-3">
-                            <p className="text-[11px] text-gray-400">Daily Quantity</p>
-                            <p className="text-sm font-semibold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Daily Quantity</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {selectedCustomer.dailyQty} L/day
                             </p>
                           </div>
-                          <div className="rounded-lg bg-gray-50 p-3">
-                            <p className="text-[11px] text-gray-400">Milk Type</p>
-                            <p className="text-sm font-semibold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Milk Type</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {selectedCustomer.milkType}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-gray-50 p-3">
-                            <p className="text-[11px] text-gray-400">Price per Liter</p>
-                            <p className="text-sm font-semibold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Price per Liter</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {formatPKR(selectedCustomer.pricePerLiter)}
                             </p>
                           </div>
-                          <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 p-3 border border-green-100">
+                          <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 p-3 border border-green-100 dark:border-green-900">
                             <p className="text-[11px] text-green-600">Monthly Bill</p>
-                            <p className="text-sm font-bold text-green-700">
+                            <p className="text-sm font-bold text-green-700 dark:text-green-300">
                               {formatPKR(selectedCustomer.monthlyBill)}
                             </p>
                           </div>
@@ -1492,12 +1492,12 @@ export default function CustomersPage() {
                       {selectedCustomer.vacations.some((v) => isVacationActive(v)) && (
                         <>
                           <Separator />
-                          <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-3 flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 shrink-0">
+                          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 p-3 flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50 shrink-0">
                               <Umbrella className="h-4 w-4 text-amber-600" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-amber-800">Currently on Vacation</p>
+                              <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">Currently on Vacation</p>
                               <p className="text-[11px] text-amber-600 truncate">
                                 {selectedCustomer.vacations
                                   .filter((v) => isVacationActive(v))
@@ -1513,28 +1513,28 @@ export default function CustomersPage() {
 
                       {/* Current Month Summary */}
                       <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                           Current Month Summary
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="rounded-xl border border-green-100 bg-gradient-to-br from-green-50/80 to-emerald-50/50 p-3 sm:p-4">
+                          <div className="rounded-xl border border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50/80 to-emerald-50/50 dark:from-green-950/80 dark:to-emerald-950/50 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Package className="h-4 w-4 text-green-600" />
-                              <p className="text-xs font-medium text-green-700">Deliveries</p>
+                              <p className="text-xs font-medium text-green-700 dark:text-green-300">Deliveries</p>
                             </div>
-                            <p className="text-xl sm:text-2xl font-bold text-green-800">
+                            <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-200">
                               {currentMonthStats.deliveries}
                             </p>
                             <p className="text-[11px] sm:text-xs text-green-600 mt-0.5">
                               {currentMonthStats.deliveredLiters.toFixed(1)}L delivered
                             </p>
                           </div>
-                          <div className="rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 p-3 sm:p-4">
+                          <div className="rounded-xl border border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 dark:from-emerald-950/80 dark:to-teal-950/50 p-3 sm:p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <CreditCard className="h-4 w-4 text-emerald-600" />
-                              <p className="text-xs font-medium text-emerald-700">Payments</p>
+                              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Payments</p>
                             </div>
-                            <p className="text-xl sm:text-2xl font-bold text-emerald-800">
+                            <p className="text-xl sm:text-2xl font-bold text-emerald-800 dark:text-emerald-200">
                               {currentMonthStats.paymentsCount}
                             </p>
                             <p className="text-[11px] sm:text-xs text-emerald-600 mt-0.5">
@@ -1548,36 +1548,36 @@ export default function CustomersPage() {
 
                       {/* Quick Stats */}
                       <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                           Quick Stats
                         </h4>
                         <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                          <div className="rounded-lg bg-gray-50 p-2.5 sm:p-3 text-center">
-                            <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-base sm:text-lg font-bold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-2.5 sm:p-3 text-center">
+                            <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-500 mx-auto mb-1" />
+                            <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                               {selectedCustomer.deliveries.filter((d) => d.status === 'Delivered').length}
                             </p>
-                            <p className="text-[9px] sm:text-[10px] text-gray-400">Total Deliveries</p>
+                            <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-500">Total Deliveries</p>
                           </div>
-                          <div className="rounded-lg bg-gray-50 p-2.5 sm:p-3 text-center">
-                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 mx-auto mb-1" />
-                            <p className="text-base sm:text-lg font-bold text-gray-900">
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-2.5 sm:p-3 text-center">
+                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-500 mx-auto mb-1" />
+                            <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                               {selectedCustomer.payments.filter((p) => p.status === 'Completed').length}
                             </p>
-                            <p className="text-[9px] sm:text-[10px] text-gray-400">Total Payments</p>
+                            <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-500">Total Payments</p>
                           </div>
                           <div className={`rounded-lg p-2.5 sm:p-3 text-center ${
-                            ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-red-50 to-rose-50' : 'bg-gradient-to-br from-green-50 to-emerald-50'
+                            ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950' : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950'
                           }`}>
                             <IndianRupee className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mx-auto mb-1 ${
                               ledgerSummary.balance > 0 ? 'text-red-400' : 'text-green-400'
                             }`} />
                             <p className={`text-base sm:text-lg font-bold ${
-                              ledgerSummary.balance > 0 ? 'text-red-700' : 'text-green-700'
+                              ledgerSummary.balance > 0 ? 'text-red-700 dark:text-red-300' : 'text-green-700 dark:text-green-300'
                             }`}>
                               {formatPKR(Math.abs(ledgerSummary.balance))}
                             </p>
-                            <p className="text-[9px] sm:text-[10px] text-gray-400">
+                            <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-500">
                               {ledgerSummary.balance > 0 ? 'Outstanding' : ledgerSummary.balance < 0 ? 'Overpaid' : 'Settled'}
                             </p>
                           </div>
@@ -1588,9 +1588,9 @@ export default function CustomersPage() {
                       {selectedCustomer.notes && (
                         <>
                           <Separator />
-                          <div className="rounded-lg bg-gray-50 p-3">
-                            <p className="text-[11px] text-gray-400">Notes</p>
-                            <p className="text-sm text-gray-700">{selectedCustomer.notes}</p>
+                          <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Notes</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{selectedCustomer.notes}</p>
                           </div>
                         </>
                       )}
@@ -1600,31 +1600,31 @@ export default function CustomersPage() {
                     <TabsContent value="products" className="mt-3 sm:mt-4 space-y-4">
                       {/* Milk Plan - Primary Product */}
                       <div>
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                           Primary Milk Plan
                         </h4>
-                        <div className="rounded-xl border border-green-100 bg-gradient-to-br from-green-50/60 to-emerald-50/40 p-4">
+                        <div className="rounded-xl border border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50/60 to-emerald-50/40 dark:from-green-950/60 dark:to-emerald-950/40 p-4">
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 shrink-0">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/50 shrink-0">
                               <Milk className="h-5 w-5 text-green-600" />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-gray-900">{selectedCustomer.milkType} Milk</p>
-                              <p className="text-xs text-gray-500">Daily delivery</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{selectedCustomer.milkType} Milk</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Daily delivery</p>
                             </div>
                           </div>
                           <div className="grid grid-cols-3 gap-3">
-                            <div className="rounded-lg bg-white/80 p-2.5">
-                              <p className="text-[10px] text-gray-400">Daily Qty</p>
-                              <p className="text-sm font-bold text-gray-900">{selectedCustomer.dailyQty} L</p>
+                            <div className="rounded-lg bg-white/80 dark:bg-gray-800/80 p-2.5">
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500">Daily Qty</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{selectedCustomer.dailyQty} L</p>
                             </div>
-                            <div className="rounded-lg bg-white/80 p-2.5">
-                              <p className="text-[10px] text-gray-400">Price/L</p>
-                              <p className="text-sm font-bold text-gray-900">{formatPKR(selectedCustomer.pricePerLiter)}</p>
+                            <div className="rounded-lg bg-white/80 dark:bg-gray-800/80 p-2.5">
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500">Price/L</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatPKR(selectedCustomer.pricePerLiter)}</p>
                             </div>
-                            <div className="rounded-lg bg-white/80 p-2.5">
-                              <p className="text-[10px] text-gray-400">Monthly</p>
-                              <p className="text-sm font-bold text-green-700">{formatPKR(selectedCustomer.monthlyBill)}</p>
+                            <div className="rounded-lg bg-white/80 dark:bg-gray-800/80 p-2.5">
+                              <p className="text-[10px] text-gray-400 dark:text-gray-500">Monthly</p>
+                              <p className="text-sm font-bold text-green-700 dark:text-green-300 dark:text-green-300">{formatPKR(selectedCustomer.monthlyBill)}</p>
                             </div>
                           </div>
                         </div>
@@ -1635,7 +1635,7 @@ export default function CustomersPage() {
                       {/* Other Daily Products */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                             Other Daily Products
                           </h4>
                           <Button
@@ -1645,7 +1645,7 @@ export default function CustomersPage() {
                               setProductForm({ itemId: '', dailyQty: 1 })
                               setProductFormOpen(true)
                             }}
-                            className="h-8 text-[11px] border-green-200 text-green-600 hover:bg-green-50"
+                            className="h-8 text-[11px] border-green-200 dark:border-green-800 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/50"
                             disabled={availableProducts.length === 0}
                           >
                             <Plus className="h-3 w-3 mr-1" />
@@ -1654,7 +1654,7 @@ export default function CustomersPage() {
                         </div>
 
                         {selectedCustomer.products.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                          <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
                             <ShoppingBag className="h-8 w-8 mb-2" />
                             <p className="text-sm font-medium">No additional products</p>
                             <p className="text-xs mt-1">Add other daily products this customer receives</p>
@@ -1664,20 +1664,20 @@ export default function CustomersPage() {
                             {selectedCustomer.products.map((cp) => (
                               <div
                                 key={cp.id}
-                                className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 min-h-[52px] hover:bg-gray-50 transition-colors"
+                                className="flex items-center gap-3 rounded-xl border border-gray-100 dark:border-gray-800 p-3 min-h-[52px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                   <span className={`shrink-0 h-2.5 w-2.5 rounded-full ${CATEGORY_COLORS[cp.item.category] || 'bg-gray-400'}`} />
                                   <div className="min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">{cp.item.name}</p>
-                                    <p className="text-[11px] text-gray-400">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{cp.item.name}</p>
+                                    <p className="text-[11px] text-gray-400 dark:text-gray-500">
                                       {cp.item.category} · {formatPKR(cp.item.pricePerUnit)}/{cp.item.unit}
                                     </p>
                                   </div>
                                 </div>
                                 <div className="text-right shrink-0">
-                                  <p className="text-sm font-semibold text-gray-900">{cp.dailyQty} {cp.item.unit}</p>
-                                  <p className="text-[11px] text-gray-400">{formatPKR(cp.dailyQty * cp.item.pricePerUnit)}/day</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{cp.dailyQty} {cp.item.unit}</p>
+                                  <p className="text-[11px] text-gray-400 dark:text-gray-500">{formatPKR(cp.dailyQty * cp.item.pricePerUnit)}/day</p>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                   <Button
@@ -1688,7 +1688,7 @@ export default function CustomersPage() {
                                       setEditProductQty(String(cp.dailyQty))
                                       setEditProductOpen(true)
                                     }}
-                                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                    className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                                   >
                                     <PencilLine className="h-3 w-3" />
                                   </Button>
@@ -1696,7 +1696,7 @@ export default function CustomersPage() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleDeleteProduct(cp.id)}
-                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                                   >
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
@@ -1711,7 +1711,7 @@ export default function CustomersPage() {
                     {/* ── Vacations Tab ───────────────────────────── */}
                     <TabsContent value="vacations" className="mt-3 sm:mt-4 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        <h4 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                           Vacations & Leave
                         </h4>
                         <Button
@@ -1721,7 +1721,7 @@ export default function CustomersPage() {
                             setVacationForm({ startDate: '', endDate: '', notes: '' })
                             setVacationFormOpen(true)
                           }}
-                          className="h-8 text-[11px] border-amber-200 text-amber-600 hover:bg-amber-50"
+                          className="h-8 text-[11px] border-amber-200 dark:border-amber-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50"
                         >
                           <Plus className="h-3 w-3 mr-1" />
                           Add Vacation
@@ -1729,7 +1729,7 @@ export default function CustomersPage() {
                       </div>
 
                       {selectedCustomer.vacations.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                        <div className="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500">
                           <Umbrella className="h-10 w-10 mb-3" />
                           <p className="text-sm font-medium">No vacations scheduled</p>
                           <p className="text-xs mt-1">Add vacation periods when the customer won&apos;t receive deliveries</p>
@@ -1744,49 +1744,49 @@ export default function CustomersPage() {
                                 key={v.id}
                                 className={`rounded-xl border p-3 min-h-[52px] transition-colors ${
                                   active
-                                    ? 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50'
+                                    ? 'border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-50'
                                     : upcoming
-                                    ? 'border-blue-100 bg-blue-50/40'
-                                    : 'border-gray-100 bg-white'
+                                    ? 'border-blue-100 dark:border-blue-900 bg-blue-50/40 dark:bg-blue-950/40'
+                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900'
                                 }`}
                               >
                                 <div className="flex items-center gap-3">
                                   <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${
-                                    active ? 'bg-amber-100' : upcoming ? 'bg-blue-100' : 'bg-gray-100'
+                                    active ? 'bg-amber-100' : upcoming ? 'bg-blue-100' : 'bg-gray-100 dark:bg-gray-800'
                                   }`}>
                                     {active ? (
                                       <Umbrella className="h-4 w-4 text-amber-600" />
                                     ) : upcoming ? (
                                       <CalendarOff className="h-4 w-4 text-blue-600" />
                                     ) : (
-                                      <CalendarDays className="h-4 w-4 text-gray-400" />
+                                      <CalendarDays className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                     )}
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                      <p className="text-sm font-semibold text-gray-900 truncate">
+                                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                                         {formatDateRange(v.startDate, v.endDate)}
                                       </p>
                                       {active && (
-                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-amber-100 text-amber-700 border-amber-200" variant="outline">
+                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/50 dark:text-amber-300 dark:border-amber-800" variant="outline">
                                           Active
                                         </Badge>
                                       )}
                                       {upcoming && (
-                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-blue-100 text-blue-700 border-blue-200" variant="outline">
+                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800" variant="outline">
                                           Upcoming
                                         </Badge>
                                       )}
                                     </div>
                                     {v.notes && (
-                                      <p className="text-[11px] text-gray-500 mt-0.5 truncate">{v.notes}</p>
+                                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{v.notes}</p>
                                     )}
                                   </div>
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleDeleteVacation(v.id)}
-                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 shrink-0"
+                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 shrink-0"
                                   >
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
@@ -1798,9 +1798,9 @@ export default function CustomersPage() {
                       )}
 
                       {/* Info note */}
-                      <div className="rounded-lg bg-gray-50 p-3 flex items-start gap-2.5">
-                        <AlertCircle className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-gray-500">
+                      <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3 flex items-start gap-2.5">
+                        <AlertCircle className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400">
                           Customers on vacation won&apos;t be included in daily delivery auto-generation.
                           Past vacations are kept for records.
                         </p>
@@ -1810,7 +1810,7 @@ export default function CustomersPage() {
                     {/* ── Ledger Tab ───────────────────────────────── */}
                     <TabsContent value="ledger" className="mt-3 sm:mt-4">
                       {ledger.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">
                           <BookOpen className="h-10 w-10 mb-3" />
                           <p className="text-sm font-medium">No ledger entries yet</p>
                           <p className="text-xs mt-1">Transactions will appear here as deliveries and payments are recorded</p>
@@ -1819,33 +1819,33 @@ export default function CustomersPage() {
                         <div className="space-y-4">
                           {/* Ledger Summary Cards */}
                           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                            <div className="rounded-lg bg-gradient-to-br from-red-50 to-rose-50 p-2.5 sm:p-3 text-center">
+                            <div className="rounded-lg bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-50 p-2.5 sm:p-3 text-center">
                               <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 mx-auto mb-1" />
                               <p className="text-[10px] sm:text-xs text-red-600">Debit</p>
-                              <p className="text-sm sm:text-base font-bold text-red-700">
+                              <p className="text-sm sm:text-base font-bold text-red-700 dark:text-red-300">
                                 {formatPKR(ledgerSummary.totalDebit)}
                               </p>
                             </div>
-                            <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 p-2.5 sm:p-3 text-center">
+                            <div className="rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 p-2.5 sm:p-3 text-center">
                               <ArrowDownRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 mx-auto mb-1" />
                               <p className="text-[10px] sm:text-xs text-green-600">Credit</p>
-                              <p className="text-sm sm:text-base font-bold text-green-700">
+                              <p className="text-sm sm:text-base font-bold text-green-700 dark:text-green-300">
                                 {formatPKR(ledgerSummary.totalCredit)}
                               </p>
                             </div>
                             <div className={`rounded-lg p-2.5 sm:p-3 text-center ${
-                              ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-amber-50 to-yellow-50' : ledgerSummary.balance < 0 ? 'bg-gradient-to-br from-green-50 to-emerald-50' : 'bg-gray-50'
+                              ledgerSummary.balance > 0 ? 'bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950' : ledgerSummary.balance < 0 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950' : 'bg-gray-50 dark:bg-gray-800/50'
                             }`}>
                               <Wallet className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mx-auto mb-1 ${
                                 ledgerSummary.balance > 0 ? 'text-amber-500' : 'text-green-500'
                               }`} />
                               <p className={`text-[10px] sm:text-xs ${
-                                ledgerSummary.balance > 0 ? 'text-amber-600' : 'text-green-600'
+                                ledgerSummary.balance > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'
                               }`}>
                                 {ledgerSummary.balance > 0 ? 'Due' : 'Bal.'}
                               </p>
                               <p className={`text-sm sm:text-base font-bold ${
-                                ledgerSummary.balance > 0 ? 'text-amber-700' : 'text-green-700'
+                                ledgerSummary.balance > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-green-700 dark:text-green-300'
                               }`}>
                                 {formatPKR(Math.abs(ledgerSummary.balance))}
                               </p>
@@ -1857,7 +1857,7 @@ export default function CustomersPage() {
                             {ledger.map((entry) => (
                               <div
                                 key={entry.id}
-                                className="rounded-xl border border-gray-100 p-3 bg-white"
+                                className="rounded-xl border border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-900"
                               >
                                 <div className="flex items-center justify-between mb-1.5">
                                   <div className="flex items-center gap-1.5">
@@ -1866,32 +1866,32 @@ export default function CustomersPage() {
                                     ) : (
                                       <ArrowDownRight className="h-3 w-3 text-green-400" />
                                     )}
-                                    <span className="text-[11px] text-gray-500 font-mono">{entry.date}</span>
+                                    <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">{entry.date}</span>
                                   </div>
                                   <span className={`text-xs font-bold font-mono ${
-                                    entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400'
+                                    entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400 dark:text-gray-500'
                                   }`}>
                                     Bal: {entry.balance !== 0 ? formatPKR(Math.abs(entry.balance)) : '—'}
                                   </span>
                                 </div>
-                                <p className="text-xs text-gray-700 mb-2 truncate">{entry.description}</p>
+                                <p className="text-xs text-gray-700 dark:text-gray-300 mb-2 truncate">{entry.description}</p>
                                 <div className="flex items-center gap-3">
                                   {entry.debit > 0 ? (
                                     <span className="text-xs font-semibold text-red-600 font-mono">Dr: {formatPKR(entry.debit)}</span>
                                   ) : (
-                                    <span className="text-xs text-gray-300 font-mono">Dr: —</span>
+                                    <span className="text-xs text-gray-300 dark:text-gray-600 font-mono">Dr: —</span>
                                   )}
                                   {entry.credit > 0 ? (
                                     <span className="text-xs font-semibold text-green-600 font-mono">Cr: {formatPKR(entry.credit)}</span>
                                   ) : (
-                                    <span className="text-xs text-gray-300 font-mono">Cr: —</span>
+                                    <span className="text-xs text-gray-300 dark:text-gray-600 font-mono">Cr: —</span>
                                   )}
                                 </div>
                               </div>
                             ))}
-                            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                            <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">
                               <div className="flex items-center justify-between text-xs font-bold">
-                                <span className="text-gray-700">Total</span>
+                                <span className="text-gray-700 dark:text-gray-300">Total</span>
                                 <div className="flex items-center gap-3">
                                   <span className="text-red-600 font-mono">{formatPKR(ledgerSummary.totalDebit)}</span>
                                   <span className="text-green-600 font-mono">{formatPKR(ledgerSummary.totalCredit)}</span>
@@ -1901,27 +1901,27 @@ export default function CustomersPage() {
                           </div>
 
                           {/* Desktop: Ledger Table */}
-                          <div className="hidden sm:block rounded-xl border border-gray-200 overflow-hidden">
+                          <div className="hidden sm:block rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                             <Table>
                               <TableHeader>
-                                <TableRow className="bg-gray-50 hover:bg-gray-50">
-                                  <TableHead className="text-[11px] font-semibold text-gray-500 w-[100px]">Date</TableHead>
-                                  <TableHead className="text-[11px] font-semibold text-gray-500">Description</TableHead>
-                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Debit</TableHead>
-                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Credit</TableHead>
-                                  <TableHead className="text-[11px] font-semibold text-gray-500 text-right w-[100px]">Balance</TableHead>
+                                <TableRow className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 w-[100px]">Date</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Description</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 text-right w-[100px]">Debit</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 text-right w-[100px]">Credit</TableHead>
+                                  <TableHead className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 text-right w-[100px]">Balance</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {ledger.map((entry, idx) => (
                                   <TableRow
                                     key={entry.id}
-                                    className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-gray-50`}
+                                    className={`${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'} hover:bg-gray-50 dark:hover:bg-gray-800`}
                                   >
-                                    <TableCell className="text-xs text-gray-600 font-mono">
+                                    <TableCell className="text-xs text-gray-600 dark:text-gray-400 font-mono">
                                       {entry.date}
                                     </TableCell>
-                                    <TableCell className="text-xs text-gray-700">
+                                    <TableCell className="text-xs text-gray-700 dark:text-gray-300">
                                       <div className="flex items-center gap-2">
                                         {entry.type === 'delivery' || entry.type === 'sale' ? (
                                           <ArrowUpRight className="h-3 w-3 text-red-400 shrink-0" />
@@ -1930,7 +1930,7 @@ export default function CustomersPage() {
                                         )}
                                         <span className="truncate max-w-[200px]">{entry.description}</span>
                                         {entry.type === 'sale' && (
-                                          <Badge className="shrink-0 text-[9px] px-1 py-0 rounded bg-purple-50 text-purple-600 border-purple-200" variant="outline">
+                                          <Badge className="shrink-0 text-[9px] px-1 py-0 rounded bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800" variant="outline">
                                             Sale
                                           </Badge>
                                         )}
@@ -1942,7 +1942,7 @@ export default function CustomersPage() {
                                           {formatPKR(entry.debit)}
                                         </span>
                                       ) : (
-                                        <span className="text-gray-300">—</span>
+                                        <span className="text-gray-300 dark:text-gray-600">—</span>
                                       )}
                                     </TableCell>
                                     <TableCell className="text-xs text-right font-mono">
@@ -1951,12 +1951,12 @@ export default function CustomersPage() {
                                           {formatPKR(entry.credit)}
                                         </span>
                                       ) : (
-                                        <span className="text-gray-300">—</span>
+                                        <span className="text-gray-300 dark:text-gray-600">—</span>
                                       )}
                                     </TableCell>
                                     <TableCell className="text-xs text-right font-mono">
                                       <span className={`font-semibold ${
-                                        entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400'
+                                        entry.balance > 0 ? 'text-amber-600' : entry.balance < 0 ? 'text-green-600' : 'text-gray-400 dark:text-gray-500'
                                       }`}>
                                         {entry.balance !== 0 ? formatPKR(Math.abs(entry.balance)) : '—'}
                                       </span>
@@ -1965,8 +1965,8 @@ export default function CustomersPage() {
                                 ))}
                               </TableBody>
                               <TableFooter>
-                                <TableRow className="bg-gray-100 hover:bg-gray-100">
-                                  <TableCell className="text-xs font-bold text-gray-700" colSpan={2}>
+                                <TableRow className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                  <TableCell className="text-xs font-bold text-gray-700 dark:text-gray-300" colSpan={2}>
                                     Total
                                   </TableCell>
                                   <TableCell className="text-xs text-right font-mono font-bold text-red-600">
@@ -1976,7 +1976,7 @@ export default function CustomersPage() {
                                     {formatPKR(ledgerSummary.totalCredit)}
                                   </TableCell>
                                   <TableCell className={`text-xs text-right font-mono font-bold ${
-                                    ledgerSummary.balance > 0 ? 'text-amber-700' : 'text-green-700'
+                                    ledgerSummary.balance > 0 ? 'text-amber-700 dark:text-amber-300' : 'text-green-700 dark:text-green-300'
                                   }`}>
                                     {formatPKR(Math.abs(ledgerSummary.balance))}
                                   </TableCell>
@@ -1999,9 +1999,9 @@ export default function CustomersPage() {
       <Dialog open={vacationFormOpen} onOpenChange={setVacationFormOpen}>
         <DialogContent className={isMobile ? 'w-[100vw] h-[100dvh] rounded-none p-0' : 'sm:max-w-md'}>
           <div className={isMobile ? 'flex flex-col h-full' : ''}>
-            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100' : ''}>
+            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800' : ''}>
               <DialogTitle className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
                   <Umbrella className="h-3.5 w-3.5 text-amber-600" />
                 </div>
                 Add Vacation
@@ -2020,7 +2020,7 @@ export default function CustomersPage() {
                     type="date"
                     value={vacationForm.startDate}
                     onChange={(e) => setVacationForm({ ...vacationForm, startDate: e.target.value })}
-                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -2031,7 +2031,7 @@ export default function CustomersPage() {
                     type="date"
                     value={vacationForm.endDate}
                     onChange={(e) => setVacationForm({ ...vacationForm, endDate: e.target.value })}
-                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                     min={vacationForm.startDate || undefined}
                   />
                 </div>
@@ -2042,11 +2042,11 @@ export default function CustomersPage() {
                   placeholder="Reason for vacation..."
                   value={vacationForm.notes}
                   onChange={(e) => setVacationForm({ ...vacationForm, notes: e.target.value })}
-                  className="rounded-lg border-gray-200 min-h-[60px]"
+                  className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[60px]"
                 />
               </div>
             </div>
-            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 bg-white' : 'pt-2'}`}>
+            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900' : 'pt-2'}`}>
               <Button
                 variant="outline"
                 onClick={() => setVacationFormOpen(false)}
@@ -2071,9 +2071,9 @@ export default function CustomersPage() {
       <Dialog open={productFormOpen} onOpenChange={setProductFormOpen}>
         <DialogContent className={isMobile ? 'w-[100vw] h-[100dvh] rounded-none p-0' : 'sm:max-w-md'}>
           <div className={isMobile ? 'flex flex-col h-full' : ''}>
-            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100' : ''}>
+            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800' : ''}>
               <DialogTitle className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-100">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/50">
                   <ShoppingCart className="h-3.5 w-3.5 text-green-600" />
                 </div>
                 Add Daily Product
@@ -2091,7 +2091,7 @@ export default function CustomersPage() {
                   value={productForm.itemId}
                   onValueChange={(v) => setProductForm({ ...productForm, itemId: v })}
                 >
-                  <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                  <SelectTrigger className="rounded-lg border-gray-200 dark:border-gray-700 w-full min-h-[44px]">
                     <SelectValue placeholder="Select a product..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -2106,7 +2106,7 @@ export default function CustomersPage() {
                   </SelectContent>
                 </Select>
                 {availableProducts.length === 0 && (
-                  <p className="text-[11px] text-gray-400">All available products have been added already</p>
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">All available products have been added already</p>
                 )}
               </div>
               <div className="space-y-1.5">
@@ -2119,13 +2119,13 @@ export default function CustomersPage() {
                   step={0.5}
                   value={productForm.dailyQty}
                   onChange={(e) => setProductForm({ ...productForm, dailyQty: parseFloat(e.target.value) || 0 })}
-                  className="rounded-lg border-gray-200 min-h-[44px]"
+                  className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                 />
               </div>
               {productForm.itemId && (
-                <div className="rounded-lg bg-gray-50 p-3">
-                  <p className="text-[11px] text-gray-400">Daily Cost</p>
-                  <p className="text-sm font-bold text-gray-900">
+                <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500">Daily Cost</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                     {formatPKR(
                       productForm.dailyQty *
                         (inventoryItems.find((i) => i.id === productForm.itemId)?.pricePerUnit || 0)
@@ -2134,7 +2134,7 @@ export default function CustomersPage() {
                 </div>
               )}
             </div>
-            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 bg-white' : 'pt-2'}`}>
+            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900' : 'pt-2'}`}>
               <Button
                 variant="outline"
                 onClick={() => setProductFormOpen(false)}
@@ -2160,7 +2160,7 @@ export default function CustomersPage() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <PencilLine className="h-4 w-4 text-gray-500" />
+              <PencilLine className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               Edit Quantity
             </DialogTitle>
             <DialogDescription className="text-xs">
@@ -2176,13 +2176,13 @@ export default function CustomersPage() {
                 step={0.5}
                 value={editProductQty}
                 onChange={(e) => setEditProductQty(e.target.value)}
-                className="rounded-lg border-gray-200 min-h-[44px]"
+                className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
               />
             </div>
             {editingProduct && (
-              <div className="rounded-lg bg-gray-50 p-3">
-                <p className="text-[11px] text-gray-400">New Daily Cost</p>
-                <p className="text-sm font-bold text-gray-900">
+              <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 p-3">
+                <p className="text-[11px] text-gray-400 dark:text-gray-500">New Daily Cost</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                   {formatPKR((parseFloat(editProductQty) || 0) * editingProduct.item.pricePerUnit)}
                 </p>
               </div>
@@ -2210,7 +2210,7 @@ export default function CustomersPage() {
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden sm:rounded-lg !top-0 !left-0 !translate-x-0 !translate-y-0 sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] w-screen h-[100dvh] sm:w-full sm:h-auto sm:max-h-[92vh] rounded-none">
           <div className="flex flex-col h-full sm:max-h-[92vh]">
-            <DialogHeader className="shrink-0 px-4 sm:px-6 pt-5 sm:pt-6 pb-3 border-b border-gray-100">
+            <DialogHeader className="shrink-0 px-4 sm:px-6 pt-5 sm:pt-6 pb-3 border-b border-gray-100 dark:border-gray-800">
               <DialogTitle className="text-lg">
                 {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
               </DialogTitle>
@@ -2231,7 +2231,7 @@ export default function CustomersPage() {
                   placeholder="Customer name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="rounded-lg border-gray-200 min-h-[44px]"
+                  className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                 />
               </div>
 
@@ -2245,7 +2245,7 @@ export default function CustomersPage() {
                     placeholder="0300-1234567"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -2256,7 +2256,7 @@ export default function CustomersPage() {
                     value={form.area}
                     onValueChange={(v) => setForm({ ...form, area: v })}
                   >
-                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                    <SelectTrigger className="rounded-lg border-gray-200 dark:border-gray-700 w-full min-h-[44px]">
                       <SelectValue placeholder="Select area" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2279,7 +2279,7 @@ export default function CustomersPage() {
                   placeholder="Street, building, landmark..."
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  className="rounded-lg border-gray-200 min-h-[44px]"
+                  className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                 />
               </div>
 
@@ -2297,7 +2297,7 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setForm({ ...form, dailyQty: parseFloat(e.target.value) || 0 })
                     }
-                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -2313,7 +2313,7 @@ export default function CustomersPage() {
                       })
                     }}
                   >
-                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                    <SelectTrigger className="rounded-lg border-gray-200 dark:border-gray-700 w-full min-h-[44px]">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2340,7 +2340,7 @@ export default function CustomersPage() {
                     onChange={(e) =>
                       setForm({ ...form, pricePerLiter: parseFloat(e.target.value) || 0 })
                     }
-                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[44px]"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -2349,7 +2349,7 @@ export default function CustomersPage() {
                     value={form.deliveryTime}
                     onValueChange={(v) => setForm({ ...form, deliveryTime: v })}
                   >
-                    <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                    <SelectTrigger className="rounded-lg border-gray-200 dark:border-gray-700 w-full min-h-[44px]">
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2363,9 +2363,9 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 p-3 flex items-center justify-between">
-                <p className="text-sm text-green-700 font-medium">Estimated Monthly Bill</p>
-                <p className="text-lg font-bold text-green-800">
+              <div className="rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border border-green-100 dark:border-green-900 p-3 flex items-center justify-between">
+                <p className="text-sm text-green-700 font-medium dark:text-green-300">Estimated Monthly Bill</p>
+                <p className="text-lg font-bold text-green-800 dark:text-green-200">
                   {formatPKR(calcMonthlyBill(form.dailyQty, form.pricePerLiter))}
                 </p>
               </div>
@@ -2379,12 +2379,12 @@ export default function CustomersPage() {
                   placeholder="Additional notes..."
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="rounded-lg border-gray-200 min-h-[60px]"
+                  className="rounded-lg border-gray-200 dark:border-gray-700 min-h-[60px]"
                 />
               </div>
             </div>
 
-            <div className="shrink-0 px-4 sm:px-6 pb-5 sm:pb-6 pt-3 border-t border-gray-100 bg-white">
+            <div className="shrink-0 px-4 sm:px-6 pb-5 sm:pb-6 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"

@@ -99,16 +99,16 @@ interface PaymentSummary {
 const formatPKR = (amount: number) => `₨${amount.toLocaleString()}`
 
 const statusConfig: Record<string, { color: string; bg: string; border: string; icon: React.ElementType; ring: string }> = {
-  Completed: { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', icon: CheckCircle, ring: 'ring-emerald-500/20' },
-  Pending: { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', icon: Clock, ring: 'ring-amber-500/20' },
-  Failed: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle, ring: 'ring-red-500/20' },
+  Completed: { color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-950', border: 'border-emerald-200 dark:border-emerald-800', icon: CheckCircle, ring: 'ring-emerald-500/20' },
+  Pending: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950', border: 'border-amber-200 dark:border-amber-800', icon: Clock, ring: 'ring-amber-500/20' },
+  Failed: { color: 'text-red-700 dark:text-red-300', bg: 'bg-red-50 dark:bg-red-950', border: 'border-red-200 dark:border-red-800', icon: XCircle, ring: 'ring-red-500/20' },
 }
 
 const methodConfig: Record<string, { color: string; bg: string; icon: React.ElementType }> = {
-  Cash: { color: 'text-green-700', bg: 'bg-green-50', icon: Banknote },
-  UPI: { color: 'text-blue-700', bg: 'bg-blue-50', icon: ArrowUpRight },
-  'Bank Transfer': { color: 'text-purple-700', bg: 'bg-purple-50', icon: Receipt },
-  Cheque: { color: 'text-amber-700', bg: 'bg-amber-50', icon: Receipt },
+  Cash: { color: 'text-green-700 dark:text-green-300', bg: 'bg-green-50 dark:bg-green-950/50', icon: Banknote },
+  UPI: { color: 'text-blue-700 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-950/50', icon: ArrowUpRight },
+  'Bank Transfer': { color: 'text-purple-700 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-950/50', icon: Receipt },
+  Cheque: { color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-950/50', icon: Receipt },
 }
 
 export default function PaymentsPage() {
@@ -327,8 +327,8 @@ export default function PaymentsPage() {
             <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight">Payments</h1>
-            <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Track payments and pending dues</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Payments</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Track payments and pending dues</p>
           </div>
         </div>
         <Button
@@ -342,15 +342,15 @@ export default function PaymentsPage() {
 
       {/* ─── Summary Cards ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-        <Card className="rounded-xl border-0 bg-gradient-to-br from-emerald-50 to-green-50 shadow-sm ring-1 ring-emerald-100">
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950 dark:to-green-950 shadow-sm ring-1 ring-emerald-100 dark:ring-emerald-900/50">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Received</p>
-                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">Received</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   {loading ? '—' : formatPKR(summary?.totalReceived || 0)}
                 </p>
               </div>
@@ -358,15 +358,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-0 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm ring-1 ring-amber-100">
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 shadow-sm ring-1 ring-amber-100 dark:ring-amber-900/50">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Pending</p>
-                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">Pending</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   {loading ? '—' : formatPKR(summary?.totalDue || 0)}
                 </p>
               </div>
@@ -374,15 +374,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-0 bg-gradient-to-br from-red-50 to-rose-50 shadow-sm ring-1 ring-red-100">
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950 shadow-sm ring-1 ring-red-100 dark:ring-red-900/50">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shrink-0 shadow-sm">
                 <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Pending #</p>
-                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">Pending #</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   {loading ? '—' : summary?.pendingCount || 0}
                 </p>
               </div>
@@ -390,15 +390,15 @@ export default function PaymentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm ring-1 ring-blue-100">
+        <Card className="rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 shadow-sm ring-1 ring-blue-100 dark:ring-blue-900/50">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shrink-0 shadow-sm">
                 <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-sm text-gray-500 truncate">Transactions</p>
-                <p className="text-sm sm:text-xl font-bold text-gray-900 truncate">
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">Transactions</p>
+                <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   {loading ? '—' : payments.length}
                 </p>
               </div>
@@ -409,14 +409,14 @@ export default function PaymentsPage() {
 
       {/* ─── Customer Dues (Horizontal scroll on mobile) ─── */}
       {summary && summary.customerDues.length > 0 && (
-        <Card className="rounded-xl border-0 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 shadow-sm ring-1 ring-amber-200/60">
+        <Card className="rounded-xl border-0 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-950 dark:via-orange-950 dark:to-amber-950 shadow-sm ring-1 ring-amber-200/60 dark:ring-amber-800/60">
           <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6 px-4 sm:px-6">
-            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
-              <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-amber-100 flex items-center justify-center">
-                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" />
+            <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400" />
               </div>
               Customers with Pending Dues
-              <Badge className="ml-auto bg-amber-100 text-amber-700 border-amber-200 text-[10px] sm:text-xs">
+              <Badge className="ml-auto bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-[10px] sm:text-xs">
                 {summary.customerDues.length}
               </Badge>
             </CardTitle>
@@ -427,13 +427,13 @@ export default function PaymentsPage() {
               {summary.customerDues.slice(0, 6).map((due) => (
                 <div
                   key={due.customerId}
-                  className="flex items-center justify-between rounded-xl bg-white/80 backdrop-blur-sm p-3 border border-amber-100 shadow-sm shrink-0 w-[220px] sm:w-auto sm:shrink transition-all hover:shadow-md"
+                  className="flex items-center justify-between rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-3 border border-amber-100 dark:border-amber-900/50 shadow-sm shrink-0 w-[220px] sm:w-auto sm:shrink transition-all hover:shadow-md"
                 >
                   <div className="min-w-0 mr-3">
-                    <p className="text-sm font-medium text-gray-900 truncate">{due.customerName}</p>
-                    <p className="text-[11px] text-gray-500">{due.customerPhone}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{due.customerName}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{due.customerPhone}</p>
                   </div>
-                  <span className="text-sm font-bold text-amber-700 whitespace-nowrap bg-amber-50 px-2 py-0.5 rounded-lg">
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300 whitespace-nowrap bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-lg">
                     {formatPKR(due.totalDue)}
                   </span>
                 </div>
@@ -444,14 +444,14 @@ export default function PaymentsPage() {
       )}
 
       {/* ─── Filters ─── */}
-      <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-200/60 p-3 sm:p-4">
+      <div className="rounded-xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700 p-3 sm:p-4">
         <div className="flex flex-col gap-2.5 sm:gap-3">
           {/* Search - full width on all sizes */}
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
             <Input
               placeholder="Search by customer or invoice..."
-              className="pl-9 h-11 sm:h-10 bg-gray-50/80 border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:bg-white"
+              className="pl-9 h-11 sm:h-10 bg-gray-50/80 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 rounded-xl text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:bg-white dark:focus:bg-gray-800"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -481,7 +481,7 @@ export default function PaymentsPage() {
                 <SelectItem value="Cheque">Cheque</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap self-center sm:ml-auto">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap self-center sm:ml-auto">
               Showing {payments.length} payment{payments.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -492,18 +492,18 @@ export default function PaymentsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 dark:border-green-900/50 border-t-green-500 animate-spin" />
           </div>
-          <p className="text-sm text-gray-500">Loading payments...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading payments...</p>
         </div>
       ) : payments.length === 0 ? (
-        <Card className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60">
+        <Card className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700">
           <CardContent className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
-            <div className="h-16 w-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <CreditCard className="h-8 w-8 text-gray-300" />
+            <div className="h-16 w-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <CreditCard className="h-8 w-8 text-gray-300 dark:text-gray-600" />
             </div>
-            <p className="text-gray-600 text-base font-semibold">No payments found</p>
-            <p className="text-gray-400 text-sm mt-1">Record a payment to get started</p>
+            <p className="text-gray-600 dark:text-gray-400 text-base font-semibold">No payments found</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">Record a payment to get started</p>
             <Button
               onClick={() => setShowAddDialog(true)}
               className="mt-5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl h-11 px-5 shadow-sm shadow-green-200"
@@ -523,7 +523,7 @@ export default function PaymentsPage() {
             return (
               <Card
                 key={payment.id}
-                className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60 hover:ring-gray-300 hover:shadow-md transition-all cursor-pointer"
+                className="rounded-xl border-0 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700 hover:ring-gray-300 dark:hover:ring-gray-600 hover:shadow-md transition-all cursor-pointer"
                 onClick={() => { setSelectedPayment(payment); setShowDetailDialog(true) }}
               >
                 <CardContent className="p-3 sm:p-4">
@@ -537,24 +537,24 @@ export default function PaymentsPage() {
                     {/* Main info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
                           {payment.customer?.name || 'Unknown'}
                         </p>
                         {/* Amount - prominent on mobile */}
-                        <p className="font-bold text-gray-900 text-sm sm:text-base whitespace-nowrap">
+                        <p className="font-bold text-gray-900 dark:text-gray-100 text-sm sm:text-base whitespace-nowrap">
                           {formatPKR(payment.amount)}
                         </p>
                       </div>
 
                       <div className="flex items-center justify-between mt-1 gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="text-[11px] sm:text-xs text-gray-500">{payment.date}</span>
+                          <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">{payment.date}</span>
                           {/* Period & invoice hidden on mobile */}
                           {payment.period && (
-                            <span className="text-[11px] sm:text-xs text-gray-400 hidden sm:inline">• {payment.period}</span>
+                            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 hidden sm:inline">• {payment.period}</span>
                           )}
                           {payment.invoiceNumber && (
-                            <span className="text-[11px] sm:text-xs text-gray-400 hidden sm:inline">• {payment.invoiceNumber}</span>
+                            <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 hidden sm:inline">• {payment.invoiceNumber}</span>
                           )}
                         </div>
 
@@ -578,10 +578,10 @@ export default function PaymentsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 sm:h-8 sm:w-8 shrink-0 rounded-lg hover:bg-gray-100 -mr-1.5 sm:mr-0"
+                          className="h-10 w-10 sm:h-8 sm:w-8 shrink-0 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 -mr-1.5 sm:mr-0"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                          <MoreHorizontal className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-xl">
@@ -608,7 +608,7 @@ export default function PaymentsPage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={(e) => { e.stopPropagation(); openDeleteDialog(payment) }}
-                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete Payment
@@ -618,7 +618,7 @@ export default function PaymentsPage() {
                   </div>
 
                   {/* Mobile: Edit/Delete action buttons below card */}
-                  <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-gray-100 sm:hidden">
+                  <div className="flex gap-2 mt-2.5 pt-2.5 border-t border-gray-100 dark:border-gray-800 sm:hidden">
                     <Button
                       variant="outline"
                       size="sm"
@@ -631,7 +631,7 @@ export default function PaymentsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 h-9 text-xs rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      className="flex-1 h-9 text-xs rounded-lg text-red-600 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700"
                       onClick={(e) => { e.stopPropagation(); openDeleteDialog(payment) }}
                     >
                       <Trash2 className="h-3.5 w-3.5 mr-1.5" />
@@ -654,7 +654,7 @@ export default function PaymentsPage() {
           max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
           max-sm:p-0 max-sm:gap-0
         ">
-          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 dark:max-sm:border-gray-800 max-sm:sticky max-sm:top-0 max-sm:bg-white dark:max-sm:bg-gray-900 max-sm:z-10">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
                 <IndianRupee className="h-4 w-4 text-white" />
@@ -679,9 +679,9 @@ export default function PaymentsPage() {
               </Select>
             </div>
             {selectedCustomer && (
-              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-3 text-sm ring-1 ring-gray-100">
-                <p className="text-gray-600">
-                  Monthly Bill: <span className="font-bold text-gray-900">{formatPKR(selectedCustomer.monthlyBill)}</span>
+              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 p-3 text-sm ring-1 ring-gray-100 dark:ring-gray-700">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Monthly Bill: <span className="font-bold text-gray-900 dark:text-gray-100">{formatPKR(selectedCustomer.monthlyBill)}</span>
                 </p>
               </div>
             )}
@@ -742,7 +742,7 @@ export default function PaymentsPage() {
               />
             </div>
           </div>
-          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 max-sm:sticky max-sm:bottom-0 max-sm:bg-white max-sm:gap-2">
+          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 dark:max-sm:border-gray-800 max-sm:sticky max-sm:bottom-0 max-sm:bg-white dark:max-sm:bg-gray-900 max-sm:gap-2">
             <Button
               variant="outline"
               onClick={() => setShowAddDialog(false)}
@@ -771,7 +771,7 @@ export default function PaymentsPage() {
           max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
           max-sm:p-0 max-sm:gap-0
         ">
-          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 dark:max-sm:border-gray-800 max-sm:sticky max-sm:top-0 max-sm:bg-white dark:max-sm:bg-gray-900 max-sm:z-10">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
                 <Pencil className="h-4 w-4 text-white" />
@@ -782,15 +782,15 @@ export default function PaymentsPage() {
           {selectedPayment && (
             <div className="space-y-4 py-4 px-4 sm:px-0 overflow-y-auto flex-1 max-sm:pb-4">
               {/* Customer info (read-only) */}
-              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 p-3 text-sm ring-1 ring-gray-100">
+              <div className="rounded-xl bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 p-3 text-sm ring-1 ring-gray-100 dark:ring-gray-700">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-600">
-                    Customer: <span className="font-bold text-gray-900">{selectedPayment.customer?.name || 'Unknown'}</span>
+                  <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Customer: <span className="font-bold text-gray-900 dark:text-gray-100">{selectedPayment.customer?.name || 'Unknown'}</span>
                   </span>
                 </div>
                 {selectedPayment.invoiceNumber && (
-                  <p className="text-gray-400 text-xs mt-1">Invoice: {selectedPayment.invoiceNumber}</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Invoice: {selectedPayment.invoiceNumber}</p>
                 )}
               </div>
 
@@ -865,7 +865,7 @@ export default function PaymentsPage() {
               </div>
             </div>
           )}
-          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 max-sm:sticky max-sm:bottom-0 max-sm:bg-white max-sm:gap-2">
+          <DialogFooter className="max-sm:px-4 max-sm:py-3 max-sm:border-t max-sm:border-gray-100 dark:max-sm:border-gray-800 max-sm:sticky max-sm:bottom-0 max-sm:bg-white dark:max-sm:bg-gray-900 max-sm:gap-2">
             <Button
               variant="outline"
               onClick={() => setShowEditDialog(false)}
@@ -890,7 +890,7 @@ export default function PaymentsPage() {
         <AlertDialogContent className="rounded-xl max-sm:mx-4 max-sm:max-w-[calc(100vw-2rem)]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-950/50 flex items-center justify-center">
                 <Trash2 className="h-4 w-4 text-red-600" />
               </div>
               Delete Payment
@@ -926,7 +926,7 @@ export default function PaymentsPage() {
           max-sm:rounded-none max-sm:border-0 max-sm:flex max-sm:flex-col
           max-sm:p-0 max-sm:gap-0
         ">
-          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 max-sm:sticky max-sm:top-0 max-sm:bg-white max-sm:z-10">
+          <DialogHeader className="max-sm:px-4 max-sm:pt-4 max-sm:pb-2 max-sm:border-b max-sm:border-gray-100 dark:max-sm:border-gray-800 max-sm:sticky max-sm:top-0 max-sm:bg-white dark:max-sm:bg-gray-900 max-sm:z-10">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
                 <Receipt className="h-4 w-4 text-white" />
@@ -948,44 +948,44 @@ export default function PaymentsPage() {
                       <DStatusIcon className={`h-5 w-5 ${dsc.color}`} />
                       <span className={`font-semibold text-sm ${dsc.color}`}>{selectedPayment.status}</span>
                     </div>
-                    <span className="text-xl sm:text-2xl font-bold text-gray-900">{formatPKR(selectedPayment.amount)}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{formatPKR(selectedPayment.amount)}</span>
                   </div>
                 </div>
 
                 {/* Detail rows */}
-                <div className="divide-y divide-gray-100 rounded-xl ring-1 ring-gray-200/60 bg-white overflow-hidden">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-xl ring-1 ring-gray-200/60 dark:ring-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-gray-500">Customer</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Customer</span>
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <Users className="h-3.5 w-3.5 text-gray-500" />
+                      <div className="h-7 w-7 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <Users className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                       </div>
                       <span className="font-medium text-sm">{selectedPayment.customer?.name}</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-gray-500">Date</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Date</span>
                     <span className="text-sm font-medium">{selectedPayment.date}</span>
                   </div>
                   <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-gray-500">Method</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Method</span>
                     <Badge variant="outline" className={`${dmc.color} ${dmc.bg} border-0 text-xs`}>
                       <DMethodIcon className="h-3 w-3 mr-1" />
                       {selectedPayment.method}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-gray-500">Period</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Period</span>
                     <span className="text-sm font-medium">{selectedPayment.period || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-sm text-gray-500">Invoice #</span>
-                    <span className="text-sm font-mono bg-gray-50 px-2 py-0.5 rounded-md">{selectedPayment.invoiceNumber || '—'}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Invoice #</span>
+                    <span className="text-sm font-mono bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-md">{selectedPayment.invoiceNumber || '—'}</span>
                   </div>
                   {selectedPayment.notes && (
                     <div className="px-4 py-3">
-                      <span className="text-sm text-gray-500 block mb-1">Notes</span>
-                      <p className="text-sm bg-gray-50 rounded-xl p-3 ring-1 ring-gray-100">{selectedPayment.notes}</p>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 block mb-1">Notes</span>
+                      <p className="text-sm bg-gray-50 dark:bg-gray-800 rounded-xl p-3 ring-1 ring-gray-100 dark:ring-gray-700">{selectedPayment.notes}</p>
                     </div>
                   )}
                 </div>
@@ -1021,7 +1021,7 @@ export default function PaymentsPage() {
                       setShowDetailDialog(false)
                       setTimeout(() => openDeleteDialog(selectedPayment), 150)
                     }}
-                    className="rounded-xl h-11 sm:h-10 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 px-3"
+                    className="rounded-xl h-11 sm:h-10 text-red-600 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 px-3"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

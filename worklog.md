@@ -971,3 +971,225 @@ Stage Summary:
 - Toggle available in: Desktop header, Mobile header, Desktop sidebar, Settings page
 - Global CSS overrides ensure all page components automatically adapt to dark mode
 - No individual component changes needed - CSS handles color remapping
+
+---
+Task ID: 3-a
+Agent: dashboard-dark-mode-fixer
+Task: Add dark mode support to dashboard-page.tsx
+
+Work Log:
+- Added dark: variants to status badge functions (deliveryStatusConfig, paymentStatusConfig, paymentMethodBadge)
+- Added dark: variants to KPICard component (text-gray-500 → dark:text-gray-400, text-gray-900 → dark:text-gray-100)
+- Added dark: variants to SalesTooltip (bg-white/95 → dark:bg-gray-800/95, border-gray-200 → dark:border-gray-700, text-gray-500 → dark:text-gray-400, text-gray-400 → dark:text-gray-500)
+- Added dark: variants to all skeleton cards (border-gray-200 → dark:border-gray-700)
+- Added dark: variants to chart cards (border-gray-200 → dark:border-gray-700, text-gray-800 → dark:text-gray-200, text-gray-400 → dark:text-gray-500)
+- Added dark: variants to list items (border-gray-100 → dark:border-gray-800, bg-gray-50/50 → dark:bg-gray-800/30, hover:bg-gray-100 → dark:hover:bg-gray-700, text-gray-800 → dark:text-gray-200)
+- Added dark: variants to Today's Sales card (border-green-200 → dark:border-green-800, from-white → dark:from-gray-900, to-green-50/20 → dark:to-green-950/20)
+- Added dark: variants to page header (from-green-100 → dark:from-green-900, text-gray-900 → dark:text-gray-100, border-gray-200 → dark:border-gray-700)
+- Added dark: variants to error states (bg-red-50 → dark:bg-red-950/50, border-red-200 → dark:border-red-800, text-red-600 → dark:text-red-400)
+- Added dark: variants to KPI accent props (from-white → dark:from-gray-900, to-*-50/40 → dark:to-*-950/30, border-*-200/60 → dark:border-*-800/60)
+- Added dark: variants to gradient icon containers (from-green-100 → dark:from-green-900, to-emerald-100 → dark:to-emerald-900, etc.)
+- Added dark: variants to sale item cards (bg-white → dark:bg-gray-800, border-gray-100 → dark:border-gray-700)
+
+Stage Summary:
+- dashboard-page.tsx now fully supports dark mode
+- All text, background, border, and badge colors have dark: variants
+- Lint passes clean
+
+---
+Task ID: 3-b
+Agent: Subagent (dark-mode-styling)
+Task: Add dark mode support to leads-page.tsx
+
+Work Log:
+- Read full leads-page.tsx (1340+ lines) and analyzed all components
+- Added dark: classes to PIPELINE_STAGES constant — lightBg, badgeBg, badgeText, hoverBorder, overRing, cardBorder, cardBg for all 5 stages (New=blue, Contacted=amber, Trial=purple, Converted=green, Lost=red)
+- Added dark: variants to sourceBadgeClasses function — all 5 sources (Walk-in=emerald, Phone=sky, Referral=violet, Online=orange, Ad=pink) plus default gray
+- Added dark: variants to getStageColor function — all 5 stages plus default
+- SortableLeadCard: text-gray-900→dark:text-gray-100, text-gray-500→dark:text-gray-400, text-gray-700→dark:text-gray-300, text-gray-400→dark:text-gray-500, text-gray-300→dark:text-gray-600
+- DragOverlayCard: bg-white→dark:bg-gray-900, text-gray-900→dark:text-gray-100, text-gray-500→dark:text-gray-400
+- DroppableKanbanColumn: text-gray-800→dark:text-gray-200, text-gray-400→dark:text-gray-500, empty state border/bg dark variants
+- MobileLeadCard: bg-white→dark:bg-gray-900, border-gray-100→dark:border-gray-800, hover:border-gray-200→dark:hover:border-gray-700, all text colors dark variants
+- PipelineProgressBar: bg-gray-100→dark:bg-gray-800, text-gray-400→dark:text-gray-500
+- Page header: text-gray-900→dark:text-gray-100, text-gray-500→dark:text-gray-400
+- Loading state: text-gray-500→dark:text-gray-400
+- Mobile stats: bg-gray-50→dark:bg-gray-800, text-gray-900→dark:text-gray-100, text-gray-400→dark:text-gray-500, bg-green-50→dark:bg-green-950/50, bg-blue-50→dark:bg-blue-950/50
+- Search input: bg-white→dark:bg-gray-800, border-gray-200→dark:border-gray-700, clear button bg-gray-100→dark:bg-gray-700
+- Stage filter tabs: bg-white→dark:bg-gray-800, text-gray-600→dark:text-gray-300, border-gray-200→dark:border-gray-700 for All tab; bg-white→dark:bg-gray-800, text-gray-500→dark:text-gray-400, border-gray-100→dark:border-gray-700 for stage tabs
+- Filter card: border-gray-200/80→dark:border-gray-700, Label text-gray-500→dark:text-gray-400
+- Mobile empty state: bg-gray-50→dark:bg-gray-800/50, text-gray-300→dark:text-gray-600, text-gray-900→dark:text-gray-100, text-gray-500→dark:text-gray-400
+- Desktop stats: bg/icon colors dark variants (gray, green, blue, emerald), border-gray-200/80→dark:border-gray-700, text-gray-500→dark:text-gray-400
+- Desktop filters: border→dark:border-gray-700, text-gray-400/500/700 dark variants, Clear button dark variant
+- Desktop empty state: border→dark:border-gray-700, bg-gray-50→dark:bg-gray-800/50, text colors dark variants
+- Lead detail Sheet: info cards bg-gray-50→dark:bg-gray-800, text-gray-400/500/700/900 dark variants, Move to Stage label, action buttons border-red dark variants
+- Dialog form: border-gray-100→dark:border-gray-800 in header/footer, footer bg-white→dark:bg-gray-900
+- Convert dialog: bg-green-100→dark:bg-green-900, text-gray-900→dark:text-gray-100
+- Delete dialog: bg-red-100→dark:bg-red-900
+- Lint passes clean, dev server running fine
+
+Stage Summary:
+- Full dark mode support added to leads-page.tsx
+- All 19 key areas specified in requirements addressed
+- PIPELINE_STAGES, sourceBadgeClasses, getStageColor all have dark: variants inline
+- All components (SortableLeadCard, DragOverlayCard, DroppableKanbanColumn, MobileLeadCard, PipelineProgressBar) have dark: classes
+- All page sections (header, stats, search, filters, tabs, empty states, dialogs) have dark: classes
+- Zero functionality changes — all data logic preserved
+- Lint passes clean
+
+---
+Task ID: 3-e
+Agent: Subagent (dark-mode-expert)
+Task: Add dark mode support to payments-page.tsx
+
+Work Log:
+- Read full payments-page.tsx (1036 lines) and identified all areas needing dark: variants
+- Read worklog.md to understand previous agent work context
+- Added dark: variants to statusConfig constants: color (dark:text-{color}-300), bg (dark:bg-{color}-950), border (dark:border-{color}-800)
+- Added dark: variants to methodConfig constants: color (dark:text-{color}-300), bg (dark:bg-{color}-950/50)
+- Page header: text-gray-900 → dark:text-gray-100, text-gray-500 → dark:text-gray-400
+- Summary cards: 4 gradient cards updated with dark:from-{color}-950 dark:to-{color}-950, ring dark:ring-{color}-900/50, text-gray-500 → dark:text-gray-400, text-gray-900 → dark:text-gray-100
+- Customer dues section: gradient dark:from-amber-950 dark:via-orange-950 dark:to-amber-950, ring dark:ring-amber-800/60, icon bg dark:bg-amber-900/50, badge dark variants, due cards bg-white/80 → dark:bg-gray-900/80, border dark:border-amber-900/50, text colors, amount badge dark variants
+- Filter bar: bg-white → dark:bg-gray-900, ring dark:ring-gray-700, search input dark:bg-gray-800/50, dark:border-gray-700, dark:placeholder:text-gray-500, dark:focus:bg-gray-800, result count dark:text-gray-400
+- Payment cards: ring dark:ring-gray-700, hover dark:hover:ring-gray-600, all text-gray-900 → dark:text-gray-100, text-gray-500 → dark:text-gray-400, text-gray-400 → dark:text-gray-500, hover:bg-gray-100 → dark:hover:bg-gray-700, border-t dark:border-gray-800, delete button dark:border-red-800 dark:hover:bg-red-950
+- Loading state: border dark:border-green-900/50, text dark:text-gray-400
+- Empty state: ring dark:ring-gray-700, icon bg dark:bg-gray-800, text-gray-600 → dark:text-gray-400, text-gray-400 → dark:text-gray-500
+- Record Payment dialog: header dark:max-sm:border-gray-800 dark:max-sm:bg-gray-900, customer info dark:from-gray-800/50 dark:to-slate-800/50 dark:ring-gray-700 dark:text-gray-400 dark:text-gray-100, footer dark:max-sm:border-gray-800 dark:max-sm:bg-gray-900
+- Edit Payment dialog: same header/footer pattern, customer info same dark variants, invoice text dark:text-gray-500
+- Delete dialog: icon bg dark:bg-red-950/50
+- Payment detail dialog: header dark variants, amount text dark:text-gray-100, detail rows dark:divide-gray-800 dark:ring-gray-700 dark:bg-gray-900, icon bg dark:bg-gray-800, all label text dark:text-gray-400, invoice mono dark:bg-gray-800, notes dark:bg-gray-800 dark:ring-gray-700, delete button dark:border-red-800 dark:hover:bg-red-950
+- Dropdown menu: focus:bg-red-50 → dark:focus:bg-red-950 for delete item
+- Fixed accidental `}}` typos introduced by MultiEdit (lines 748, 871)
+- Lint passes clean
+- All data fetching logic, types, event handlers, and API calls preserved exactly
+
+Stage Summary:
+- Full dark mode support added to payments-page.tsx
+- 10 key areas covered: statusConfig/methodConfig, header, summary cards, customer dues, filter bar, payment cards, loading/empty states, add/edit dialogs, delete dialog, detail dialog
+- All color mappings follow the spec: text-gray-900→dark:text-gray-100, bg-white→dark:bg-gray-900, border-gray-200→dark:border-gray-700, etc.
+- Badge/status colors follow spec: bg-emerald-50→dark:bg-emerald-950, text-emerald-700→dark:text-emerald-300, etc.
+- Gradients follow spec: from-emerald-50 to-green-50→dark:from-emerald-950 dark:to-green-950
+- Mobile dialog headers/footers use dark:max-sm: prefix for proper stacking with responsive variants
+- Zero functionality changes — all data logic preserved
+
+---
+Task ID: 3-f
+Agent: Subagent (dark-mode-expert)
+Task: Add dark mode support to inventory-page.tsx
+
+Work Log:
+- Read existing inventory-page.tsx (1503 lines) and analyzed all components
+- Added dark: variants to categoryConfig constant for all 7 categories (Milk, Yogurt, Butter, Cream, Eggs, Paneer, Other) — color, bg, border classes
+- Page header: icon gradient bg (dark:from-green-900 dark:to-emerald-900), icon color, title text-gray-900→dark:text-gray-100, subtitle text-gray-500→dark:text-gray-400, Categories button border
+- Summary cards: border-gray-200→dark:border-gray-700, gradients from-white→dark:from-gray-900, to-*-50/30→dark:to-*-950/30, icon bg→dark:*-900/50, icon color→dark:*-400, label text→dark:text-gray-400, value text→dark:text-gray-100
+- Filter/search bar: card border, search icon, input bg-gray-50→dark:bg-gray-800 + border, item count text, status filter pills bg-gray-100→dark:bg-gray-800 + text + hover + active, mobile count text
+- Category tabs: inactive tabs bg-white→dark:bg-gray-800, text-gray-600→dark:text-gray-300, hover→dark:hover:bg-gray-700, border→dark:border-gray-700
+- Mobile inventory cards: border→dark:border-gray-700, bg-white→dark:bg-gray-900, selected bg→dark:bg-green-950/30, checkbox border→dark:border-gray-600, name→dark:text-gray-100, inactive badge→dark:bg-gray-800 dark:text-gray-400, price/today stats text colors, separator dots
+- Desktop inventory cards: border→dark:border-gray-700, name→dark:text-gray-100, status badge bg/text, price text, today's sale section bg→dark:bg-gray-800/50, label/value text colors, revenue text→dark:text-green-400
+- Bulk action bar: bg-white/95→dark:bg-gray-900/95, border→dark:border-gray-700, icon bg→dark:bg-green-900/50, selected count text, all action buttons (mobile + desktop) text/border/hover colors, separator line
+- Empty state: card border, icon bg→dark:bg-gray-800, icon color, title/subtitle text
+- Add Item dialog: icon bg→dark:bg-green-900/50, icon color
+- Edit Item dialog: icon bg→dark:bg-green-900/50, icon color
+- Record Sale dialog: icon bg, product info card bg→dark:bg-gray-800/50, text colors, customer select error state border/bg, total amount card bg→dark:bg-green-950/50 + border→dark:border-green-800, total label→dark:text-gray-300
+- Sales History dialog: icon bg, empty state icon bg/color/text, sale items border/bg/text colors, revenue text
+- Manage Categories dialog: icon bg, empty state, category list items border/bg, category name text, edit/save/cancel/delete button colors
+- All red action buttons (delete): text-red→dark:text-red-400, hover→dark:hover:text-red-300, hover:bg-red-50→dark:hover:bg-red-950/50, border→dark:border-red-800
+- Fixed stray `}` typo introduced during edit (line 848 double closing brace)
+- Lint passes clean
+- Dev server running fine
+
+Stage Summary:
+- Full dark mode support added to inventory-page.tsx
+- All 11 key areas covered: categoryConfig, header, summary cards, filter bar, category tabs, mobile/desktop cards, bulk action bar, empty states, all 5 dialogs
+- Applied consistent dark mode mapping rules throughout
+- Zero functionality changes — all data logic preserved
+
+---
+Task ID: 3-d
+Agent: Subagent (dark-mode-stylist)
+Task: Add dark mode support to deliveries-page.tsx
+
+Work Log:
+- Read worklog.md to understand previous agent work
+- Read full deliveries-page.tsx (1558 lines) and identified all areas needing dark: Tailwind classes
+- Added dark variants to PRODUCT_COLORS constant (8 products: Milk, Yogurt, Butter, Cream, Eggs, Paneer, Ghee, Other)
+  - bg: bg-{color}-50 → dark:bg-{color}-950
+  - text: text-{color}-700 → dark:text-{color}-300
+  - border: border-{color}-200 → dark:border-{color}-800
+- Added dark variants to getStatusBadge function (4 statuses: Pending, Delivered, Missed, Cancelled)
+  - Pending: dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800
+  - Delivered: dark:bg-green-950 dark:text-green-300 dark:border-green-800
+  - Missed: dark:bg-red-950 dark:text-red-300 dark:border-red-800
+  - Cancelled: dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700
+- Added dark mode to page header: icon gradient dark:from-green-900/50 dark:to-emerald-900/50, text-gray-900 → dark:text-gray-100, text-gray-500 → dark:text-gray-400
+- Added dark mode to vacation banner: bg-amber-50 → dark:bg-amber-950/50, border → dark:border-amber-800, text colors, icon bg, dismiss button
+- Added dark mode to all 5 summary stat cards: border-gray-200 → dark:border-gray-700, icon backgrounds, text-gray-900 → dark:text-gray-100, text-gray-500 → dark:text-gray-400
+- Added dark mode to revenue/extra count row: bg-emerald-50 → dark:bg-emerald-950/50, bg-amber-50 → dark:bg-amber-950/50, text colors, borders
+- Added dark mode to Generate button: border-green-300 → dark:border-green-700, hover states
+- Added dark mode to loading/empty states: borders, bg-gray-100 → dark:bg-gray-800, text colors, Generate button
+- Added dark mode to route group headers: bg-gray-50 → dark:bg-gray-800/50, borders, hover/active states, icon bg, text-gray-800 → dark:text-gray-200, pending badge, chevron
+- Added dark mode to delivery cards: divide-gray-100 → dark:divide-gray-800, customer avatar bg/text, name text, meta text, bg-white → dark:bg-gray-900, border-gray-100 → dark:border-gray-800, Extra badge, price text, notes button, action buttons (Delivered/Missed/Retry), Cancel button
+- Added dark mode to record extra dialog/form: customer info box (bg-green-50 → dark:bg-green-950/50, bg-green-100 → dark:bg-green-950), total amount box (bg-amber-50 → dark:bg-amber-950/50), dialog icon bg
+- Added dark mode to vacation customers section: bg-amber-50/50 → dark:bg-amber-950/30, border → dark:border-amber-800, text colors, vacation badges
+- Total: 87 dark: Tailwind classes added across all areas
+- Lint passes clean, dev server running fine
+
+Stage Summary:
+- Deliveries page fully supports dark mode with 87 dark: Tailwind variants
+- All 12 key areas covered: PRODUCT_COLORS, getStatusBadge, page header, vacation banner, summary stats, revenue row, filter buttons, loading/empty states, route groups, delivery cards, record extra dialog, vacation customers section
+- Color mapping follows spec: bg-{color}-50 → dark:bg-{color}-950, text-{color}-700 → dark:text-{color}-300, border-{color}-200 → dark:border-{color}-800
+- Icon backgrounds: bg-green-100 → dark:bg-green-950/50, bg-amber-100 → dark:bg-amber-900/50
+- Zero functionality changes — all data logic preserved
+
+---
+Task ID: 3-c
+Agent: Subagent (dark-mode-expert)
+Task: Add dark mode support to customers-page.tsx
+
+Work Log:
+- Read worklog.md for context on previous changes
+- Read full customers-page.tsx file (2433 lines) to identify all light-only color classes
+- Applied systematic dark mode variants using global replace_all for safe patterns:
+  - text-gray-900 → dark:text-gray-100 (all instances)
+  - text-gray-700 → dark:text-gray-300 (all instances)
+  - text-gray-600 → dark:text-gray-400 (all instances)
+  - text-gray-500 → dark:text-gray-400 (all instances)
+  - text-gray-400 → dark:text-gray-500 (all instances)
+  - text-gray-300 → dark:text-gray-600 (all instances)
+  - border-gray-200/80 → dark:border-gray-700 (all instances)
+  - border-gray-100 → dark:border-gray-800 (all instances)
+  - bg-gray-100 → dark:bg-gray-800 (all instances)
+  - hover:bg-gray-50 → dark:hover:bg-gray-800 (all instances)
+  - hover:bg-gray-100 → dark:hover:bg-gray-700 (all instances)
+- Fixed cascading replacement duplicates (dark:text-gray-400 dark:text-gray-500 → dark:text-gray-400, etc.)
+- Fixed hover:text patterns that incorrectly got dark:text instead of dark:hover:text
+- Applied targeted dark mode edits for specific components:
+  - Page header: shadow-green-200 → dark:shadow-green-900/30
+  - Summary stat cards: icon bgs (bg-gray-100 → dark:bg-gray-800, bg-green-50 → dark:bg-green-950/50, bg-amber-50 → dark:bg-amber-950/50, bg-emerald-50 → dark:bg-emerald-950/50), accent gradient bar
+  - Filter bar: border-gray-200 on inputs/selects → dark:border-gray-700
+  - Mobile customer list: bg-white → dark:bg-gray-900, selection states with dark variants
+  - Desktop customer cards: gradient bar dark variants, badge colors
+  - Bulk action bar: bg-white/95 → dark:bg-gray-900/95, border-gray-200 → dark:border-gray-700
+  - Detail dialog: header border, all overview tab cards (bg-gray-50 → dark:bg-gray-800/50), milk plan card (gradient + border dark variants), vacation banner, current month summary cards, quick stats, notes
+  - Products tab: primary milk plan card, product list items, empty state
+  - Vacations tab: vacation cards with conditional dark variants (active/upcoming/past), vacation badges, info note
+  - Ledger tab: mobile card entries, desktop table (header, rows, footer), summary cards (debit/credit/balance gradients)
+  - Badge colors: green/amber status badges → dark:bg-*-950 dark:text-*-300 dark:border-*-800; blue/purple/orange secondary badges; amber/blue vacation badges; purple sale badge
+  - Form dialogs: vacation form, product form, edit product form, add/edit customer form - all input borders, footer bg-white → dark:bg-gray-900
+  - Icon backgrounds: bg-green-100 → dark:bg-green-900/50, bg-amber-100 → dark:bg-amber-900/50
+  - Colored text: text-amber-800 → dark:text-amber-200, text-green-800 → dark:text-green-200, text-emerald-800 → dark:text-emerald-200, text-green-700 → dark:text-green-300, text-red-700 → dark:text-red-300, text-emerald-700 → dark:text-emerald-300
+  - Colored borders: border-green-100 → dark:border-green-900, border-emerald-100 → dark:border-emerald-900, border-blue-100 → dark:border-blue-900
+  - Gradient backgrounds: all from-*-50 to-*-50 gradients got dark:from-*-950 dark:to-*-950 variants
+  - Colored button hovers: hover:bg-green-50 → dark:hover:bg-green-950/50, hover:bg-amber-50 → dark:hover:bg-amber-950/50, hover:bg-red-50 → dark:hover:bg-red-950/50, hover:bg-emerald-50 → dark:hover:bg-emerald-950/50
+  - Selected card states: bg-green-50/60 → dark:bg-green-950/60, bg-green-50/30 → dark:bg-green-950/30, border-green-300 → dark:border-green-700
+  - Monthly bill preview gradient: dark variants
+  - Ledger balance ternary colors: all got dark: variants
+- Verified no duplicate dark: classes remain
+- Lint passes clean
+- Dev server running without errors
+
+Stage Summary:
+- Full dark mode support added to customers-page.tsx (2433 lines)
+- All 12 key areas fixed: page header, summary stats, filter bar, mobile list, desktop cards, detail dialog (all tabs), add/edit form, delete dialog, vacation form, product form, bulk action bar, empty states
+- Systematic approach: global replace_all for safe patterns + targeted edits for complex cases
+- Zero functionality changes — all data logic preserved
+- Lint passes clean

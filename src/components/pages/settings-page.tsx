@@ -132,12 +132,12 @@ interface TabDef {
 }
 
 const SETTINGS_TABS: TabDef[] = [
-  { id: 'general', label: 'General', mobileLabel: 'General', icon: Store, color: 'text-green-600', bgLight: 'bg-green-100', description: 'Shop info, hours & account' },
-  { id: 'delivery', label: 'Delivery', mobileLabel: 'Delivery', icon: Truck, color: 'text-amber-600', bgLight: 'bg-amber-100', description: 'Routes, areas & schedules' },
-  { id: 'products', label: 'Products & Pricing', mobileLabel: 'Products', icon: Milk, color: 'text-sky-600', bgLight: 'bg-sky-100', description: 'Milk types, categories & pricing' },
-  { id: 'staff', label: 'Staff', mobileLabel: 'Staff', icon: Users, color: 'text-purple-600', bgLight: 'bg-purple-100', description: 'Manage team members' },
-  { id: 'notifications', label: 'Notifications', mobileLabel: 'Alerts', icon: Bell, color: 'text-orange-600', bgLight: 'bg-orange-100', description: 'Alert preferences' },
-  { id: 'data', label: 'Data & Backup', mobileLabel: 'Data', icon: Database, color: 'text-cyan-600', bgLight: 'bg-cyan-100', description: 'Export, backup & reset' },
+  { id: 'general', label: 'General', mobileLabel: 'General', icon: Store, color: 'text-green-600', bgLight: 'bg-green-100 dark:bg-green-900/50', description: 'Shop info, hours & account' },
+  { id: 'delivery', label: 'Delivery', mobileLabel: 'Delivery', icon: Truck, color: 'text-amber-600', bgLight: 'bg-amber-100 dark:bg-amber-900/50', description: 'Routes, areas & schedules' },
+  { id: 'products', label: 'Products & Pricing', mobileLabel: 'Products', icon: Milk, color: 'text-sky-600', bgLight: 'bg-sky-100 dark:bg-sky-900/50', description: 'Milk types, categories & pricing' },
+  { id: 'staff', label: 'Staff', mobileLabel: 'Staff', icon: Users, color: 'text-purple-600', bgLight: 'bg-purple-100 dark:bg-purple-900/50', description: 'Manage team members' },
+  { id: 'notifications', label: 'Notifications', mobileLabel: 'Alerts', icon: Bell, color: 'text-orange-600', bgLight: 'bg-orange-100 dark:bg-orange-900/50', description: 'Alert preferences' },
+  { id: 'data', label: 'Data & Backup', mobileLabel: 'Data', icon: Database, color: 'text-cyan-600', bgLight: 'bg-cyan-100 dark:bg-cyan-900/50', description: 'Export, backup & reset' },
 ]
 
 // ── Theme Toggle Sub-Component ────────────────────────────────────────────
@@ -623,7 +623,7 @@ export default function SettingsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-gray-500">Loading settings...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading settings...</p>
         </div>
       </div>
     )
@@ -634,50 +634,50 @@ export default function SettingsPage() {
   const renderGeneralTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Shop Info */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-green-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-950/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-green-100 shadow-sm">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/50 shadow-sm">
               <Store className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Shop Information</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Basic details about your dairy shop</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Shop Information</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Basic details about your dairy shop</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="shopName" className="text-xs md:text-sm font-medium text-gray-700">Shop Name</Label>
+              <Label htmlFor="shopName" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Shop Name</Label>
               <Input id="shopName" placeholder="Enter shop name" value={settings.shopName} onChange={(e) => updateField('shopName', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="shopPhone" className="text-xs md:text-sm font-medium text-gray-700">Phone Number</Label>
+              <Label htmlFor="shopPhone" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</Label>
               <Input id="shopPhone" placeholder="0300-1234567" value={settings.shopPhone} onChange={(e) => updateField('shopPhone', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="shopAddress" className="text-xs md:text-sm font-medium text-gray-700">Address</Label>
+            <Label htmlFor="shopAddress" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Address</Label>
             <Textarea id="shopAddress" placeholder="Enter shop address" value={settings.shopAddress} onChange={(e) => updateField('shopAddress', e.target.value)} className="rounded-lg border-gray-200 min-h-[72px] md:min-h-[80px] resize-none" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="shopEmail" className="text-xs md:text-sm font-medium text-gray-700">Email</Label>
+            <Label htmlFor="shopEmail" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Email</Label>
             <Input id="shopEmail" type="email" placeholder="shop@example.com" value={settings.shopEmail} onChange={(e) => updateField('shopEmail', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
           </div>
         </CardContent>
       </Card>
 
       {/* Appearance / Theme */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 shadow-sm">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/50 shadow-sm">
               <Sun className="h-4 w-4 text-violet-600" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Appearance</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Choose light or dark theme</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Appearance</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Choose light or dark theme</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -688,49 +688,49 @@ export default function SettingsPage() {
 
       {/* Business Hours & Pricing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 shadow-sm">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50 shadow-sm">
                 <Clock className="h-4 w-4 text-amber-600" />
               </div>
               <div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Business Hours</CardTitle>
-                <CardDescription className="text-[11px] md:text-xs text-gray-500">Shop operating schedule</CardDescription>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Business Hours</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Shop operating schedule</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="businessHours" className="text-xs md:text-sm font-medium text-gray-700">Operating Hours</Label>
+              <Label htmlFor="businessHours" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Operating Hours</Label>
               <Input id="businessHours" placeholder="6:00 AM - 10:00 PM" value={settings.businessHours} onChange={(e) => updateField('businessHours', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
-              <p className="text-[10px] md:text-[11px] text-gray-400">Format: 6:00 AM - 10:00 PM</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400 dark:text-gray-500">Format: 6:00 AM - 10:00 PM</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-emerald-50/50 to-transparent">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-950/30">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-emerald-100 shadow-sm">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50 shadow-sm">
                 <IndianRupee className="h-4 w-4 text-emerald-600" />
               </div>
               <div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Default Pricing</CardTitle>
-                <CardDescription className="text-[11px] md:text-xs text-gray-500">Base milk price & currency</CardDescription>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Default Pricing</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Base milk price & currency</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
             <div className="space-y-1.5">
-              <Label htmlFor="defaultMilkPrice" className="text-xs md:text-sm font-medium text-gray-700">Default Milk Price / Liter (PKR)</Label>
+              <Label htmlFor="defaultMilkPrice" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Default Milk Price / Liter (PKR)</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₨</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500">₨</span>
                 <Input id="defaultMilkPrice" type="number" placeholder="60" value={settings.defaultMilkPrice} onChange={(e) => updateField('defaultMilkPrice', e.target.value)} className="rounded-lg border-gray-200 pl-8 h-10 md:h-auto" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="currency" className="text-xs md:text-sm font-medium text-gray-700">Currency</Label>
+              <Label htmlFor="currency" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Currency</Label>
               <Input id="currency" placeholder="PKR" value={settings.currency} onChange={(e) => updateField('currency', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
             </div>
           </CardContent>
@@ -738,15 +738,15 @@ export default function SettingsPage() {
       </div>
 
       {/* Account */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-gray-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-800/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-gray-100 shadow-sm">
-              <User className="h-4 w-4 text-gray-600" />
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
+              <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Account</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Your profile & account settings</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Account</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Your profile & account settings</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -756,12 +756,12 @@ export default function SettingsPage() {
               <Milk className="h-5 w-5 md:h-6 md:w-6 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900">{settings.shopName || 'DairyFlow Admin'}</p>
-              <p className="text-xs text-gray-500 truncate">{settings.shopEmail || 'admin@dairyflow.com'}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{settings.shopName || 'DairyFlow Admin'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{settings.shopEmail || 'admin@dairyflow.com'}</p>
             </div>
           </div>
           <Separator />
-          <Button variant="outline" onClick={() => toast.success('Logged out')} className="w-full h-11 md:h-10 rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 min-h-[44px]">
+          <Button variant="outline" onClick={() => toast.success('Logged out')} className="w-full h-11 md:h-10 rounded-lg border-gray-200 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 min-h-[44px]">
             <LogOut className="h-4 w-4 mr-2" />
             Logout
           </Button>
@@ -773,36 +773,36 @@ export default function SettingsPage() {
   const renderDeliveryTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Delivery Settings */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 shadow-sm">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50 shadow-sm">
               <Truck className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Delivery Configuration</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Charges & cutoff times</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Delivery Configuration</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Charges & cutoff times</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6 pb-4 md:pb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="deliveryCharge" className="text-xs md:text-sm font-medium text-gray-700">Delivery Charge (PKR)</Label>
+              <Label htmlFor="deliveryCharge" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Delivery Charge (PKR)</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₨</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500">₨</span>
                 <Input id="deliveryCharge" type="number" placeholder="50" value={settings.deliveryCharge} onChange={(e) => updateField('deliveryCharge', e.target.value)} className="rounded-lg border-gray-200 pl-8 h-10 md:h-auto" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="morningCutoff" className="text-xs md:text-sm font-medium text-gray-700">Morning Cutoff</Label>
+              <Label htmlFor="morningCutoff" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Morning Cutoff</Label>
               <Input id="morningCutoff" placeholder="07:00 AM" value={settings.morningCutoff} onChange={(e) => updateField('morningCutoff', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
-              <p className="text-[10px] md:text-[11px] text-gray-400">After this → evening delivery</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400 dark:text-gray-500">After this → evening delivery</p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="eveningCutoff" className="text-xs md:text-sm font-medium text-gray-700">Evening Cutoff</Label>
+              <Label htmlFor="eveningCutoff" className="text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300">Evening Cutoff</Label>
               <Input id="eveningCutoff" placeholder="06:00 PM" value={settings.eveningCutoff} onChange={(e) => updateField('eveningCutoff', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
-              <p className="text-[10px] md:text-[11px] text-gray-400">After this → next day</p>
+              <p className="text-[10px] md:text-[11px] text-gray-400 dark:text-gray-500">After this → next day</p>
             </div>
           </div>
         </CardContent>
@@ -811,16 +811,16 @@ export default function SettingsPage() {
       {/* Areas & Delivery Times side by side on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Areas */}
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-rose-50/50 to-transparent">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-rose-50/50 to-transparent dark:from-rose-950/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-rose-100 shadow-sm">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/50 shadow-sm">
                   <MapPin className="h-4 w-4 text-rose-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Delivery Areas</CardTitle>
-                  <CardDescription className="text-[11px] md:text-xs text-gray-500">{areas.length} area{areas.length !== 1 ? 's' : ''} configured</CardDescription>
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Delivery Areas</CardTitle>
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{areas.length} area{areas.length !== 1 ? 's' : ''} configured</CardDescription>
                 </div>
               </div>
               <Button variant="outline" size="sm" onClick={openAddArea} className="h-8 md:h-9 text-xs border-rose-200 text-rose-600 hover:bg-rose-50 min-w-[44px] md:min-w-0">
@@ -833,7 +833,7 @@ export default function SettingsPage() {
             {areasLoading ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-rose-500" /></div>
             ) : areas.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
                 <MapPin className="h-8 w-8 mb-2" />
                 <p className="text-sm">No areas added yet</p>
                 <p className="text-xs">Tap &quot;+&quot; to get started</p>
@@ -841,18 +841,18 @@ export default function SettingsPage() {
             ) : (
               <div className="space-y-1.5 md:space-y-2 max-h-72 md:max-h-80 overflow-y-auto">
                 {areas.map((area) => (
-                  <div key={area.id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]">
+                  <div key={area.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2 md:p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors min-h-[44px]">
                     <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-rose-100 shrink-0">
+                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/50 shrink-0">
                         <MapPin className="h-3 w-3 md:h-3.5 md:w-3.5 text-rose-600" />
                       </div>
-                      <p className="text-sm font-medium text-gray-900 truncate">{area.name}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{area.name}</p>
                     </div>
                     <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => openEditArea(area)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                      <Button variant="ghost" size="sm" onClick={() => openEditArea(area)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteArea(area.id)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteArea(area.id)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -864,16 +864,16 @@ export default function SettingsPage() {
         </Card>
 
         {/* Delivery Times */}
-        <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-teal-50/50 to-transparent">
+        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-teal-50/50 to-transparent dark:from-teal-950/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-teal-100 shadow-sm">
+                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/50 shadow-sm">
                   <Clock className="h-4 w-4 text-teal-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Delivery Times</CardTitle>
-                  <CardDescription className="text-[11px] md:text-xs text-gray-500">{deliveryTimes.length} slot{deliveryTimes.length !== 1 ? 's' : ''} configured</CardDescription>
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Delivery Times</CardTitle>
+                  <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{deliveryTimes.length} slot{deliveryTimes.length !== 1 ? 's' : ''} configured</CardDescription>
                 </div>
               </div>
               <Button variant="outline" size="sm" onClick={openAddDeliveryTime} className="h-8 md:h-9 text-xs border-teal-200 text-teal-600 hover:bg-teal-50 min-w-[44px] md:min-w-0">
@@ -886,7 +886,7 @@ export default function SettingsPage() {
             {deliveryTimesLoading ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-teal-500" /></div>
             ) : deliveryTimes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-8 text-gray-400 dark:text-gray-500">
                 <Clock className="h-8 w-8 mb-2" />
                 <p className="text-sm">No delivery times added yet</p>
                 <p className="text-xs">Tap &quot;+&quot; to get started</p>
@@ -894,18 +894,18 @@ export default function SettingsPage() {
             ) : (
               <div className="space-y-1.5 md:space-y-2 max-h-72 md:max-h-80 overflow-y-auto">
                 {deliveryTimes.map((dt) => (
-                  <div key={dt.id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]">
+                  <div key={dt.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2 md:p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors min-h-[44px]">
                     <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-teal-100 shrink-0">
+                      <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/50 shrink-0">
                         <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 text-teal-600" />
                       </div>
-                      <p className="text-sm font-medium text-gray-900 truncate">{dt.name}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{dt.name}</p>
                     </div>
                     <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
-                      <Button variant="ghost" size="sm" onClick={() => openEditDeliveryTime(dt)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                      <Button variant="ghost" size="sm" onClick={() => openEditDeliveryTime(dt)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteDeliveryTime(dt.id)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteDeliveryTime(dt.id)} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -922,16 +922,16 @@ export default function SettingsPage() {
   const renderProductsTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Milk Types - Full Width */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-sky-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-sky-50/50 to-transparent dark:from-sky-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-sky-100 shadow-sm">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/50 shadow-sm">
                 <Milk className="h-4 w-4 text-sky-600" />
               </div>
               <div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Milk Types & Pricing</CardTitle>
-                <CardDescription className="text-[11px] md:text-xs text-gray-500">{milkTypes.length} type{milkTypes.length !== 1 ? 's' : ''} · Manage products and their rates</CardDescription>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Milk Types & Pricing</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{milkTypes.length} type{milkTypes.length !== 1 ? 's' : ''} · Manage products and their rates</CardDescription>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={openAddMilkType} className="h-8 md:h-9 text-xs border-sky-200 text-sky-600 hover:bg-sky-50 min-w-[44px] md:min-w-0">
@@ -944,12 +944,12 @@ export default function SettingsPage() {
           {milkTypesLoading ? (
             <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-sky-500" /></div>
           ) : milkTypes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-50 mb-3">
                 <Milk className="h-8 w-8 text-sky-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">No milk types added yet</p>
-              <p className="text-xs text-gray-400 mt-1">Add your first milk type to get started</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No milk types added yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Add your first milk type to get started</p>
               <Button variant="outline" size="sm" onClick={openAddMilkType} className="mt-4 h-9 text-xs border-sky-200 text-sky-600 hover:bg-sky-50">
                 <Plus className="h-3.5 w-3.5 mr-1.5" />Add Milk Type
               </Button>
@@ -957,25 +957,25 @@ export default function SettingsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {milkTypes.map((mt) => (
-                <div key={mt.id} className="group relative flex flex-col rounded-xl border border-gray-100 p-4 hover:border-sky-200 hover:bg-sky-50/30 transition-all min-h-[100px]">
+                <div key={mt.id} className="group relative flex flex-col rounded-xl border border-gray-100 dark:border-gray-800 p-4 hover:border-sky-200 hover:bg-sky-50/30 transition-all min-h-[100px]">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-900/50 shrink-0">
                       <Milk className="h-5 w-5 text-sky-600" />
                     </div>
                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="sm" onClick={() => openEditMilkType(mt)} className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-white">
+                      <Button variant="ghost" size="sm" onClick={() => openEditMilkType(mt)} className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400 hover:bg-white">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteMilkType(mt.id)} className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteMilkType(mt.id)} className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-900">{mt.name}</p>
-                  <p className="text-lg font-bold text-sky-600 mt-1">₨ {mt.pricePerLiter.toLocaleString()}<span className="text-xs font-normal text-gray-400">/liter</span></p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{mt.name}</p>
+                  <p className="text-lg font-bold text-sky-600 mt-1">₨ {mt.pricePerLiter.toLocaleString()}<span className="text-xs font-normal text-gray-400 dark:text-gray-500">/liter</span></p>
                   {/* Mobile edit/delete always visible */}
                   <div className="flex items-center gap-1 mt-3 sm:hidden">
-                    <Button variant="outline" size="sm" onClick={() => openEditMilkType(mt)} className="h-8 flex-1 text-xs border-gray-200">
+                    <Button variant="outline" size="sm" onClick={() => openEditMilkType(mt)} className="h-8 flex-1 text-xs border-gray-200 dark:border-gray-700">
                       <Pencil className="h-3 w-3 mr-1" />Edit
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleDeleteMilkType(mt.id)} className="h-8 flex-1 text-xs border-red-200 text-red-600">
@@ -990,16 +990,16 @@ export default function SettingsPage() {
       </Card>
 
       {/* Categories - Full Width */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 shadow-sm">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/50 shadow-sm">
                 <Package className="h-4 w-4 text-violet-600" />
               </div>
               <div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Categories</CardTitle>
-                <CardDescription className="text-[11px] md:text-xs text-gray-500">{categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} · Organize your products</CardDescription>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Categories</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} · Organize your products</CardDescription>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={openAddCategory} className="h-8 md:h-9 text-xs border-violet-200 text-violet-600 hover:bg-violet-50 min-w-[44px] md:min-w-0">
@@ -1012,12 +1012,12 @@ export default function SettingsPage() {
           {categoriesLoading ? (
             <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-violet-500" /></div>
           ) : categories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50 mb-3">
                 <Package className="h-8 w-8 text-violet-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">No categories added yet</p>
-              <p className="text-xs text-gray-400 mt-1">Add your first category to organize products</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No categories added yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Add your first category to organize products</p>
               <Button variant="outline" size="sm" onClick={openAddCategory} className="mt-4 h-9 text-xs border-violet-200 text-violet-600 hover:bg-violet-50">
                 <Plus className="h-3.5 w-3.5 mr-1.5" />Add Category
               </Button>
@@ -1025,25 +1025,25 @@ export default function SettingsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {categories.map((cat) => (
-                <div key={cat.id} className="group relative flex flex-col rounded-xl border border-gray-100 p-4 hover:border-violet-200 hover:bg-violet-50/30 transition-all min-h-[100px]">
+                <div key={cat.id} className="group relative flex flex-col rounded-xl border border-gray-100 dark:border-gray-800 p-4 hover:border-violet-200 hover:bg-violet-50/30 transition-all min-h-[100px]">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/50 shrink-0">
                       <Package className="h-5 w-5 text-violet-600" />
                     </div>
                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="sm" onClick={() => openEditCategory(cat)} className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-white">
+                      <Button variant="ghost" size="sm" onClick={() => openEditCategory(cat)} className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400 hover:bg-white">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteCategory(cat.id)} className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteCategory(cat.id)} className="h-8 w-8 p-0 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-900">{cat.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{cat.name}</p>
                   <p className="text-xs text-violet-500 mt-1">Product category</p>
                   {/* Mobile edit/delete always visible */}
                   <div className="flex items-center gap-1 mt-3 sm:hidden">
-                    <Button variant="outline" size="sm" onClick={() => openEditCategory(cat)} className="h-8 flex-1 text-xs border-gray-200">
+                    <Button variant="outline" size="sm" onClick={() => openEditCategory(cat)} className="h-8 flex-1 text-xs border-gray-200 dark:border-gray-700">
                       <Pencil className="h-3 w-3 mr-1" />Edit
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleDeleteCategory(cat.id)} className="h-8 flex-1 text-xs border-red-200 text-red-600">
@@ -1061,16 +1061,16 @@ export default function SettingsPage() {
 
   const renderStaffTab = () => (
     <div className="space-y-4 md:space-y-6">
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-purple-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-purple-100 shadow-sm">
+              <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/50 shadow-sm">
                 <Users className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Team Members</CardTitle>
-                <CardDescription className="text-[11px] md:text-xs text-gray-500">{SAMPLE_STAFF.length} member{SAMPLE_STAFF.length !== 1 ? 's' : ''} · Delivery & warehouse staff</CardDescription>
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Team Members</CardTitle>
+                <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{SAMPLE_STAFF.length} member{SAMPLE_STAFF.length !== 1 ? 's' : ''} · Delivery & warehouse staff</CardDescription>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={() => toast.info('Feature coming soon')} className="h-8 md:h-9 text-xs border-purple-200 text-purple-600 hover:bg-purple-50 min-w-[44px] md:min-w-0">
@@ -1083,7 +1083,7 @@ export default function SettingsPage() {
           <div className="space-y-1.5 md:space-y-2">
             {SAMPLE_STAFF.map((staff, index) => (
               <div key={staff.id}>
-                <div className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2.5 md:p-3 hover:bg-gray-50 transition-colors min-h-[44px]">
+                <div className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 md:p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors min-h-[44px]">
                   <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
                     <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-100 to-purple-200 shrink-0">
                       <span className="text-[10px] md:text-xs font-semibold text-purple-700">
@@ -1091,18 +1091,18 @@ export default function SettingsPage() {
                       </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{staff.name}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{staff.name}</p>
                       <div className="flex items-center gap-1.5 md:gap-2 mt-0.5">
                         <Badge variant="secondary" className="text-[10px] h-5 px-1.5 bg-purple-50 text-purple-700 border-purple-100">{staff.role}</Badge>
-                        <span className="text-[11px] text-gray-400 truncate hidden sm:inline">{staff.phone}</span>
+                        <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate hidden sm:inline">{staff.phone}</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Feature coming soon')} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Feature coming soon')} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Feature coming soon')} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                    <Button variant="ghost" size="sm" onClick={() => toast.info('Feature coming soon')} className="h-9 w-9 md:h-7 md:w-7 p-0 text-gray-400 dark:text-gray-500 hover:text-red-600 hover:bg-red-50">
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -1118,15 +1118,15 @@ export default function SettingsPage() {
 
   const renderNotificationsTab = () => (
     <div className="space-y-4 md:space-y-6">
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-orange-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-orange-100 shadow-sm">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/50 shadow-sm">
               <Bell className="h-4 w-4 text-orange-600" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Notification Preferences</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Choose what alerts you want to receive</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Notification Preferences</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Choose what alerts you want to receive</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -1144,8 +1144,8 @@ export default function SettingsPage() {
                     <item.icon className="h-4 w-4 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                    <p className="text-[11px] md:text-xs text-gray-500">{item.desc}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
+                    <p className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">{item.desc}</p>
                   </div>
                 </div>
                 <Switch checked={notifications[item.key]} onCheckedChange={(checked) => setNotifications((prev) => ({ ...prev, [item.key]: checked }))} className="scale-110 md:scale-100" />
@@ -1161,45 +1161,45 @@ export default function SettingsPage() {
   const renderDataTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Export/Backup/Restore */}
-      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
-        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-cyan-50/50 to-transparent">
+      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-cyan-50/50 to-transparent dark:from-cyan-950/30">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-cyan-100 shadow-sm">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900/50 shadow-sm">
               <Database className="h-4 w-4 text-cyan-600" />
             </div>
             <div>
-              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Data Management</CardTitle>
-              <CardDescription className="text-[11px] md:text-xs text-gray-500">Export, backup & restore your data</CardDescription>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">Data Management</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Export, backup & restore your data</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 px-4 md:px-6 pb-4 md:pb-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button onClick={() => toast.success('Export started')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 hover:border-cyan-200 transition-all text-left min-h-[44px]">
+            <button onClick={() => toast.success('Export started')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-cyan-200 transition-all text-left min-h-[44px]">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50 shrink-0">
                 <Download className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Export Data</p>
-                <p className="text-[11px] text-gray-500">Download CSV files</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Export Data</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">Download CSV files</p>
               </div>
             </button>
-            <button onClick={() => toast.success('Backup created')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 hover:border-cyan-200 transition-all text-left min-h-[44px]">
+            <button onClick={() => toast.success('Backup created')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-cyan-200 transition-all text-left min-h-[44px]">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50 shrink-0">
                 <Upload className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Backup</p>
-                <p className="text-[11px] text-gray-500">Create data backup</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Backup</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">Create data backup</p>
               </div>
             </button>
-            <button onClick={() => toast.info('Select backup file')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 hover:border-cyan-200 transition-all text-left min-h-[44px]">
+            <button onClick={() => toast.info('Select backup file')} className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-cyan-200 transition-all text-left min-h-[44px]">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-50 shrink-0">
                 <RotateCcw className="h-5 w-5 text-cyan-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Restore</p>
-                <p className="text-[11px] text-gray-500">Restore from backup</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Restore</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">Restore from backup</p>
               </div>
             </button>
           </div>
@@ -1251,15 +1251,15 @@ export default function SettingsPage() {
             <Settings className="h-4 w-4 md:h-5 md:w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-xs md:text-sm text-gray-500 hidden sm:block">Configure your dairy shop</p>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Configure your dairy shop</p>
           </div>
         </div>
 
         {/* Desktop save button */}
         {!isMobile && isDirty && (
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-9 rounded-lg border-gray-200" disabled={saving}>
+            <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-9 rounded-lg border-gray-200 dark:border-gray-700" disabled={saving}>
               Discard
             </Button>
             <Button onClick={handleSave} disabled={saving} className="h-9 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm min-w-[120px]">
@@ -1284,15 +1284,15 @@ export default function SettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={"flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-medium whitespace-nowrap transition-all shrink-0 min-h-[44px] " + (isActive ? "bg-green-50 text-green-700 border border-green-200 shadow-sm" : "bg-white text-gray-500 border border-gray-100 hover:bg-gray-50")}
+                className={"flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-medium whitespace-nowrap transition-all shrink-0 min-h-[44px] " + (isActive ? "bg-green-50 text-green-700 border border-green-200 shadow-sm" : "bg-white text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800")}
               >
-                <Icon className={"h-3.5 w-3.5 " + (isActive ? "text-green-600" : "text-gray-400")} />
+                <Icon className={"h-3.5 w-3.5 " + (isActive ? "text-green-600" : "text-gray-400 dark:text-gray-500")} />
                 {tab.mobileLabel}
                 {tab.id === 'products' && (milkTypes.length + categories.length) > 0 && (
-                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-sky-100 text-sky-700 border-0 rounded-full">{milkTypes.length + categories.length}</Badge>
+                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-sky-100 dark:bg-sky-900/50 text-sky-700 border-0 rounded-full">{milkTypes.length + categories.length}</Badge>
                 )}
                 {tab.id === 'delivery' && areas.length > 0 && (
-                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-rose-100 text-rose-700 border-0 rounded-full">{areas.length}</Badge>
+                  <Badge className="h-4 min-w-4 px-1 text-[9px] bg-rose-100 dark:bg-rose-900/50 text-rose-700 border-0 rounded-full">{areas.length}</Badge>
                 )}
               </button>
             )
@@ -1311,20 +1311,20 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={"group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer text-left " + (isActive ? "bg-green-50 text-green-700 shadow-sm" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700")}
+                    className={"group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer text-left " + (isActive ? "bg-green-50 text-green-700 shadow-sm" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:text-gray-300")}
                   >
-                    <div className={"flex h-8 w-8 items-center justify-center rounded-lg shrink-0 " + (isActive ? "bg-green-100" : "bg-gray-50 group-hover:bg-gray-100")}>
-                      <Icon className={"h-4 w-4 " + (isActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600")} />
+                    <div className={"flex h-8 w-8 items-center justify-center rounded-lg shrink-0 " + (isActive ? "bg-green-100 dark:bg-green-900/50" : "bg-gray-50 group-hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700")}>
+                      <Icon className={"h-4 w-4 " + (isActive ? "text-green-600" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-400")} />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate">{tab.label}</p>
                       {isActive && <p className="text-[10px] text-green-600/70 truncate leading-tight mt-0.5">{tab.description}</p>}
                     </div>
                     {tab.id === 'products' && (milkTypes.length + categories.length) > 0 && (
-                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-sky-100 text-sky-700 border-0 rounded-full shrink-0">{milkTypes.length + categories.length}</Badge>
+                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-sky-100 dark:bg-sky-900/50 text-sky-700 border-0 rounded-full shrink-0">{milkTypes.length + categories.length}</Badge>
                     )}
                     {tab.id === 'delivery' && areas.length > 0 && (
-                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-rose-100 text-rose-700 border-0 rounded-full shrink-0">{areas.length}</Badge>
+                      <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-rose-100 dark:bg-rose-900/50 text-rose-700 border-0 rounded-full shrink-0">{areas.length}</Badge>
                     )}
                     {!isActive && <ChevronRight className="h-3.5 w-3.5 text-gray-300 ml-auto shrink-0" />}
                   </button>
@@ -1365,9 +1365,9 @@ export default function SettingsPage() {
       {isDirty && !isMobile && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-3 z-50">
           <div className="mx-auto flex max-w-5xl items-center justify-between">
-            <p className="text-sm text-gray-500">You have unsaved changes</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">You have unsaved changes</p>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-9 rounded-lg border-gray-200" disabled={saving}>
+              <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-9 rounded-lg border-gray-200 dark:border-gray-700" disabled={saving}>
                 Discard
               </Button>
               <Button onClick={handleSave} disabled={saving} className="h-9 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm min-w-[120px]">
@@ -1414,7 +1414,7 @@ export default function SettingsPage() {
         <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
           <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/50">
                 <MapPin className="h-4 w-4 text-rose-600" />
               </div>
               {editingArea ? 'Edit Area' : 'Add Area'}
@@ -1422,7 +1422,7 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-gray-700">Area Name</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Area Name</Label>
               <Input placeholder="Enter area name" value={areaName} onChange={(e) => setAreaName(e.target.value)} className="rounded-lg border-gray-200 h-11 md:h-auto" autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleAreaSubmit() }} />
             </div>
           </div>
@@ -1440,7 +1440,7 @@ export default function SettingsPage() {
         <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
           <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-900/50">
                 <Milk className="h-4 w-4 text-sky-600" />
               </div>
               {editingMilkType ? 'Edit Milk Type' : 'Add Milk Type'}
@@ -1448,13 +1448,13 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-gray-700">Milk Type Name</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Milk Type Name</Label>
               <Input placeholder="e.g. Fresh, Buffalo, Camel" value={milkTypeName} onChange={(e) => setMilkTypeName(e.target.value)} className="rounded-lg border-gray-200 h-11 md:h-auto" autoFocus />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-gray-700">Price per Liter (PKR)</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price per Liter (PKR)</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₨</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500">₨</span>
                 <Input type="number" placeholder="60" value={milkTypePrice} onChange={(e) => setMilkTypePrice(e.target.value)} className="rounded-lg border-gray-200 pl-8 h-11 md:h-auto" onKeyDown={(e) => { if (e.key === 'Enter') handleMilkTypeSubmit() }} />
               </div>
             </div>
@@ -1473,7 +1473,7 @@ export default function SettingsPage() {
         <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
           <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/50">
                 <Clock className="h-4 w-4 text-teal-600" />
               </div>
               {editingDeliveryTime ? 'Edit Delivery Time' : 'Add Delivery Time'}
@@ -1481,7 +1481,7 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-gray-700">Delivery Time</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Delivery Time</Label>
               <Input placeholder="e.g. Morning 6-9 AM" value={deliveryTimeName} onChange={(e) => setDeliveryTimeName(e.target.value)} className="rounded-lg border-gray-200 h-11 md:h-auto" autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleDeliveryTimeSubmit() }} />
             </div>
           </div>
@@ -1499,7 +1499,7 @@ export default function SettingsPage() {
         <DialogContent className={`sm:max-w-[400px] ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0 flex flex-col justify-end' : ''}`}>
           <DialogHeader className={isMobile ? 'px-1' : ''}>
             <DialogTitle className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/50">
                 <Package className="h-4 w-4 text-violet-600" />
               </div>
               {editingCategory ? 'Edit Category' : 'Add Category'}
@@ -1507,7 +1507,7 @@ export default function SettingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-gray-700">Category Name</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category Name</Label>
               <Input placeholder="e.g. Milk, Yogurt, Butter" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} className="rounded-lg border-gray-200 h-11 md:h-auto" autoFocus onKeyDown={(e) => { if (e.key === 'Enter') handleCategorySubmit() }} />
             </div>
           </div>

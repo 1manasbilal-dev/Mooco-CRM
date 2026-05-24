@@ -111,14 +111,14 @@ const ROUTE_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 const STATUSES = ['All', 'Pending', 'Delivered', 'Missed', 'Cancelled']
 
 const PRODUCT_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Milk: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
-  Yogurt: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
-  Butter: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
-  Cream: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', dot: 'bg-purple-500' },
-  Eggs: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500' },
-  Paneer: { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200', dot: 'bg-teal-500' },
-  Ghee: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-500' },
-  Other: { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', dot: 'bg-gray-500' },
+  Milk: { bg: 'bg-green-50 dark:bg-green-950', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-800', dot: 'bg-green-500' },
+  Yogurt: { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800', dot: 'bg-blue-500' },
+  Butter: { bg: 'bg-amber-50 dark:bg-amber-950', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-800', dot: 'bg-amber-500' },
+  Cream: { bg: 'bg-purple-50 dark:bg-purple-950', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-800', dot: 'bg-purple-500' },
+  Eggs: { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-800', dot: 'bg-orange-500' },
+  Paneer: { bg: 'bg-teal-50 dark:bg-teal-950', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-200 dark:border-teal-800', dot: 'bg-teal-500' },
+  Ghee: { bg: 'bg-yellow-50 dark:bg-yellow-950', text: 'text-yellow-700 dark:text-yellow-300', border: 'border-yellow-200 dark:border-yellow-800', dot: 'bg-yellow-500' },
+  Other: { bg: 'bg-gray-50 dark:bg-gray-800/50', text: 'text-gray-700 dark:text-gray-300', border: 'border-gray-200 dark:border-gray-700', dot: 'bg-gray-500' },
 }
 
 function getProductColor(productName: string) {
@@ -168,28 +168,28 @@ function getStatusBadge(status: string, compact = false) {
   switch (status) {
     case 'Pending':
       return (
-        <Badge className={`${sizeClasses} bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 font-medium`}>
+        <Badge className={`${sizeClasses} bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 dark:hover:bg-amber-950 font-medium`}>
           <Clock className="size-3 mr-1 shrink-0" />
           Pending
         </Badge>
       )
     case 'Delivered':
       return (
-        <Badge className={`${sizeClasses} bg-green-50 text-green-700 border-green-200 hover:bg-green-50 font-medium`}>
+        <Badge className={`${sizeClasses} bg-green-50 text-green-700 border-green-200 hover:bg-green-50 dark:bg-green-950 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-950 font-medium`}>
           <CheckCircle className="size-3 mr-1 shrink-0" />
           Delivered
         </Badge>
       )
     case 'Missed':
       return (
-        <Badge className={`${sizeClasses} bg-red-50 text-red-700 border-red-200 hover:bg-red-50 font-medium`}>
+        <Badge className={`${sizeClasses} bg-red-50 text-red-700 border-red-200 hover:bg-red-50 dark:bg-red-950 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-950 font-medium`}>
           <XCircle className="size-3 mr-1 shrink-0" />
           Missed
         </Badge>
       )
     case 'Cancelled':
       return (
-        <Badge className={`${sizeClasses} bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50 font-medium`}>
+        <Badge className={`${sizeClasses} bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-800 font-medium`}>
           <Ban className="size-3 mr-1 shrink-0" />
           Cancelled
         </Badge>
@@ -879,13 +879,13 @@ export default function DeliveriesPage() {
   // --- Record Extra Delivery Form ---
   const recordExtraForm = (
     <div className="grid gap-4 py-2">
-      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-100">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-          <Truck className="h-4 w-4 text-green-600" />
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/50 border border-green-100 dark:border-green-800">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
+          <Truck className="h-4 w-4 text-green-600 dark:text-green-400" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-green-800">{extraDelivery.customerName}</p>
-          <p className="text-xs text-green-600">Extra delivery for {selectedDate}</p>
+          <p className="text-sm font-semibold text-green-800 dark:text-green-200">{extraDelivery.customerName}</p>
+          <p className="text-xs text-green-600 dark:text-green-400">Extra delivery for {selectedDate}</p>
         </div>
       </div>
 
@@ -935,9 +935,9 @@ export default function DeliveriesPage() {
         const item = inventoryItems.find((i) => i.id === extraDelivery.itemId)
         if (!item) return null
         return (
-          <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-100">
-            <span className="text-sm text-amber-700">Total Amount</span>
-            <span className="text-lg font-bold text-amber-800">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-100 dark:border-amber-800">
+            <span className="text-sm text-amber-700 dark:text-amber-300">Total Amount</span>
+            <span className="text-lg font-bold text-amber-800 dark:text-amber-200">
               {formatPKR(extraDelivery.quantity * item.pricePerUnit)}
             </span>
           </div>
@@ -995,12 +995,12 @@ export default function DeliveriesPage() {
         {/* Title row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100">
-              <Truck className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+            <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50">
+              <Truck className="h-4 w-4 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Deliveries</h1>
-              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Track daily milk & product deliveries</p>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Deliveries</h1>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Track daily milk & product deliveries</p>
             </div>
           </div>
         </div>
@@ -1015,7 +1015,7 @@ export default function DeliveriesPage() {
           />
           <Button
             variant="outline"
-            className="h-11 sm:h-9 gap-2 shrink-0 border-green-300 text-green-700 hover:bg-green-50"
+            className="h-11 sm:h-9 gap-2 shrink-0 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950"
             onClick={() => generateDeliveries(selectedDate)}
             disabled={generating}
           >
@@ -1077,22 +1077,22 @@ export default function DeliveriesPage() {
 
       {/* 2. Vacation Awareness Banner */}
       {generationResult && generationResult.skippedVacation > 0 && !vacationBannerDismissed && (
-        <div className="flex items-center gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-amber-50 border border-amber-200">
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+        <div className="flex items-center gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-amber-800">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
               {generationResult.skippedVacation} customer{generationResult.skippedVacation !== 1 ? 's' : ''} on vacation
             </p>
-            <p className="text-xs text-amber-600 mt-0.5">
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
               Deliveries were skipped for customers currently on vacation.
             </p>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 shrink-0 text-amber-500 hover:text-amber-700 hover:bg-amber-100"
+            className="h-8 w-8 p-0 shrink-0 text-amber-500 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50"
             onClick={() => setVacationBannerDismissed(true)}
           >
             <X className="h-4 w-4" />
@@ -1102,58 +1102,58 @@ export default function DeliveriesPage() {
 
       {/* 3. Summary Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-gray-400 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-gray-400 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-gray-100">
-              <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-gray-100 dark:bg-gray-800">
+              <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">{summary.total}</p>
-              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Total</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{summary.total}</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Total</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-green-500 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-green-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-green-50">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-green-50 dark:bg-green-950/50">
               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xl sm:text-2xl font-bold text-green-600">{summary.delivered}</p>
-              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Delivered</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Delivered</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-amber-500 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-amber-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-amber-50">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-amber-50 dark:bg-amber-950/50">
               <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xl sm:text-2xl font-bold text-amber-600">{summary.pending}</p>
-              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Pending</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Pending</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-red-500 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-red-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-red-50">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-red-50 dark:bg-red-950/50">
               <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xl sm:text-2xl font-bold text-red-600">{summary.missed}</p>
-              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Missed</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Missed</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 border-l-4 border-l-emerald-500 shadow-sm col-span-2 lg:col-span-1">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-emerald-500 shadow-sm col-span-2 lg:col-span-1">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-emerald-50">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-emerald-50 dark:bg-emerald-950/50">
               <Milk className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
             </div>
             <div className="min-w-0">
               <p className="text-xl sm:text-2xl font-bold text-emerald-600">{formatQuantity(summary.totalMilk)}</p>
-              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Total Milk</p>
+              <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">Total Milk</p>
             </div>
           </CardContent>
         </Card>
@@ -1161,14 +1161,14 @@ export default function DeliveriesPage() {
 
       {/* Revenue + Extra count row */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-100">
-          <span className="text-xs sm:text-sm text-emerald-700">Revenue:</span>
-          <span className="text-sm sm:text-base font-bold text-emerald-800">{formatPKR(summary.totalRevenue)}</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-800">
+          <span className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300">Revenue:</span>
+          <span className="text-sm sm:text-base font-bold text-emerald-800 dark:text-emerald-200">{formatPKR(summary.totalRevenue)}</span>
         </div>
         {summary.extraCount > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-100">
-            <PackagePlus className="h-3.5 w-3.5 text-amber-600" />
-            <span className="text-xs sm:text-sm font-medium text-amber-700">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-100 dark:border-amber-800">
+            <PackagePlus className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="text-xs sm:text-sm font-medium text-amber-700 dark:text-amber-300">
               {summary.extraCount} extra delivery{summary.extraCount !== 1 ? 's' : ''}
             </span>
           </div>
@@ -1215,24 +1215,24 @@ export default function DeliveriesPage() {
 
       {/* 5. Route-Grouped Delivery List */}
       {loading ? (
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
           <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-green-500" />
-              <p className="text-sm text-gray-500">Loading deliveries...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading deliveries...</p>
             </div>
           </CardContent>
         </Card>
       ) : deliveries.length === 0 ? (
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm">
+        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
           <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                <Truck className="h-6 w-6 text-gray-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                <Truck className="h-6 w-6 text-gray-400 dark:text-gray-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500">No deliveries found</p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No deliveries found</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   {selectedDate === getTodayStr()
                     ? 'Generate deliveries or add one manually to get started.'
                     : 'No deliveries found for the selected date and filters.'}
@@ -1241,7 +1241,7 @@ export default function DeliveriesPage() {
               <div className="flex items-center gap-2 mt-1">
                 <Button
                   variant="outline"
-                  className="h-11 gap-2 border-green-300 text-green-700 hover:bg-green-50"
+                  className="h-11 gap-2 border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950"
                   onClick={() => generateDeliveries(selectedDate)}
                   disabled={generating}
                 >
@@ -1284,46 +1284,46 @@ export default function DeliveriesPage() {
                 open={collapsedRoutes[group.route] !== false}
                 onOpenChange={() => toggleRoute(group.route)}
               >
-                <Card className="rounded-lg sm:rounded-xl border-gray-200 shadow-sm overflow-hidden">
+                <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                   {/* Route header */}
                   <CollapsibleTrigger asChild>
-                    <button className="w-full bg-gray-50 border-b border-gray-200 px-3 sm:px-4 py-3 sm:py-3 flex items-center justify-between hover:bg-gray-100/80 transition-colors active:bg-gray-100">
+                    <button className="w-full bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3 sm:py-3 flex items-center justify-between hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors active:bg-gray-100 dark:active:bg-gray-700">
                       <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-green-100">
-                          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
+                        <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-green-100 dark:bg-green-950/50">
+                          <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
                         </div>
-                        <span className="font-semibold text-gray-800 text-sm sm:text-base">{group.label}</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base">{group.label}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {routePendingCount > 0 && (
-                          <Badge className="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-600 border-amber-200 font-medium">
+                          <Badge className="text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 font-medium">
                             {routePendingCount} pending
                           </Badge>
                         )}
                         <Badge variant="outline" className="text-[11px] sm:text-xs font-medium px-2 py-0.5">
                           {group.deliveries.length} delivery{group.deliveries.length !== 1 ? 's' : ''}
                         </Badge>
-                        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${collapsedRoutes[group.route] === false ? '' : 'rotate-180'}`} />
+                        <ChevronDown className={`h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${collapsedRoutes[group.route] === false ? '' : 'rotate-180'}`} />
                       </div>
                     </button>
                   </CollapsibleTrigger>
 
                   {/* Delivery items grouped by customer */}
                   <CollapsibleContent>
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
                       {customerEntries.map(({ customer, customerId, items }) => (
                         <div key={customerId} className="px-3 sm:px-4 py-3 sm:py-3.5">
                           {/* Customer Header */}
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2 min-w-0">
-                              <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-700 text-xs font-bold">
+                              <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-xs font-bold">
                                 {customer.name.charAt(0).toUpperCase()}
                               </div>
                               <div className="min-w-0">
-                                <span className="font-semibold text-gray-900 text-sm sm:text-base truncate block">
+                                <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate block">
                                   {customer.name}
                                 </span>
-                                <span className="text-[10px] sm:text-xs text-gray-400">
+                                <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
                                   {customer.area}{customer.phone ? ` · ${customer.phone}` : ''}
                                 </span>
                               </div>
@@ -1331,7 +1331,7 @@ export default function DeliveriesPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-8 sm:h-7 gap-1 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 shrink-0 px-2 sm:px-2.5"
+                              className="h-8 sm:h-7 gap-1 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/50 shrink-0 px-2 sm:px-2.5"
                               onClick={() => openExtraDialog(customerId, customer.name)}
                             >
                               <PackagePlus className="h-3.5 w-3.5" />
@@ -1347,7 +1347,7 @@ export default function DeliveriesPage() {
                               return (
                                 <div
                                   key={delivery.id}
-                                  className="flex items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-white border border-gray-100 hover:border-gray-200 transition-colors"
+                                  className="flex items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-colors"
                                 >
                                   {/* Product color dot */}
                                   <div className={`mt-1 size-2.5 shrink-0 rounded-full ${productColor.dot}`} />
@@ -1362,11 +1362,11 @@ export default function DeliveriesPage() {
                                         {formatQuantity(delivery.quantity)}
                                       </span>
                                       {delivery.isExtra && (
-                                        <Badge className="text-[10px] px-1.5 py-0 bg-amber-100 text-amber-700 border-amber-200 font-semibold">
+                                        <Badge className="text-[10px] px-1.5 py-0 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 font-semibold">
                                           Extra
                                         </Badge>
                                       )}
-                                      <span className="text-[10px] sm:text-xs text-gray-400 ml-auto shrink-0">
+                                      <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 ml-auto shrink-0">
                                         {formatPKR(delivery.quantity * delivery.pricePerUnit)}
                                       </span>
                                     </div>
@@ -1400,7 +1400,7 @@ export default function DeliveriesPage() {
                                         </div>
                                       ) : (
                                         <button
-                                          className="text-[10px] sm:text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                                          className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
                                           onClick={() => {
                                             setEditingNotesId(delivery.id)
                                             setNotesValue(delivery.notes || '')
@@ -1417,7 +1417,7 @@ export default function DeliveriesPage() {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          className="h-8 sm:h-7 flex-1 sm:flex-none sm:min-w-[100px] gap-1 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 font-medium text-xs"
+                                          className="h-8 sm:h-7 flex-1 sm:flex-none sm:min-w-[100px] gap-1 border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950 dark:hover:text-green-300 font-medium text-xs"
                                           onClick={() => updateStatus(delivery.id, 'Delivered')}
                                           disabled={updatingId === delivery.id}
                                         >
@@ -1431,7 +1431,7 @@ export default function DeliveriesPage() {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          className="h-8 sm:h-7 flex-1 sm:flex-none sm:min-w-[70px] gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium text-xs"
+                                          className="h-8 sm:h-7 flex-1 sm:flex-none sm:min-w-[70px] gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-300 font-medium text-xs"
                                           onClick={() => updateStatus(delivery.id, 'Missed')}
                                           disabled={updatingId === delivery.id}
                                         >
@@ -1447,7 +1447,7 @@ export default function DeliveriesPage() {
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          className="h-8 sm:h-7 gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 font-medium text-xs"
+                                          className="h-8 sm:h-7 gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950 font-medium text-xs"
                                           onClick={() => updateStatus(delivery.id, 'Pending')}
                                           disabled={updatingId === delivery.id}
                                         >
@@ -1462,7 +1462,7 @@ export default function DeliveriesPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-7 sm:h-6 text-[10px] sm:text-xs text-gray-400 hover:text-red-500 px-1 mt-0.5"
+                                        className="h-7 sm:h-6 text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 px-1 mt-0.5"
                                         onClick={() => updateStatus(delivery.id, 'Cancelled')}
                                         disabled={updatingId === delivery.id}
                                       >
@@ -1483,14 +1483,14 @@ export default function DeliveriesPage() {
                           return vacationRoute === group.route
                         })
                         return routeVacations.length > 0 ? (
-                          <div className="px-3 sm:px-4 py-2 bg-amber-50/50 border-t border-amber-100">
+                          <div className="px-3 sm:px-4 py-2 bg-amber-50/50 dark:bg-amber-950/30 border-t border-amber-100 dark:border-amber-800">
                             <div className="flex items-center gap-1.5 mb-1.5">
-                              <Umbrella className="h-3.5 w-3.5 text-amber-500" />
-                              <span className="text-xs font-medium text-amber-600">On Vacation</span>
+                              <Umbrella className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
+                              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">On Vacation</span>
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                               {routeVacations.map((v) => (
-                                <Badge key={v.id} variant="outline" className="text-[10px] bg-amber-50/80 text-amber-600 border-amber-200 px-2 py-0.5">
+                                <Badge key={v.id} variant="outline" className="text-[10px] bg-amber-50/80 dark:bg-amber-950/50 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800 px-2 py-0.5">
                                   {v.customer.name} ({v.startDate} → {v.endDate})
                                 </Badge>
                               ))}
@@ -1513,7 +1513,7 @@ export default function DeliveriesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/50">
                   <PackagePlus className="h-4 w-4 text-amber-600" />
                 </div>
                 Record Extra Delivery

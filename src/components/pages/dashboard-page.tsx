@@ -119,41 +119,41 @@ function formatMonth(monthStr: string): string {
 function deliveryStatusConfig(status: string) {
   switch (status) {
     case 'Delivered':
-      return { bg: 'bg-green-50 text-green-700 border-green-200' }
+      return { bg: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800' }
     case 'Pending':
-      return { bg: 'bg-amber-50 text-amber-700 border-amber-200' }
+      return { bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800' }
     case 'Missed':
-      return { bg: 'bg-red-50 text-red-700 border-red-200' }
+      return { bg: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800' }
     case 'Cancelled':
-      return { bg: 'bg-gray-50 text-gray-600 border-gray-200' }
+      return { bg: 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700' }
     default:
-      return { bg: 'bg-gray-50 text-gray-600 border-gray-200' }
+      return { bg: 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700' }
   }
 }
 
 function paymentStatusConfig(status: string) {
   switch (status) {
     case 'Completed':
-      return { bg: 'bg-green-50 text-green-700 border-green-200' }
+      return { bg: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800' }
     case 'Pending':
-      return { bg: 'bg-amber-50 text-amber-700 border-amber-200' }
+      return { bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800' }
     default:
-      return { bg: 'bg-gray-50 text-gray-600 border-gray-200' }
+      return { bg: 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700' }
   }
 }
 
 function paymentMethodBadge(method: string) {
   switch (method) {
     case 'Cash':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
     case 'Bank Transfer':
-      return 'bg-blue-50 text-blue-700 border-blue-200'
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800'
     case 'Online':
-      return 'bg-purple-50 text-purple-700 border-purple-200'
+      return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800'
     case 'Cheque':
-      return 'bg-orange-50 text-orange-700 border-orange-200'
+      return 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800'
     default:
-      return 'bg-gray-50 text-gray-600 border-gray-200'
+      return 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
   }
 }
 
@@ -196,8 +196,8 @@ function KPICard({ label, value, icon, iconBg, trend, accentBg, accentBorder }: 
           )}
         </div>
         <div className="mt-2 md:mt-3">
-          <p className="text-xs md:text-sm font-medium text-gray-500">{label}</p>
-          <p className="mt-0.5 md:mt-1 text-lg md:text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="mt-0.5 md:mt-1 text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
         </div>
       </CardContent>
     </Card>
@@ -208,13 +208,13 @@ function KPICard({ label, value, icon, iconBg, trend, accentBg, accentBorder }: 
 function SalesTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) {
   if (!active || !payload || !payload.length) return null
   return (
-    <div className="rounded-lg border border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-2 shadow-lg">
-      <p className="mb-1 text-xs font-medium text-gray-500">{label}</p>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm px-3 py-2 shadow-lg">
+      <p className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{label}</p>
       {payload.map((entry, index) => (
         <p key={index} className="text-sm font-semibold" style={{ color: entry.color }}>
           {entry.name === 'totalRevenue' ? `₨${entry.value.toLocaleString()}` : entry.value.toLocaleString()}
           {' '}
-          <span className="font-normal text-gray-400">
+          <span className="font-normal text-gray-400 dark:text-gray-500">
             {entry.name === 'totalRevenue'
               ? 'Revenue'
               : entry.name === 'totalMilkSold'
@@ -232,7 +232,7 @@ function SalesTooltip({ active, payload, label }: { active?: boolean; payload?: 
 // ── Skeleton Loaders ───────────────────────────────────
 function KPISkeleton() {
   return (
-    <Card className="rounded-xl border-gray-200 shadow-sm">
+    <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
       <CardContent className="p-3 md:p-5">
         <div className="flex items-start justify-between">
           <Skeleton className="h-8 w-8 md:h-10 md:w-10 rounded-lg" />
@@ -249,7 +249,7 @@ function KPISkeleton() {
 
 function ChartSkeleton() {
   return (
-    <Card className="rounded-xl border-gray-200 shadow-sm">
+    <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
       <CardHeader className="pb-0 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
         <Skeleton className="h-4 md:h-5 w-28 md:w-40" />
       </CardHeader>
@@ -262,7 +262,7 @@ function ChartSkeleton() {
 
 function ListSkeleton() {
   return (
-    <Card className="rounded-xl border-gray-200 shadow-sm">
+    <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
       <CardHeader className="pb-0 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
         <Skeleton className="h-4 md:h-5 w-28 md:w-40" />
       </CardHeader>
@@ -320,17 +320,17 @@ export default function DashboardPage() {
       {/* ── Page Header ────────────────────────────────── */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 shadow-sm">
+          <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 shadow-sm">
             <LayoutDashboard className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
           </div>
           <div>
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="hidden md:block text-sm text-gray-500">Overview of your dairy business</p>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+            <p className="hidden md:block text-sm text-gray-500 dark:text-gray-400">Overview of your dairy business</p>
           </div>
         </div>
         <Badge
           variant="outline"
-          className="flex items-center gap-1 md:gap-1.5 border-gray-200 px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-gray-600"
+          className="flex items-center gap-1 md:gap-1.5 border-gray-200 dark:border-gray-700 px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400"
         >
           <CalendarDays className="h-3 w-3 md:h-3.5 md:w-3.5" />
           <span className="hidden sm:inline">{today}</span>
@@ -345,7 +345,7 @@ export default function DashboardPage() {
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => <KPISkeleton key={i} />)
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600 dark:text-red-400">
             Failed to load KPI data
           </div>
         ) : (
@@ -355,8 +355,8 @@ export default function DashboardPage() {
               value={data?.totalActiveCustomers.toLocaleString() ?? '0'}
               icon={<Users className="h-4 w-4 md:h-5 md:w-5 text-green-600" />}
               iconBg="bg-green-100"
-              accentBg="bg-gradient-to-br from-white to-green-50/40"
-              accentBorder="border-green-200/60"
+              accentBg="bg-gradient-to-br from-white to-green-50/40 dark:from-gray-900 dark:to-green-950/30"
+              accentBorder="border-green-200/60 dark:border-green-800/60"
               trend={{ value: 12, direction: 'up' }}
             />
             <KPICard
@@ -364,8 +364,8 @@ export default function DashboardPage() {
               value={data?.newLeadsToday.toLocaleString() ?? '0'}
               icon={<UserPlus className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />}
               iconBg="bg-blue-100"
-              accentBg="bg-gradient-to-br from-white to-blue-50/40"
-              accentBorder="border-blue-200/60"
+              accentBg="bg-gradient-to-br from-white to-blue-50/40 dark:from-gray-900 dark:to-blue-950/30"
+              accentBorder="border-blue-200/60 dark:border-blue-800/60"
               trend={{ value: 8, direction: 'up' }}
             />
             <KPICard
@@ -373,8 +373,8 @@ export default function DashboardPage() {
               value={`${data?.milkDeliveredToday.toLocaleString() ?? '0'}L`}
               icon={<Droplets className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />}
               iconBg="bg-emerald-100"
-              accentBg="bg-gradient-to-br from-white to-emerald-50/40"
-              accentBorder="border-emerald-200/60"
+              accentBg="bg-gradient-to-br from-white to-emerald-50/40 dark:from-gray-900 dark:to-emerald-950/30"
+              accentBorder="border-emerald-200/60 dark:border-emerald-800/60"
               trend={{ value: 5, direction: 'up' }}
             />
             <KPICard
@@ -382,8 +382,8 @@ export default function DashboardPage() {
               value={formatPKR(data?.revenueToday ?? 0)}
               icon={<DollarSign className="h-4 w-4 md:h-5 md:w-5 text-amber-600" />}
               iconBg="bg-amber-100"
-              accentBg="bg-gradient-to-br from-white to-amber-50/40"
-              accentBorder="border-amber-200/60"
+              accentBg="bg-gradient-to-br from-white to-amber-50/40 dark:from-gray-900 dark:to-amber-950/30"
+              accentBorder="border-amber-200/60 dark:border-amber-800/60"
               trend={{ value: 15, direction: 'up' }}
             />
             <KPICard
@@ -391,8 +391,8 @@ export default function DashboardPage() {
               value={formatPKR(data?.pendingPayments ?? 0)}
               icon={<AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500" />}
               iconBg="bg-red-100"
-              accentBg="bg-gradient-to-br from-white to-red-50/40"
-              accentBorder="border-red-200/60"
+              accentBg="bg-gradient-to-br from-white to-red-50/40 dark:from-gray-900 dark:to-red-950/30"
+              accentBorder="border-red-200/60 dark:border-red-800/60"
               trend={{ value: 3, direction: 'down' }}
             />
           </>
@@ -407,18 +407,18 @@ export default function DashboardPage() {
             <ChartSkeleton />
           </>
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600 dark:text-red-400">
             Failed to load chart data
           </div>
         ) : (
           <>
             {/* Monthly Sales Trend */}
-            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+            <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <CardHeader className="pb-0 px-3 md:px-6 pt-4 md:pt-6">
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-200">
                   Monthly Sales Trend
                 </CardTitle>
-                <p className="text-[10px] md:text-xs text-gray-400">Revenue over the last 30 days</p>
+                <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">Revenue over the last 30 days</p>
               </CardHeader>
               <CardContent className="px-2 md:px-4 pt-2 pb-3 md:pb-4">
                 <div className="h-48 md:h-72">
@@ -469,12 +469,12 @@ export default function DashboardPage() {
             </Card>
 
             {/* Customer Growth */}
-            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+            <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <CardHeader className="pb-0 px-3 md:px-6 pt-4 md:pt-6">
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-200">
                   Customer Growth
                 </CardTitle>
-                <p className="text-[10px] md:text-xs text-gray-400">New customers by month</p>
+                <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">New customers by month</p>
               </CardHeader>
               <CardContent className="px-2 md:px-4 pt-2 pb-3 md:pb-4">
                 <div className="h-48 md:h-72">
@@ -525,26 +525,26 @@ export default function DashboardPage() {
             <ListSkeleton />
           </>
         ) : error ? (
-          <div className="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600">
+          <div className="col-span-full rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 p-4 md:p-6 text-center text-xs md:text-sm text-red-600 dark:text-red-400">
             Failed to load recent activity
           </div>
         ) : (
           <>
             {/* Recent Deliveries */}
-            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+            <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100">
+                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900">
                     <Truck className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-600" />
                   </div>
-                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-200">
                     Recent Deliveries
                   </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
                 {(data?.recentDeliveries ?? []).length === 0 ? (
-                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
+                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400 dark:text-gray-500">
                     No recent deliveries
                   </p>
                 ) : (
@@ -554,13 +554,13 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={d.id}
-                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 active:scale-[0.98]"
+                          className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-[0.98]"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs md:text-sm font-medium text-gray-800">
+                            <p className="truncate text-xs md:text-sm font-medium text-gray-800 dark:text-gray-200">
                               {d.customer.name}
                             </p>
-                            <p className="text-[10px] md:text-xs text-gray-400">
+                            <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">
                               {d.quantity}L · {formatDate(d.date)}
                             </p>
                           </div>
@@ -579,20 +579,20 @@ export default function DashboardPage() {
             </Card>
 
             {/* Recent Payments */}
-            <Card className="rounded-xl border-gray-200 shadow-sm overflow-hidden">
+            <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-100 to-yellow-100">
+                  <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900">
                     <CreditCard className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600" />
                   </div>
-                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                  <CardTitle className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-200">
                     Recent Payments
                   </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="px-3 md:px-6 pb-4 md:pb-6">
                 {(data?.recentPayments ?? []).length === 0 ? (
-                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
+                  <p className="py-6 md:py-8 text-center text-xs md:text-sm text-gray-400 dark:text-gray-500">
                     No recent payments
                   </p>
                 ) : (
@@ -603,13 +603,13 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 active:scale-[0.98]"
+                          className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-[0.98]"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs md:text-sm font-medium text-gray-800">
+                            <p className="truncate text-xs md:text-sm font-medium text-gray-800 dark:text-gray-200">
                               {p.customer.name}
                             </p>
-                            <p className="text-[10px] md:text-xs text-gray-400">
+                            <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">
                               {formatPKR(p.amount)} · {formatDate(p.date)}
                             </p>
                           </div>
@@ -640,22 +640,22 @@ export default function DashboardPage() {
 
       {/* ── Today's Product Sales ───────────────────────────── */}
       {!loading && !error && data?.todaySales && data.todaySales.length > 0 && (
-        <Card className="rounded-xl border-green-200 bg-gradient-to-br from-white to-green-50/20 shadow-sm overflow-hidden">
+        <Card className="rounded-xl border-green-200 dark:border-green-800 bg-gradient-to-br from-white to-green-50/20 dark:from-gray-900 dark:to-green-950/20 shadow-sm overflow-hidden">
           <CardHeader className="pb-1 md:pb-2 px-3 md:px-6 pt-4 md:pt-6">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100">
+                <div className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-md bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900">
                   <Package className="h-3 w-3 md:h-3.5 md:w-3.5 text-green-600" />
                 </div>
-                <CardTitle className="text-sm md:text-base font-semibold text-gray-800">
+                <CardTitle className="text-sm md:text-base font-semibold text-gray-800 dark:text-gray-200">
                   Today&apos;s Product Sales
                 </CardTitle>
               </div>
               <div className="flex items-center gap-1.5 md:gap-3">
-                <Badge className="bg-green-50 text-green-700 border-green-200 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
+                <Badge className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
                   {data.todayTotalSold.toFixed(1)} sold
                 </Badge>
-                <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
+                <Badge className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1">
                   {formatPKR(data.todaySalesRevenue)}
                 </Badge>
               </div>
@@ -666,11 +666,11 @@ export default function DashboardPage() {
               {data.todaySales.map((sale) => (
                 <div
                   key={sale.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
+                  className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs md:text-sm font-medium text-gray-800 truncate">{sale.item?.name}</p>
-                    <p className="text-[10px] md:text-xs text-gray-400">
+                    <p className="text-xs md:text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{sale.item?.name}</p>
+                    <p className="text-[10px] md:text-xs text-gray-400 dark:text-gray-500">
                       {sale.item?.category} · ₨{sale.item?.pricePerUnit}/{sale.item?.unit}
                     </p>
                   </div>
@@ -678,7 +678,7 @@ export default function DashboardPage() {
                     <p className="text-xs md:text-sm font-semibold text-green-700">
                       {sale.quantity} {sale.item?.unit}
                     </p>
-                    <p className="text-[10px] md:text-xs text-gray-500">
+                    <p className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
                       {formatPKR(sale.quantity * (sale.item?.pricePerUnit ?? 0))}
                     </p>
                   </div>

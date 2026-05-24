@@ -132,11 +132,11 @@ interface LeadFormData {
 // ── Constants ──────────────────────────────────────────
 
 const PIPELINE_STAGES = [
-  { id: 'New', label: 'New', icon: Sparkles, color: 'blue', bgClass: 'bg-blue-500', lightBg: 'bg-blue-50', textClass: 'text-blue-700', borderClass: 'border-l-blue-500', badgeBg: 'bg-blue-100', badgeText: 'text-blue-700', hoverBorder: 'hover:border-blue-300', overRing: 'ring-blue-200', dotClass: 'bg-blue-400', cardBorder: 'border-blue-200', cardBg: 'bg-blue-50/50' },
-  { id: 'Contacted', label: 'Contacted', icon: Phone, color: 'amber', bgClass: 'bg-amber-500', lightBg: 'bg-amber-50', textClass: 'text-amber-700', borderClass: 'border-l-amber-500', badgeBg: 'bg-amber-100', badgeText: 'text-amber-700', hoverBorder: 'hover:border-amber-300', overRing: 'ring-amber-200', dotClass: 'bg-amber-400', cardBorder: 'border-amber-200', cardBg: 'bg-amber-50/50' },
-  { id: 'Trial', label: 'Trial', icon: Clock, color: 'purple', bgClass: 'bg-purple-500', lightBg: 'bg-purple-50', textClass: 'text-purple-700', borderClass: 'border-l-purple-500', badgeBg: 'bg-purple-100', badgeText: 'text-purple-700', hoverBorder: 'hover:border-purple-300', overRing: 'ring-purple-200', dotClass: 'bg-purple-400', cardBorder: 'border-purple-200', cardBg: 'bg-purple-50/50' },
-  { id: 'Converted', label: 'Converted', icon: CheckCircle2, color: 'green', bgClass: 'bg-green-500', lightBg: 'bg-green-50', textClass: 'text-green-700', borderClass: 'border-l-green-500', badgeBg: 'bg-green-100', badgeText: 'text-green-700', hoverBorder: 'hover:border-green-300', overRing: 'ring-green-200', dotClass: 'bg-green-400', cardBorder: 'border-green-200', cardBg: 'bg-green-50/50' },
-  { id: 'Lost', label: 'Lost', icon: XCircle, color: 'red', bgClass: 'bg-red-500', lightBg: 'bg-red-50', textClass: 'text-red-700', borderClass: 'border-l-red-500', badgeBg: 'bg-red-100', badgeText: 'text-red-700', hoverBorder: 'hover:border-red-300', overRing: 'ring-red-200', dotClass: 'bg-red-400', cardBorder: 'border-red-200', cardBg: 'bg-red-50/50' },
+  { id: 'New', label: 'New', icon: Sparkles, color: 'blue', bgClass: 'bg-blue-500', lightBg: 'bg-blue-50 dark:bg-blue-950/50', textClass: 'text-blue-700', borderClass: 'border-l-blue-500', badgeBg: 'bg-blue-100 dark:bg-blue-900', badgeText: 'text-blue-700 dark:text-blue-300', hoverBorder: 'hover:border-blue-300 dark:hover:border-blue-700', overRing: 'ring-blue-200 dark:ring-blue-800', dotClass: 'bg-blue-400', cardBorder: 'border-blue-200 dark:border-blue-800', cardBg: 'bg-blue-50/50 dark:bg-blue-950/30' },
+  { id: 'Contacted', label: 'Contacted', icon: Phone, color: 'amber', bgClass: 'bg-amber-500', lightBg: 'bg-amber-50 dark:bg-amber-950/50', textClass: 'text-amber-700', borderClass: 'border-l-amber-500', badgeBg: 'bg-amber-100 dark:bg-amber-900', badgeText: 'text-amber-700 dark:text-amber-300', hoverBorder: 'hover:border-amber-300 dark:hover:border-amber-700', overRing: 'ring-amber-200 dark:ring-amber-800', dotClass: 'bg-amber-400', cardBorder: 'border-amber-200 dark:border-amber-800', cardBg: 'bg-amber-50/50 dark:bg-amber-950/30' },
+  { id: 'Trial', label: 'Trial', icon: Clock, color: 'purple', bgClass: 'bg-purple-500', lightBg: 'bg-purple-50 dark:bg-purple-950/50', textClass: 'text-purple-700', borderClass: 'border-l-purple-500', badgeBg: 'bg-purple-100 dark:bg-purple-900', badgeText: 'text-purple-700 dark:text-purple-300', hoverBorder: 'hover:border-purple-300 dark:hover:border-purple-700', overRing: 'ring-purple-200 dark:ring-purple-800', dotClass: 'bg-purple-400', cardBorder: 'border-purple-200 dark:border-purple-800', cardBg: 'bg-purple-50/50 dark:bg-purple-950/30' },
+  { id: 'Converted', label: 'Converted', icon: CheckCircle2, color: 'green', bgClass: 'bg-green-500', lightBg: 'bg-green-50 dark:bg-green-950/50', textClass: 'text-green-700', borderClass: 'border-l-green-500', badgeBg: 'bg-green-100 dark:bg-green-900', badgeText: 'text-green-700 dark:text-green-300', hoverBorder: 'hover:border-green-300 dark:hover:border-green-700', overRing: 'ring-green-200 dark:ring-green-800', dotClass: 'bg-green-400', cardBorder: 'border-green-200 dark:border-green-800', cardBg: 'bg-green-50/50 dark:bg-green-950/30' },
+  { id: 'Lost', label: 'Lost', icon: XCircle, color: 'red', bgClass: 'bg-red-500', lightBg: 'bg-red-50 dark:bg-red-950/50', textClass: 'text-red-700', borderClass: 'border-l-red-500', badgeBg: 'bg-red-100 dark:bg-red-900', badgeText: 'text-red-700 dark:text-red-300', hoverBorder: 'hover:border-red-300 dark:hover:border-red-700', overRing: 'ring-red-200 dark:ring-red-800', dotClass: 'bg-red-400', cardBorder: 'border-red-200 dark:border-red-800', cardBg: 'bg-red-50/50 dark:bg-red-950/30' },
 ] as const
 
 const SOURCES = ['Walk-in', 'Phone', 'Referral', 'Online', 'Ad'] as const
@@ -159,13 +159,13 @@ function getStageConfig(status: string) {
 
 function sourceBadgeClasses(source: string): string {
   const map: Record<string, string> = {
-    'Walk-in': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    'Phone': 'bg-sky-50 text-sky-700 border-sky-200',
-    'Referral': 'bg-violet-50 text-violet-700 border-violet-200',
-    'Online': 'bg-orange-50 text-orange-700 border-orange-200',
-    'Ad': 'bg-pink-50 text-pink-700 border-pink-200',
+    'Walk-in': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800',
+    'Phone': 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800',
+    'Referral': 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-800',
+    'Online': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800',
+    'Ad': 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800',
   }
-  return map[source] ?? 'bg-gray-50 text-gray-600 border-gray-200'
+  return map[source] ?? 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 function formatQty(qty: number): string {
@@ -187,13 +187,13 @@ function getInitials(name: string): string {
 
 function getStageColor(status: string): string {
   const map: Record<string, string> = {
-    'New': 'bg-blue-100 text-blue-700',
-    'Contacted': 'bg-amber-100 text-amber-700',
-    'Trial': 'bg-purple-100 text-purple-700',
-    'Converted': 'bg-green-100 text-green-700',
-    'Lost': 'bg-red-100 text-red-700',
+    'New': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    'Contacted': 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+    'Trial': 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+    'Converted': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+    'Lost': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
   }
-  return map[status] ?? 'bg-gray-100 text-gray-700'
+  return map[status] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
 }
 
 function getAvatarGradient(status: string): string {
@@ -248,7 +248,7 @@ function SortableLeadCard({
         <div className="flex items-start gap-2.5">
           {/* Drag handle */}
           <button
-            className="mt-2 flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0 touch-none"
+            className="mt-2 flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors shrink-0 touch-none"
             {...attributes}
             {...listeners}
           >
@@ -262,7 +262,7 @@ function SortableLeadCard({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="font-semibold text-sm text-gray-900 truncate">{lead.name}</h4>
+              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{lead.name}</h4>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -282,17 +282,17 @@ function SortableLeadCard({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400">
               <Phone className="h-3 w-3 shrink-0" />
               <span className="truncate">{lead.phone}</span>
             </div>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+            <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /><span>{lead.area}</span></div>
-              <div className="flex items-center gap-1"><Droplets className="h-3 w-3" /><span className="font-medium text-gray-700">{formatQty(lead.expectedQty)}</span></div>
+              <div className="flex items-center gap-1"><Droplets className="h-3 w-3" /><span className="font-medium text-gray-700 dark:text-gray-300">{formatQty(lead.expectedQty)}</span></div>
             </div>
             <div className="flex items-center justify-between mt-2">
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-5 ${sourceBadgeClasses(lead.source)}`}>{lead.source}</Badge>
-              <span className="text-[10px] text-gray-400">{formatDate(lead.createdAt)}</span>
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">{formatDate(lead.createdAt)}</span>
             </div>
           </div>
         </div>
@@ -306,14 +306,14 @@ function SortableLeadCard({
 function DragOverlayCard({ lead }: { lead: Lead }) {
   const stage = getStageConfig(lead.status)
   return (
-    <div className={`border ${stage.cardBorder} bg-white rounded-xl shadow-2xl rotate-2 scale-105 w-[280px] p-3`}>
+    <div className={`border ${stage.cardBorder} bg-white dark:bg-gray-900 rounded-xl shadow-2xl rotate-2 scale-105 w-[280px] p-3`}>
       <div className="flex items-center gap-2.5">
         <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${getAvatarGradient(lead.status)} shrink-0`}>
           <span className="text-[10px] font-bold text-white">{getInitials(lead.name)}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm text-gray-900 truncate">{lead.name}</h4>
-          <p className="text-xs text-gray-500 mt-0.5">{lead.phone}</p>
+          <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{lead.name}</h4>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{lead.phone}</p>
         </div>
       </div>
     </div>
@@ -360,13 +360,13 @@ function DroppableKanbanColumn({
             <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${stage.badgeBg}`}>
               <StageIcon className="h-3.5 w-3.5" />
             </div>
-            <h3 className="font-semibold text-sm text-gray-800">{stage.label}</h3>
+            <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{stage.label}</h3>
             <Badge variant="secondary" className={`h-5 min-w-[20px] px-1.5 text-[10px] ${stage.badgeBg} ${stage.badgeText} border-0`}>
               {leads.length}
             </Badge>
           </div>
           {totalQty > 0 && (
-            <span className="text-[10px] text-gray-400 font-medium">{totalQty}L/day</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{totalQty}L/day</span>
           )}
         </div>
         <div className={`h-0.5 rounded-full ${stage.bgClass} opacity-30`} />
@@ -376,9 +376,9 @@ function DroppableKanbanColumn({
       <SortableContext items={leadIds} strategy={verticalListSortingStrategy}>
         <div className="flex-1 space-y-2 overflow-y-auto max-h-[calc(100vh-340px)] pr-0.5 custom-scrollbar">
           {leads.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-8 px-4 rounded-lg border border-dashed border-gray-200 bg-gray-50/50">
-              <p className="text-xs text-gray-400 text-center">No leads here</p>
-              {isOver && <p className="text-[10px] mt-1 text-gray-400">Drop here</p>}
+            <div className="flex flex-col items-center justify-center py-8 px-4 rounded-lg border border-dashed border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-800/30">
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-center">No leads here</p>
+              {isOver && <p className="text-[10px] mt-1 text-gray-400 dark:text-gray-500">Drop here</p>}
             </div>
           )}
           {leads.map((lead) => (
@@ -411,7 +411,7 @@ function MobileLeadCard({
   return (
     <button
       onClick={() => onTap(lead)}
-      className="w-full text-left bg-white rounded-2xl border border-gray-100 p-3.5 hover:border-gray-200 active:scale-[0.98] transition-all duration-150 shadow-sm"
+      className="w-full text-left bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3.5 hover:border-gray-200 dark:hover:border-gray-700 active:scale-[0.98] transition-all duration-150 shadow-sm"
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}
@@ -421,26 +421,26 @@ function MobileLeadCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="font-semibold text-sm text-gray-900 truncate">{lead.name}</h4>
-            <ChevronRight className="h-4 w-4 text-gray-300 shrink-0" />
+            <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{lead.name}</h4>
+            <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600 shrink-0" />
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <Phone className="h-3 w-3 text-gray-400 shrink-0" />
-            <span className="text-xs text-gray-500 truncate">{lead.phone}</span>
+            <Phone className="h-3 w-3 text-gray-400 dark:text-gray-500 shrink-0" />
+            <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{lead.phone}</span>
           </div>
         </div>
       </div>
 
       {/* Info row */}
       <div className="flex items-center justify-between mt-2.5 pl-14">
-        <div className="flex items-center gap-2.5 text-xs text-gray-500">
+        <div className="flex items-center gap-2.5 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-1">
-            <MapPin className="h-3 w-3 text-gray-400" />
+            <MapPin className="h-3 w-3 text-gray-400 dark:text-gray-500" />
             <span className="truncate max-w-[100px]">{lead.area}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Droplets className="h-3 w-3 text-gray-400" />
-            <span className="font-medium text-gray-700">{formatQty(lead.expectedQty)}</span>
+            <Droplets className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+            <span className="font-medium text-gray-700 dark:text-gray-300">{formatQty(lead.expectedQty)}</span>
           </div>
         </div>
         <Badge className={`text-[10px] px-2 py-0.5 h-5 border-0 rounded-full ${getStageColor(lead.status)}`}>
@@ -465,7 +465,7 @@ function PipelineProgressBar({ leadsByStatus, total }: { leadsByStatus: Record<s
 
   return (
     <div className="px-1">
-      <div className="flex h-2 rounded-full overflow-hidden bg-gray-100 gap-0.5">
+      <div className="flex h-2 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 gap-0.5">
         {segments.map((seg) =>
           seg.count > 0 ? (
             <div
@@ -480,7 +480,7 @@ function PipelineProgressBar({ leadsByStatus, total }: { leadsByStatus: Record<s
         {segments.map((seg) => (
           <div key={seg.id} className="flex items-center gap-1">
             <div className={`h-1.5 w-1.5 rounded-full ${seg.bgClass}`} />
-            <span className="text-[9px] text-gray-400 font-medium">{seg.count}</span>
+            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-medium">{seg.count}</span>
           </div>
         ))}
       </div>
@@ -769,7 +769,7 @@ export default function LeadsPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <p className="text-sm text-gray-500">Loading leads...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading leads...</p>
         </div>
       </div>
     )
@@ -784,8 +784,8 @@ export default function LeadsPage() {
             <UserPlus className="h-4 w-4 md:h-5 md:w-5 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900 truncate">Leads</h1>
-            <p className="text-xs md:text-sm text-gray-500 truncate hidden sm:block">Track & manage your sales pipeline</p>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">Leads</h1>
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">Track & manage your sales pipeline</p>
           </div>
         </div>
         <Button onClick={openAddForm} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm shrink-0 h-10 md:h-auto px-4 rounded-xl">
@@ -801,17 +801,17 @@ export default function LeadsPage() {
         <div className="space-y-3">
           {/* Mobile Stats - Compact inline */}
           <div className="flex items-center gap-2 px-1">
-            <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg px-2.5 py-1.5">
               <Users className="h-3.5 w-3.5 text-gray-500" />
-              <span className="text-sm font-bold text-gray-900">{stats.total}</span>
-              <span className="text-[10px] text-gray-400">leads</span>
+              <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{stats.total}</span>
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">leads</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-green-50 rounded-lg px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-950/50 rounded-lg px-2.5 py-1.5">
               <TrendingUp className="h-3.5 w-3.5 text-green-600" />
               <span className="text-sm font-bold text-green-700">{stats.conversionRate}%</span>
               <span className="text-[10px] text-green-500">rate</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-blue-50 rounded-lg px-2.5 py-1.5">
+            <div className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 rounded-lg px-2.5 py-1.5">
               <Droplets className="h-3.5 w-3.5 text-blue-600" />
               <span className="text-sm font-bold text-blue-700">{stats.totalQty}L</span>
               <span className="text-[10px] text-blue-500">daily</span>
@@ -828,12 +828,12 @@ export default function LeadsPage() {
               placeholder="Search leads..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-11 rounded-xl bg-white border-gray-200 text-sm"
+              className="pl-9 h-11 rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm"
             />
             {(searchQuery || sourceFilter !== 'all' || areaFilter !== 'all') && (
               <button
                 onClick={() => { setSearchQuery(''); setSourceFilter('all'); setAreaFilter('all') }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full bg-gray-100 text-gray-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -844,11 +844,11 @@ export default function LeadsPage() {
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-4 px-4 pb-1">
             <button
               onClick={() => setMobileStageFilter('all')}
-              className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap shrink-0 min-h-[40px] transition-all ${mobileStageFilter === 'all' ? 'bg-gray-900 text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200'}`}
+              className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap shrink-0 min-h-[40px] transition-all ${mobileStageFilter === 'all' ? 'bg-gray-900 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}
             >
               <Layers className="h-3.5 w-3.5" />
               All
-              <span className={`ml-0.5 text-[10px] ${mobileStageFilter === 'all' ? 'text-gray-300' : 'text-gray-400'}`}>{stats.total}</span>
+              <span className={`ml-0.5 text-[10px] ${mobileStageFilter === 'all' ? 'text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>{stats.total}</span>
             </button>
             {PIPELINE_STAGES.map((stage) => {
               const count = (leadsByStatus[stage.id] || []).length
@@ -857,7 +857,7 @@ export default function LeadsPage() {
                 <button
                   key={stage.id}
                   onClick={() => setMobileStageFilter(stage.id)}
-                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap shrink-0 min-h-[40px] transition-all ${mobileStageFilter === stage.id ? `${stage.badgeBg} ${stage.badgeText} border border-transparent shadow-sm` : 'bg-white text-gray-500 border border-gray-100'}`}
+                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium whitespace-nowrap shrink-0 min-h-[40px] transition-all ${mobileStageFilter === stage.id ? `${stage.badgeBg} ${stage.badgeText} border border-transparent shadow-sm` : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700'}`}
                 >
                   <StageIcon className="h-3.5 w-3.5" />
                   {stage.label}
@@ -882,16 +882,16 @@ export default function LeadsPage() {
               )}
             </Button>
             {(areaFilter !== 'all' || sourceFilter !== 'all') && (
-              <Button variant="ghost" size="sm" className="h-9 text-xs text-gray-500" onClick={() => { setAreaFilter('all'); setSourceFilter('all') }}>Clear</Button>
+              <Button variant="ghost" size="sm" className="h-9 text-xs text-gray-500 dark:text-gray-400" onClick={() => { setAreaFilter('all'); setSourceFilter('all') }}>Clear</Button>
             )}
           </div>
 
           {/* Expanded filters */}
           {showFilters && (
-            <Card className="rounded-xl border-gray-200/80 shadow-sm">
+            <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
               <CardContent className="p-3 space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-gray-500">Area</Label>
+                  <Label className="text-xs font-medium text-gray-500 dark:text-gray-400">Area</Label>
                   <Select value={areaFilter} onValueChange={setAreaFilter}>
                     <SelectTrigger className="w-full h-10 text-xs rounded-lg"><SelectValue placeholder="All Areas" /></SelectTrigger>
                     <SelectContent>
@@ -901,7 +901,7 @@ export default function LeadsPage() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-gray-500">Source</Label>
+                  <Label className="text-xs font-medium text-gray-500 dark:text-gray-400">Source</Label>
                   <Select value={sourceFilter} onValueChange={setSourceFilter}>
                     <SelectTrigger className="w-full h-10 text-xs rounded-lg"><SelectValue placeholder="All Sources" /></SelectTrigger>
                     <SelectContent>
@@ -917,11 +917,11 @@ export default function LeadsPage() {
           {/* Mobile Lead List */}
           {filteredLeads.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 mb-4">
-                <UserPlus className="h-8 w-8 text-gray-300" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-800/50 mb-4">
+                <UserPlus className="h-8 w-8 text-gray-300 dark:text-gray-600" />
               </div>
-              <p className="font-semibold text-gray-900">No leads found</p>
-              <p className="text-sm text-gray-500 mt-1 text-center">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">No leads found</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 text-center">
                 {searchQuery || areaFilter !== 'all' || sourceFilter !== 'all' || mobileStageFilter !== 'all'
                   ? 'Try adjusting your filters'
                   : 'Add your first lead to get started'}
@@ -950,19 +950,19 @@ export default function LeadsPage() {
           {/* Desktop Stats */}
           <div className="grid grid-cols-5 gap-3">
             {[
-              { icon: Users, label: 'Total Leads', value: stats.total, color: 'gray', bg: 'bg-gray-100', text: 'text-gray-700' },
-              { icon: TrendingUp, label: 'Conversion', value: `${stats.conversionRate}%`, color: 'green', bg: 'bg-green-100', text: 'text-green-700' },
-              { icon: Layers, label: 'Active', value: stats.activeLeads, color: 'blue', bg: 'bg-blue-100', text: 'text-blue-700' },
-              { icon: Droplets, label: 'Daily Qty', value: `${stats.totalQty}L`, color: 'emerald', bg: 'bg-emerald-100', text: 'text-emerald-700' },
-              { icon: CheckCircle2, label: 'Converted', value: stats.converted, color: 'green', bg: 'bg-green-100', text: 'text-green-700' },
+              { icon: Users, label: 'Total Leads', value: stats.total, color: 'gray', bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-700 dark:text-gray-300' },
+              { icon: TrendingUp, label: 'Conversion', value: `${stats.conversionRate}%`, color: 'green', bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-700 dark:text-green-300' },
+              { icon: Layers, label: 'Active', value: stats.activeLeads, color: 'blue', bg: 'bg-blue-100 dark:bg-blue-900', text: 'text-blue-700 dark:text-blue-300' },
+              { icon: Droplets, label: 'Daily Qty', value: `${stats.totalQty}L`, color: 'emerald', bg: 'bg-emerald-100 dark:bg-emerald-900', text: 'text-emerald-700 dark:text-emerald-300' },
+              { icon: CheckCircle2, label: 'Converted', value: stats.converted, color: 'green', bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-700 dark:text-green-300' },
             ].map((stat) => (
-              <Card key={stat.label} className="rounded-xl border-gray-200/80 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={stat.label} className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-3.5">
                   <div className="flex items-center gap-2 mb-1.5">
                     <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${stat.bg}`}>
                       <stat.icon className={`h-3.5 w-3.5 ${stat.text}`} />
                     </div>
-                    <span className="text-xs font-medium text-gray-500">{stat.label}</span>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{stat.label}</span>
                   </div>
                   <p className={`text-xl font-bold ${stat.text} ml-9`}>{stat.value}</p>
                 </CardContent>
@@ -971,11 +971,11 @@ export default function LeadsPage() {
           </div>
 
           {/* Desktop Filters */}
-          <Card className="rounded-xl border-gray-200/80 shadow-sm">
+          <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-[280px]">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <Input placeholder="Search name or phone..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-9 text-sm" />
                 </div>
                 <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => setShowFilters(!showFilters)}>
@@ -984,9 +984,9 @@ export default function LeadsPage() {
                     <Badge className="h-4 min-w-[16px] px-1 text-[9px] bg-green-600 text-white border-0">{(areaFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0)}</Badge>
                   )}
                 </Button>
-                <div className="flex items-center gap-1.5 text-sm text-gray-500 ml-auto">
+                <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 ml-auto">
                   <Users className="h-4 w-4" />
-                  <span className="font-medium text-gray-700">{filteredLeads.length}</span> leads
+                  <span className="font-medium text-gray-700 dark:text-gray-300">{filteredLeads.length}</span> leads
                 </div>
               </div>
               {showFilters && (
@@ -994,7 +994,7 @@ export default function LeadsPage() {
                   <Separator className="my-3" />
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-500 shrink-0">Area:</span>
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0">Area:</span>
                       <Select value={areaFilter} onValueChange={setAreaFilter}>
                         <SelectTrigger className="w-[180px] h-8 text-xs"><SelectValue placeholder="All Areas" /></SelectTrigger>
                         <SelectContent>
@@ -1004,7 +1004,7 @@ export default function LeadsPage() {
                       </Select>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-500 shrink-0">Source:</span>
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 shrink-0">Source:</span>
                       <Select value={sourceFilter} onValueChange={setSourceFilter}>
                         <SelectTrigger className="w-[160px] h-8 text-xs"><SelectValue placeholder="All Sources" /></SelectTrigger>
                         <SelectContent>
@@ -1014,7 +1014,7 @@ export default function LeadsPage() {
                       </Select>
                     </div>
                     {(areaFilter !== 'all' || sourceFilter !== 'all') && (
-                      <Button variant="ghost" size="sm" className="h-8 text-xs text-gray-500" onClick={() => { setAreaFilter('all'); setSourceFilter('all') }}>Clear</Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-xs text-gray-500 dark:text-gray-400" onClick={() => { setAreaFilter('all'); setSourceFilter('all') }}>Clear</Button>
                     )}
                   </div>
                 </>
@@ -1035,14 +1035,14 @@ export default function LeadsPage() {
               </DragOverlay>
             </DndContext>
           ) : (
-            <Card className="rounded-xl border-gray-200/80 shadow-sm">
+            <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
               <CardContent className="flex h-64 flex-col items-center justify-center gap-3 p-6">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50">
-                  <UserPlus className="h-7 w-7 text-gray-400" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-800/50">
+                  <UserPlus className="h-7 w-7 text-gray-400 dark:text-gray-500" />
                 </div>
                 <div className="text-center">
-                  <p className="font-medium text-gray-900">No leads found</p>
-                  <p className="text-sm text-gray-500 mt-1">Add your first lead to get started</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">No leads found</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Add your first lead to get started</p>
                 </div>
                 <Button onClick={openAddForm} className="mt-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-sm">
                   <Plus className="h-4 w-4 mr-1.5" />Add Lead
@@ -1073,7 +1073,7 @@ export default function LeadsPage() {
                     <span className="text-base font-bold text-white">{getInitials(selectedLead.name)}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-lg text-gray-900 truncate">{selectedLead.name}</h3>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 truncate">{selectedLead.name}</h3>
                     <Badge className={`mt-1 text-[11px] px-2.5 py-0.5 h-6 border-0 rounded-full ${getStageColor(selectedLead.status)}`}>
                       {selectedLead.status}
                     </Badge>
@@ -1082,32 +1082,32 @@ export default function LeadsPage() {
 
                 {/* Quick Info Cards */}
                 <div className="grid grid-cols-2 gap-2.5 mb-5">
-                  <div className="flex items-center gap-2.5 bg-gray-50 rounded-xl p-3">
-                    <Phone className="h-4 w-4 text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <Phone className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] text-gray-400 font-medium">Phone</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">{selectedLead.phone}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Phone</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{selectedLead.phone}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-gray-50 rounded-xl p-3">
-                    <Droplets className="h-4 w-4 text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <Droplets className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] text-gray-400 font-medium">Daily Qty</p>
-                      <p className="text-sm font-medium text-gray-900">{formatQty(selectedLead.expectedQty)}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Daily Qty</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatQty(selectedLead.expectedQty)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-gray-50 rounded-xl p-3">
-                    <MapPin className="h-4 w-4 text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] text-gray-400 font-medium">Area</p>
-                      <p className="text-sm font-medium text-gray-900 truncate">{selectedLead.area}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Area</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{selectedLead.area}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5 bg-gray-50 rounded-xl p-3">
-                    <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] text-gray-400 font-medium">Added</p>
-                      <p className="text-sm font-medium text-gray-900">{formatDate(selectedLead.createdAt)}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Added</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatDate(selectedLead.createdAt)}</p>
                     </div>
                   </div>
                 </div>
@@ -1115,19 +1115,19 @@ export default function LeadsPage() {
                 {/* Source & Address */}
                 <div className="space-y-3 mb-5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Source</span>
+                    <span className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Source</span>
                     <Badge variant="outline" className={`text-[11px] px-2 py-0.5 h-6 ${sourceBadgeClasses(selectedLead.source)}`}>{selectedLead.source}</Badge>
                   </div>
                   {selectedLead.address && (
                     <div>
-                      <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Address</span>
-                      <p className="text-sm text-gray-700 mt-1">{selectedLead.address}</p>
+                      <span className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Address</span>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{selectedLead.address}</p>
                     </div>
                   )}
                   {selectedLead.notes && (
                     <div>
-                      <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Notes</span>
-                      <p className="text-sm text-gray-700 mt-1">{selectedLead.notes}</p>
+                      <span className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Notes</span>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{selectedLead.notes}</p>
                     </div>
                   )}
                 </div>
@@ -1137,7 +1137,7 @@ export default function LeadsPage() {
                 {/* Move to Stage */}
                 {selectedLead.status !== 'Converted' && selectedLead.status !== 'Lost' && (
                   <div className="mb-5">
-                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2.5">Move to Stage</p>
+                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5">Move to Stage</p>
                     <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-5 px-5 pb-1">
                       {PIPELINE_STAGES.filter(s => s.id !== selectedLead.status).map((stage) => {
                         const StageIcon = stage.icon
@@ -1176,7 +1176,7 @@ export default function LeadsPage() {
                 <div className="grid grid-cols-2 gap-2.5">
                   <Button
                     variant="outline"
-                    className="h-12 rounded-xl text-sm font-medium border-gray-200"
+                    className="h-12 rounded-xl text-sm font-medium border-gray-200 dark:border-gray-700"
                     onClick={() => openEditForm(selectedLead)}
                   >
                     <Pencil className="h-4 w-4 mr-1.5" />
@@ -1194,7 +1194,7 @@ export default function LeadsPage() {
                   {selectedLead.status !== 'Lost' && selectedLead.status !== 'Converted' && (
                     <Button
                       variant="outline"
-                      className="h-12 rounded-xl text-sm font-medium border-red-200 text-red-600 hover:bg-red-50"
+                      className="h-12 rounded-xl text-sm font-medium border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
                       onClick={() => { handleMarkLost(selectedLead); setDetailOpen(false) }}
                     >
                       <XCircle className="h-4 w-4 mr-1.5" />
@@ -1203,7 +1203,7 @@ export default function LeadsPage() {
                   )}
                   <Button
                     variant="outline"
-                    className="h-12 rounded-xl text-sm font-medium border-red-200 text-red-500 hover:bg-red-50"
+                    className="h-12 rounded-xl text-sm font-medium border-red-200 text-red-500 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
                     onClick={() => { setDeleteLead(selectedLead); setDetailOpen(false) }}
                   >
                     <Trash2 className="h-4 w-4 mr-1.5" />
@@ -1221,7 +1221,7 @@ export default function LeadsPage() {
         <DialogContent className={`sm:max-w-[520px] p-0 gap-0 overflow-hidden ${isMobile ? '!top-0 !left-0 !translate-x-0 !translate-y-0 w-screen h-[100dvh] max-w-none rounded-none' : 'max-h-[90vh] rounded-xl'}`}>
           <div className={`flex flex-col ${isMobile ? 'h-full' : 'max-h-[90vh]'}`}>
             {/* Header - always visible */}
-            <div className="shrink-0 px-5 pt-5 pb-3 sm:px-6 sm:pt-6 border-b border-gray-100">
+            <div className="shrink-0 px-5 pt-5 pb-3 sm:px-6 sm:pt-6 border-b border-gray-100 dark:border-gray-800">
               <DialogHeader>
                 <DialogTitle className="text-lg">{editingLead ? 'Edit Lead' : 'New Lead'}</DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm">
@@ -1275,7 +1275,7 @@ export default function LeadsPage() {
             </div>
 
             {/* Footer - always visible */}
-            <div className="shrink-0 px-5 pb-5 pt-3 sm:px-6 sm:pb-6 border-t border-gray-100 bg-white">
+            <div className="shrink-0 px-5 pb-5 pt-3 sm:px-6 sm:pb-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <DialogFooter className="flex-row gap-2.5">
                 <Button variant="outline" onClick={closeForm} disabled={submitting} className="flex-1 h-12 rounded-xl">Cancel</Button>
                 <Button onClick={handleSubmit} disabled={submitting} className="flex-1 h-12 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-sm">
@@ -1293,13 +1293,13 @@ export default function LeadsPage() {
         <DialogContent className={`sm:max-w-[420px] ${isMobile ? 'rounded-2xl mx-4 max-w-[calc(100%-2rem)]' : ''}`}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900 shrink-0">
                 <UserCheck className="h-5 w-5 text-green-600" />
               </div>
               Convert to Customer
             </DialogTitle>
             <DialogDescription>
-              Convert <span className="font-semibold text-gray-900">{convertLead?.name}</span> to a customer? This will create a new customer record.
+              Convert <span className="font-semibold text-gray-900 dark:text-gray-100">{convertLead?.name}</span> to a customer? This will create a new customer record.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row gap-2.5">
@@ -1317,7 +1317,7 @@ export default function LeadsPage() {
         <AlertDialogContent className={isMobile ? 'rounded-2xl mx-4 max-w-[calc(100%-2rem)]' : ''}>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900 shrink-0">
                 <Trash2 className="h-5 w-5 text-red-600" />
               </div>
               Delete Lead
