@@ -1345,9 +1345,9 @@ export default function SettingsPage() {
 
       {/* ── Mobile Sticky Save Bar ──────────────────────────────────── */}
       {isDirty && isMobile && (
-        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom))] left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-md px-4 py-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom))] left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-4 py-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
           <div className="flex items-center justify-between gap-3">
-            <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-11 rounded-lg border-gray-200 flex-1 text-sm" disabled={saving}>
+            <Button variant="outline" onClick={() => setSettings(savedSettings)} className="h-11 rounded-lg border-gray-200 dark:border-gray-700 flex-1 text-sm" disabled={saving}>
               <X className="h-4 w-4 mr-1.5" />Discard
             </Button>
             <Button onClick={handleSave} disabled={saving} className="h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm flex-[2] text-sm">
@@ -1363,7 +1363,7 @@ export default function SettingsPage() {
 
       {/* ── Desktop Sticky Save Bar ──────────────────────────────────── */}
       {isDirty && !isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-6 py-3 z-50">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-6 py-3 z-50">
           <div className="mx-auto flex max-w-5xl items-center justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">You have unsaved changes</p>
             <div className="flex items-center gap-3">

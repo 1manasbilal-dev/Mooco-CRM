@@ -285,17 +285,17 @@ export default function DairyFlowApp() {
                 </button>
               )
             })}
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3 px-1">Quick Actions</p>
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 px-1">Quick Actions</p>
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => { setActivePage('leads'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-green-50 border border-green-100 py-3 px-2 active:bg-green-100 transition-colors">
-                  <UserPlus className="h-5 w-5 text-green-600" /><span className="text-xs font-medium text-green-700">Add Lead</span>
+                <button onClick={() => { setActivePage('leads'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900 py-3 px-2 active:bg-green-100 dark:active:bg-green-900/50 transition-colors">
+                  <UserPlus className="h-5 w-5 text-green-600 dark:text-green-400" /><span className="text-xs font-medium text-green-700 dark:text-green-300">Add Lead</span>
                 </button>
-                <button onClick={() => { setActivePage('customers'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-100 py-3 px-2 active:bg-blue-100 transition-colors">
-                  <Users className="h-5 w-5 text-blue-600" /><span className="text-xs font-medium text-blue-700">Customer</span>
+                <button onClick={() => { setActivePage('customers'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 py-3 px-2 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors">
+                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" /><span className="text-xs font-medium text-blue-700 dark:text-blue-300">Customer</span>
                 </button>
-                <button onClick={() => { setActivePage('payments'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-amber-50 border border-amber-100 py-3 px-2 active:bg-amber-100 transition-colors">
-                  <Wallet className="h-5 w-5 text-amber-600" /><span className="text-xs font-medium text-amber-700">Payment</span>
+                <button onClick={() => { setActivePage('payments'); setMoreSheetOpen(false) }} className="flex flex-col items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900 py-3 px-2 active:bg-amber-100 dark:active:bg-amber-900/50 transition-colors">
+                  <Wallet className="h-5 w-5 text-amber-600 dark:text-amber-400" /><span className="text-xs font-medium text-amber-700 dark:text-amber-300">Payment</span>
                 </button>
               </div>
             </div>
