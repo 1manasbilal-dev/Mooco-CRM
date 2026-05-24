@@ -10,9 +10,16 @@ export async function GET(
     const customer = await db.customer.findUnique({
       where: { id },
       include: {
-        deliveries: { orderBy: { createdAt: 'desc' }, take: 50 },
+        deliveries: { orderBy: { createdAt: 'desc' }, take: 100 },
         payments: { orderBy: { createdAt: 'desc' }, take: 50 },
         lead: true,
+        products: { include: { item: true } },
+        vacations: { orderBy: { startDate: 'desc' } },
+        sales: {
+          include: { item: { select: { name: true, category: true, unit: true, pricePerUnit: true } } },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        },
       },
     })
 
@@ -56,6 +63,9 @@ export async function DELETE(
     // Delete related records first
     await db.delivery.deleteMany({ where: { customerId: id } })
     await db.payment.deleteMany({ where: { customerId: id } })
+    await db.customerProduct.deleteMany({ where: { customerId: id } })
+    await db.vacation.deleteMany({ where: { customerId: id } })
+    await db.sale.deleteMany({ where: { customerId: id } })
     // Unlink from lead
     await db.lead.updateMany({ where: { convertedToId: id }, data: { convertedToId: null } })
     await db.customer.delete({ where: { id } })

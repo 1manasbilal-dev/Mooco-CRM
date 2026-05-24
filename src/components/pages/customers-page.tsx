@@ -82,8 +82,14 @@ import {
   Wallet,
   Activity,
   ChevronRight,
+  Umbrella,
+  ShoppingBag,
+  PencilLine,
+  ShoppingCart,
+  CalendarOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 // ── Types ───────────────────────────────────────────────────────────────
 interface Customer {
@@ -104,10 +110,53 @@ interface Customer {
   _count?: { deliveries: number; payments: number }
 }
 
-interface CustomerDetail extends Customer {
-  deliveries: Delivery[]
-  payments: Payment[]
-  lead?: { id: string; name: string } | null
+interface Vacation {
+  id: string
+  customerId: string
+  startDate: string
+  endDate: string
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface CustomerProductItem {
+  id: string
+  name: string
+  category: string
+  unit: string
+  pricePerUnit: number
+  status: string
+}
+
+interface CustomerProduct {
+  id: string
+  customerId: string
+  itemId: string
+  dailyQty: number
+  createdAt: string
+  updatedAt: string
+  item: CustomerProductItem
+}
+
+interface SaleItem {
+  name: string
+  category: string
+  unit: string
+  pricePerUnit: number
+}
+
+interface Sale {
+  id: string
+  itemId: string
+  customerId: string | null
+  quantity: number
+  date: string
+  notes: string
+  amount: number
+  createdAt: string
+  updatedAt: string
+  item: SaleItem
 }
 
 interface Delivery {
@@ -117,6 +166,10 @@ interface Delivery {
   status: string
   notes: string
   route: string
+  itemId: string | null
+  isExtra: boolean
+  pricePerUnit: number
+  productName: string
   createdAt: string
 }
 
@@ -132,6 +185,15 @@ interface Payment {
   createdAt: string
 }
 
+interface CustomerDetail extends Customer {
+  deliveries: Delivery[]
+  payments: Payment[]
+  lead?: { id: string; name: string } | null
+  products: CustomerProduct[]
+  vacations: Vacation[]
+  sales: Sale[]
+}
+
 interface LedgerEntry {
   id: string
   date: string
@@ -139,12 +201,22 @@ interface LedgerEntry {
   debit: number
   credit: number
   balance: number
-  type: 'delivery' | 'payment'
+  type: 'delivery' | 'payment' | 'sale'
   status: string
 }
 
 // ── Constants ───────────────────────────────────────────────────────────
 const STATUSES = ['Active', 'Paused']
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Milk: 'bg-blue-400',
+  Yogurt: 'bg-purple-400',
+  Butter: 'bg-yellow-400',
+  Cream: 'bg-amber-300',
+  Eggs: 'bg-orange-400',
+  Paneer: 'bg-green-400',
+  Other: 'bg-gray-400',
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 function formatPKR(amount: number): string {
@@ -155,23 +227,57 @@ function calcMonthlyBill(dailyQty: number, pricePerLiter: number): number {
   return dailyQty * pricePerLiter * 30
 }
 
+function isVacationActive(vacation: Vacation): boolean {
+  const today = new Date().toISOString().split('T')[0]
+  return vacation.startDate <= today && vacation.endDate >= today
+}
+
+function isVacationUpcoming(vacation: Vacation): boolean {
+  const today = new Date().toISOString().split('T')[0]
+  return vacation.startDate > today
+}
+
+function formatDateRange(start: string, end: string): string {
+  const s = new Date(start + 'T00:00:00')
+  const e = new Date(end + 'T00:00:00')
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+  return `${s.toLocaleDateString('en-PK', opts)} — ${e.toLocaleDateString('en-PK', opts)}`
+}
+
 function buildLedger(customer: CustomerDetail): LedgerEntry[] {
   const entries: LedgerEntry[] = []
 
-  // Add delivery entries as debits (amounts owed)
+  // Add delivery entries as debits — use productName and pricePerUnit from delivery
   for (const d of customer.deliveries) {
     if (d.status === 'Delivered') {
+      const price = d.pricePerUnit || customer.pricePerLiter
+      const name = d.productName || 'Milk'
       entries.push({
         id: `d-${d.id}`,
         date: d.date,
-        description: `Milk Delivery — ${d.quantity}L × ${formatPKR(customer.pricePerLiter)}/L`,
-        debit: d.quantity * customer.pricePerLiter,
+        description: `${name} Delivery — ${d.quantity}${d.itemId ? '' : 'L'} × ${formatPKR(price)}${d.itemId ? `/${d.itemId ? 'unit' : 'L'}` : '/L'}`,
+        debit: d.quantity * price,
         credit: 0,
         balance: 0,
         type: 'delivery',
         status: d.status,
       })
     }
+  }
+
+  // Add sale entries as debits (extra sales linked to customer)
+  for (const s of customer.sales) {
+    const pricePerUnit = s.item.pricePerUnit || 0
+    entries.push({
+      id: `s-${s.id}`,
+      date: s.date,
+      description: `${s.item.name} Sale — ${s.quantity} × ${formatPKR(pricePerUnit)}`,
+      debit: s.amount || (s.quantity * pricePerUnit),
+      credit: 0,
+      balance: 0,
+      type: 'sale',
+      status: 'Completed',
+    })
   }
 
   // Add payment entries as credits (amounts paid)
@@ -209,6 +315,8 @@ function buildLedger(customer: CustomerDetail): LedgerEntry[] {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function CustomersPage() {
+  const isMobile = useIsMobile()
+
   // State
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
@@ -234,6 +342,22 @@ export default function CustomersPage() {
   // Delete dialog
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Vacation form
+  const [vacationFormOpen, setVacationFormOpen] = useState(false)
+  const [vacationForm, setVacationForm] = useState({ startDate: '', endDate: '', notes: '' })
+  const [vacationLoading, setVacationLoading] = useState(false)
+
+  // Product form
+  const [productFormOpen, setProductFormOpen] = useState(false)
+  const [productForm, setProductForm] = useState({ itemId: '', dailyQty: 1 })
+  const [productLoading, setProductLoading] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<CustomerProduct | null>(null)
+  const [editProductQty, setEditProductQty] = useState('')
+  const [editProductOpen, setEditProductOpen] = useState(false)
+
+  // Inventory items for product dropdown
+  const [inventoryItems, setInventoryItems] = useState<CustomerProductItem[]>([])
 
   // Form state
   const [form, setForm] = useState({
@@ -281,10 +405,11 @@ export default function CustomersPage() {
   useEffect(() => {
     async function fetchOptions() {
       try {
-        const [areasRes, milkTypesRes, deliveryTimesRes] = await Promise.all([
+        const [areasRes, milkTypesRes, deliveryTimesRes, inventoryRes] = await Promise.all([
           fetch('/api/areas'),
           fetch('/api/milk-types'),
           fetch('/api/delivery-times'),
+          fetch('/api/inventory'),
         ])
         if (areasRes.ok) {
           const data = await areasRes.json()
@@ -297,6 +422,10 @@ export default function CustomersPage() {
         if (deliveryTimesRes.ok) {
           const data = await deliveryTimesRes.json()
           setDeliveryTimes(Array.isArray(data) ? data : [])
+        }
+        if (inventoryRes.ok) {
+          const data = await inventoryRes.json()
+          setInventoryItems(Array.isArray(data) ? data : [])
         }
       } catch { /* ignore */ }
     }
@@ -482,6 +611,122 @@ export default function CustomersPage() {
     }
   }
 
+  // ── Vacation handlers ────────────────────────────────────────────────
+  const handleAddVacation = async () => {
+    if (!selectedCustomer || !vacationForm.startDate || !vacationForm.endDate) {
+      toast.error('Start date and end date are required')
+      return
+    }
+    if (vacationForm.endDate < vacationForm.startDate) {
+      toast.error('End date must be after start date')
+      return
+    }
+    setVacationLoading(true)
+    try {
+      const res = await fetch('/api/vacations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: selectedCustomer.id,
+          startDate: vacationForm.startDate,
+          endDate: vacationForm.endDate,
+          notes: vacationForm.notes,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to add vacation')
+      }
+      toast.success('Vacation added')
+      setVacationFormOpen(false)
+      setVacationForm({ startDate: '', endDate: '', notes: '' })
+      fetchDetail(selectedCustomer.id, 'vacations')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to add vacation')
+    } finally {
+      setVacationLoading(false)
+    }
+  }
+
+  const handleDeleteVacation = async (vacationId: string) => {
+    if (!selectedCustomer) return
+    try {
+      const res = await fetch(`/api/vacations/${vacationId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Vacation removed')
+      fetchDetail(selectedCustomer.id, 'vacations')
+    } catch {
+      toast.error('Failed to remove vacation')
+    }
+  }
+
+  // ── Customer Product handlers ────────────────────────────────────────
+  const handleAddProduct = async () => {
+    if (!selectedCustomer || !productForm.itemId) {
+      toast.error('Please select a product')
+      return
+    }
+    setProductLoading(true)
+    try {
+      const res = await fetch('/api/customer-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: selectedCustomer.id,
+          itemId: productForm.itemId,
+          dailyQty: productForm.dailyQty,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to add product')
+      }
+      toast.success('Product added to daily plan')
+      setProductFormOpen(false)
+      setProductForm({ itemId: '', dailyQty: 1 })
+      fetchDetail(selectedCustomer.id, 'products')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to add product')
+    } finally {
+      setProductLoading(false)
+    }
+  }
+
+  const handleEditProduct = async () => {
+    if (!selectedCustomer || !editingProduct) return
+    const qty = parseFloat(editProductQty)
+    if (isNaN(qty) || qty <= 0) {
+      toast.error('Please enter a valid quantity')
+      return
+    }
+    try {
+      const res = await fetch(`/api/customer-products/${editingProduct.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dailyQty: qty }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success('Product quantity updated')
+      setEditProductOpen(false)
+      setEditingProduct(null)
+      fetchDetail(selectedCustomer.id, 'products')
+    } catch {
+      toast.error('Failed to update product')
+    }
+  }
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!selectedCustomer) return
+    try {
+      const res = await fetch(`/api/customer-products/${productId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('Product removed from daily plan')
+      fetchDetail(selectedCustomer.id, 'products')
+    } catch {
+      toast.error('Failed to remove product')
+    }
+  }
+
   // ── Computed stats ───────────────────────────────────────────────────
   const activeCount = customers.filter((c) => c.status === 'Active').length
   const pausedCount = customers.filter((c) => c.status === 'Paused').length
@@ -523,6 +768,13 @@ export default function CustomersPage() {
       paymentsTotal: monthPayments.reduce((s, p) => s + p.amount, 0),
     }
   }, [selectedCustomer])
+
+  // Available products for adding (exclude already-added ones)
+  const availableProducts = useMemo(() => {
+    if (!selectedCustomer) return []
+    const addedIds = new Set(selectedCustomer.products.map((p) => p.itemId))
+    return inventoryItems.filter((item) => item.status === 'Active' && !addedIds.has(item.id))
+  }, [selectedCustomer, inventoryItems])
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
@@ -818,10 +1070,8 @@ export default function CustomersPage() {
                     isSelected ? 'ring-2 ring-green-500/40 border-green-300 bg-green-50/30' : ''
                   }`}
                 >
-                  {/* Gradient accent top */}
                   <div className={`h-0.5 ${isSelected ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-gray-100 to-gray-200'}`} />
                   <CardContent className="p-5">
-                    {/* Checkbox + Header */}
                     <div className="flex items-start gap-2 mb-3">
                       <Checkbox
                         checked={isSelected}
@@ -854,7 +1104,6 @@ export default function CustomersPage() {
                       </div>
                     </div>
 
-                    {/* Area */}
                     <div className="flex items-center gap-1.5 mb-3 pl-7">
                       <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
                       <span className="text-xs text-gray-500 truncate">
@@ -862,7 +1111,6 @@ export default function CustomersPage() {
                       </span>
                     </div>
 
-                    {/* Badges Row */}
                     <div className="flex flex-wrap gap-1.5 mb-3 pl-7">
                       <Badge
                         variant="secondary"
@@ -887,7 +1135,6 @@ export default function CustomersPage() {
                       </Badge>
                     </div>
 
-                    {/* Monthly Bill + Actions */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100 pl-7">
                       <div>
                         <p className="text-[11px] text-gray-400">Monthly Bill</p>
@@ -941,7 +1188,6 @@ export default function CustomersPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* Mobile: icon-only buttons with tooltips */}
                 <div className="flex sm:hidden items-center gap-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1004,7 +1250,6 @@ export default function CustomersPage() {
                   </Tooltip>
                 </div>
 
-                {/* Desktop: full buttons */}
                 <div className="hidden sm:flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -1149,27 +1394,30 @@ export default function CustomersPage() {
               <ScrollArea className="flex-1">
                 <div className="p-4 sm:p-6 sm:pt-4">
                   <Tabs value={detailTab} onValueChange={setDetailTab} className="w-full">
-                    <TabsList className="w-full grid grid-cols-4 h-11">
-                      <TabsTrigger value="overview" className="text-[11px] sm:text-xs">
-                        <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
-                        <span className="hidden sm:inline">Overview</span>
-                        <span className="sm:hidden">Info</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="ledger" className="text-[11px] sm:text-xs">
-                        <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
-                        Ledger
-                      </TabsTrigger>
-                      <TabsTrigger value="deliveries" className="text-[11px] sm:text-xs">
-                        <Package className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
-                        <span className="hidden sm:inline">Deliveries</span>
-                        <span className="sm:hidden">Del.</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="payments" className="text-[11px] sm:text-xs">
-                        <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
-                        <span className="hidden sm:inline">Payments</span>
-                        <span className="sm:hidden">Pay</span>
-                      </TabsTrigger>
-                    </TabsList>
+                    {/* ── Scrollable Tabs ──────────────────────────── */}
+                    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+                      <TabsList className="w-full grid grid-cols-4 h-11 min-w-[400px]">
+                        <TabsTrigger value="overview" className="text-[11px] sm:text-xs">
+                          <Activity className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                          <span className="hidden sm:inline">Overview</span>
+                          <span className="sm:hidden">Info</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="products" className="text-[11px] sm:text-xs">
+                          <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                          <span className="hidden sm:inline">Products</span>
+                          <span className="sm:hidden">Products</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="vacations" className="text-[11px] sm:text-xs">
+                          <Umbrella className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                          <span className="hidden sm:inline">Vacations</span>
+                          <span className="sm:hidden">Leave</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="ledger" className="text-[11px] sm:text-xs">
+                          <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1" />
+                          Ledger
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
 
                     {/* ── Overview Tab ─────────────────────────────── */}
                     <TabsContent value="overview" className="mt-3 sm:mt-4 space-y-4 sm:space-y-5">
@@ -1210,7 +1458,7 @@ export default function CustomersPage() {
                       {/* Milk Details */}
                       <div>
                         <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                          Milk Details
+                          Milk Plan
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="rounded-lg bg-gray-50 p-3">
@@ -1239,6 +1487,27 @@ export default function CustomersPage() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Active Vacation Banner */}
+                      {selectedCustomer.vacations.some((v) => isVacationActive(v)) && (
+                        <>
+                          <Separator />
+                          <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-3 flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 shrink-0">
+                              <Umbrella className="h-4 w-4 text-amber-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-amber-800">Currently on Vacation</p>
+                              <p className="text-[11px] text-amber-600 truncate">
+                                {selectedCustomer.vacations
+                                  .filter((v) => isVacationActive(v))
+                                  .map((v) => formatDateRange(v.startDate, v.endDate))
+                                  .join(', ')}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
 
                       <Separator />
 
@@ -1327,6 +1596,217 @@ export default function CustomersPage() {
                       )}
                     </TabsContent>
 
+                    {/* ── Products Tab ────────────────────────────── */}
+                    <TabsContent value="products" className="mt-3 sm:mt-4 space-y-4">
+                      {/* Milk Plan - Primary Product */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                          Primary Milk Plan
+                        </h4>
+                        <div className="rounded-xl border border-green-100 bg-gradient-to-br from-green-50/60 to-emerald-50/40 p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 shrink-0">
+                              <Milk className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-gray-900">{selectedCustomer.milkType} Milk</p>
+                              <p className="text-xs text-gray-500">Daily delivery</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="rounded-lg bg-white/80 p-2.5">
+                              <p className="text-[10px] text-gray-400">Daily Qty</p>
+                              <p className="text-sm font-bold text-gray-900">{selectedCustomer.dailyQty} L</p>
+                            </div>
+                            <div className="rounded-lg bg-white/80 p-2.5">
+                              <p className="text-[10px] text-gray-400">Price/L</p>
+                              <p className="text-sm font-bold text-gray-900">{formatPKR(selectedCustomer.pricePerLiter)}</p>
+                            </div>
+                            <div className="rounded-lg bg-white/80 p-2.5">
+                              <p className="text-[10px] text-gray-400">Monthly</p>
+                              <p className="text-sm font-bold text-green-700">{formatPKR(selectedCustomer.monthlyBill)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Other Daily Products */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            Other Daily Products
+                          </h4>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setProductForm({ itemId: '', dailyQty: 1 })
+                              setProductFormOpen(true)
+                            }}
+                            className="h-8 text-[11px] border-green-200 text-green-600 hover:bg-green-50"
+                            disabled={availableProducts.length === 0}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Product
+                          </Button>
+                        </div>
+
+                        {selectedCustomer.products.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                            <ShoppingBag className="h-8 w-8 mb-2" />
+                            <p className="text-sm font-medium">No additional products</p>
+                            <p className="text-xs mt-1">Add other daily products this customer receives</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {selectedCustomer.products.map((cp) => (
+                              <div
+                                key={cp.id}
+                                className="flex items-center gap-3 rounded-xl border border-gray-100 p-3 min-h-[52px] hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <span className={`shrink-0 h-2.5 w-2.5 rounded-full ${CATEGORY_COLORS[cp.item.category] || 'bg-gray-400'}`} />
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 truncate">{cp.item.name}</p>
+                                    <p className="text-[11px] text-gray-400">
+                                      {cp.item.category} · {formatPKR(cp.item.pricePerUnit)}/{cp.item.unit}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <p className="text-sm font-semibold text-gray-900">{cp.dailyQty} {cp.item.unit}</p>
+                                  <p className="text-[11px] text-gray-400">{formatPKR(cp.dailyQty * cp.item.pricePerUnit)}/day</p>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingProduct(cp)
+                                      setEditProductQty(String(cp.dailyQty))
+                                      setEditProductOpen(true)
+                                    }}
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                  >
+                                    <PencilLine className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteProduct(cp.id)}
+                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
+
+                    {/* ── Vacations Tab ───────────────────────────── */}
+                    <TabsContent value="vacations" className="mt-3 sm:mt-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          Vacations & Leave
+                        </h4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setVacationForm({ startDate: '', endDate: '', notes: '' })
+                            setVacationFormOpen(true)
+                          }}
+                          className="h-8 text-[11px] border-amber-200 text-amber-600 hover:bg-amber-50"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Vacation
+                        </Button>
+                      </div>
+
+                      {selectedCustomer.vacations.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                          <Umbrella className="h-10 w-10 mb-3" />
+                          <p className="text-sm font-medium">No vacations scheduled</p>
+                          <p className="text-xs mt-1">Add vacation periods when the customer won&apos;t receive deliveries</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {selectedCustomer.vacations.map((v) => {
+                            const active = isVacationActive(v)
+                            const upcoming = isVacationUpcoming(v)
+                            return (
+                              <div
+                                key={v.id}
+                                className={`rounded-xl border p-3 min-h-[52px] transition-colors ${
+                                  active
+                                    ? 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50'
+                                    : upcoming
+                                    ? 'border-blue-100 bg-blue-50/40'
+                                    : 'border-gray-100 bg-white'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${
+                                    active ? 'bg-amber-100' : upcoming ? 'bg-blue-100' : 'bg-gray-100'
+                                  }`}>
+                                    {active ? (
+                                      <Umbrella className="h-4 w-4 text-amber-600" />
+                                    ) : upcoming ? (
+                                      <CalendarOff className="h-4 w-4 text-blue-600" />
+                                    ) : (
+                                      <CalendarDays className="h-4 w-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-semibold text-gray-900 truncate">
+                                        {formatDateRange(v.startDate, v.endDate)}
+                                      </p>
+                                      {active && (
+                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-amber-100 text-amber-700 border-amber-200" variant="outline">
+                                          Active
+                                        </Badge>
+                                      )}
+                                      {upcoming && (
+                                        <Badge className="shrink-0 text-[9px] px-1.5 py-0 rounded-md bg-blue-100 text-blue-700 border-blue-200" variant="outline">
+                                          Upcoming
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    {v.notes && (
+                                      <p className="text-[11px] text-gray-500 mt-0.5 truncate">{v.notes}</p>
+                                    )}
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteVacation(v.id)}
+                                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 shrink-0"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {/* Info note */}
+                      <div className="rounded-lg bg-gray-50 p-3 flex items-start gap-2.5">
+                        <AlertCircle className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-gray-500">
+                          Customers on vacation won&apos;t be included in daily delivery auto-generation.
+                          Past vacations are kept for records.
+                        </p>
+                      </div>
+                    </TabsContent>
+
                     {/* ── Ledger Tab ───────────────────────────────── */}
                     <TabsContent value="ledger" className="mt-3 sm:mt-4">
                       {ledger.length === 0 ? (
@@ -1381,7 +1861,7 @@ export default function CustomersPage() {
                               >
                                 <div className="flex items-center justify-between mb-1.5">
                                   <div className="flex items-center gap-1.5">
-                                    {entry.type === 'delivery' ? (
+                                    {entry.type === 'delivery' || entry.type === 'sale' ? (
                                       <ArrowUpRight className="h-3 w-3 text-red-400" />
                                     ) : (
                                       <ArrowDownRight className="h-3 w-3 text-green-400" />
@@ -1409,7 +1889,6 @@ export default function CustomersPage() {
                                 </div>
                               </div>
                             ))}
-                            {/* Ledger totals on mobile */}
                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
                               <div className="flex items-center justify-between text-xs font-bold">
                                 <span className="text-gray-700">Total</span>
@@ -1444,12 +1923,17 @@ export default function CustomersPage() {
                                     </TableCell>
                                     <TableCell className="text-xs text-gray-700">
                                       <div className="flex items-center gap-2">
-                                        {entry.type === 'delivery' ? (
+                                        {entry.type === 'delivery' || entry.type === 'sale' ? (
                                           <ArrowUpRight className="h-3 w-3 text-red-400 shrink-0" />
                                         ) : (
                                           <ArrowDownRight className="h-3 w-3 text-green-400 shrink-0" />
                                         )}
                                         <span className="truncate max-w-[200px]">{entry.description}</span>
+                                        {entry.type === 'sale' && (
+                                          <Badge className="shrink-0 text-[9px] px-1 py-0 rounded bg-purple-50 text-purple-600 border-purple-200" variant="outline">
+                                            Sale
+                                          </Badge>
+                                        )}
                                       </div>
                                     </TableCell>
                                     <TableCell className="text-xs text-right font-mono">
@@ -1503,151 +1987,222 @@ export default function CustomersPage() {
                         </div>
                       )}
                     </TabsContent>
-
-                    {/* ── Deliveries Tab ───────────────────────────── */}
-                    <TabsContent value="deliveries" className="mt-3">
-                      {selectedCustomer.deliveries.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                          <Package className="h-8 w-8 mb-2" />
-                          <p className="text-sm">No delivery records yet</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {selectedCustomer.deliveries.map((d) => (
-                            <div
-                              key={d.id}
-                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3 min-h-[44px]"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-8 w-8 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${
-                                    d.status === 'Delivered'
-                                      ? 'bg-green-50'
-                                      : d.status === 'Missed'
-                                      ? 'bg-red-50'
-                                      : d.status === 'Cancelled'
-                                      ? 'bg-gray-100'
-                                      : 'bg-amber-50'
-                                  }`}
-                                >
-                                  {d.status === 'Delivered' ? (
-                                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                  ) : d.status === 'Missed' ? (
-                                    <XCircle className="h-4 w-4 text-red-500" />
-                                  ) : d.status === 'Cancelled' ? (
-                                    <AlertCircle className="h-4 w-4 text-gray-400" />
-                                  ) : (
-                                    <Clock className="h-4 w-4 text-amber-500" />
-                                  )}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {d.quantity}L — {d.route}
-                                  </p>
-                                  <div className="flex items-center gap-1.5 mt-0.5">
-                                    <CalendarDays className="h-3 w-3 text-gray-400" />
-                                    <p className="text-xs text-gray-500">{d.date}</p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                {d.status === 'Delivered' && (
-                                  <span className="text-xs font-mono text-red-600 font-semibold">
-                                    {formatPKR(d.quantity * selectedCustomer.pricePerLiter)}
-                                  </span>
-                                )}
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] px-2 py-0.5 rounded-md ${
-                                    d.status === 'Delivered'
-                                      ? 'bg-green-50 text-green-700 border-green-200'
-                                      : d.status === 'Missed'
-                                      ? 'bg-red-50 text-red-600 border-red-200'
-                                      : d.status === 'Cancelled'
-                                      ? 'bg-gray-100 text-gray-600 border-gray-200'
-                                      : 'bg-amber-50 text-amber-700 border-amber-200'
-                                  }`}
-                                >
-                                  {d.status}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-
-                    {/* ── Payments Tab ─────────────────────────────── */}
-                    <TabsContent value="payments" className="mt-3">
-                      {selectedCustomer.payments.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                          <CreditCard className="h-8 w-8 mb-2" />
-                          <p className="text-sm">No payment records yet</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {selectedCustomer.payments.map((p) => (
-                            <div
-                              key={p.id}
-                              className="flex items-center justify-between rounded-lg border border-gray-100 p-3 min-h-[44px]"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-8 w-8 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${
-                                    p.status === 'Completed'
-                                      ? 'bg-green-50'
-                                      : p.status === 'Failed'
-                                      ? 'bg-red-50'
-                                      : 'bg-amber-50'
-                                  }`}
-                                >
-                                  <IndianRupee
-                                    className={`h-4 w-4 ${
-                                      p.status === 'Completed'
-                                        ? 'text-green-600'
-                                        : p.status === 'Failed'
-                                        ? 'text-red-500'
-                                        : 'text-amber-500'
-                                    }`}
-                                  />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {formatPKR(p.amount)} — {p.method}
-                                  </p>
-                                  <div className="flex items-center gap-1.5 mt-0.5">
-                                    <CalendarDays className="h-3 w-3 text-gray-400" />
-                                    <p className="text-xs text-gray-500">{p.date}</p>
-                                    {p.period && (
-                                      <span className="text-xs text-gray-400">
-                                        ({p.period})
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <Badge
-                                variant="outline"
-                                className={`text-[10px] px-2 py-0.5 rounded-md ${
-                                  p.status === 'Completed'
-                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                    : p.status === 'Failed'
-                                    ? 'bg-red-50 text-red-600 border-red-200'
-                                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                                }`}
-                              >
-                                {p.status}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
                   </Tabs>
                 </div>
               </ScrollArea>
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Vacation Dialog ───────────────────────────────────────── */}
+      <Dialog open={vacationFormOpen} onOpenChange={setVacationFormOpen}>
+        <DialogContent className={isMobile ? 'w-[100vw] h-[100dvh] rounded-none p-0' : 'sm:max-w-md'}>
+          <div className={isMobile ? 'flex flex-col h-full' : ''}>
+            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100' : ''}>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100">
+                  <Umbrella className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+                Add Vacation
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Schedule a vacation period for this customer
+              </DialogDescription>
+            </DialogHeader>
+            <div className={`space-y-4 ${isMobile ? 'flex-1 overflow-y-auto px-4 py-4' : 'py-4'}`}>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">
+                    Start Date <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    type="date"
+                    value={vacationForm.startDate}
+                    onChange={(e) => setVacationForm({ ...vacationForm, startDate: e.target.value })}
+                    className="rounded-lg border-gray-200 min-h-[44px]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">
+                    End Date <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    type="date"
+                    value={vacationForm.endDate}
+                    onChange={(e) => setVacationForm({ ...vacationForm, endDate: e.target.value })}
+                    className="rounded-lg border-gray-200 min-h-[44px]"
+                    min={vacationForm.startDate || undefined}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Notes (optional)</Label>
+                <Textarea
+                  placeholder="Reason for vacation..."
+                  value={vacationForm.notes}
+                  onChange={(e) => setVacationForm({ ...vacationForm, notes: e.target.value })}
+                  className="rounded-lg border-gray-200 min-h-[60px]"
+                />
+              </div>
+            </div>
+            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 bg-white' : 'pt-2'}`}>
+              <Button
+                variant="outline"
+                onClick={() => setVacationFormOpen(false)}
+                className="rounded-xl min-h-[44px] flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddVacation}
+                disabled={vacationLoading}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl min-h-[44px] flex-1 sm:flex-none"
+              >
+                {vacationLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                Add Vacation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Product Dialog ────────────────────────────────────────── */}
+      <Dialog open={productFormOpen} onOpenChange={setProductFormOpen}>
+        <DialogContent className={isMobile ? 'w-[100vw] h-[100dvh] rounded-none p-0' : 'sm:max-w-md'}>
+          <div className={isMobile ? 'flex flex-col h-full' : ''}>
+            <DialogHeader className={isMobile ? 'shrink-0 px-4 pt-5 pb-3 border-b border-gray-100' : ''}>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-100">
+                  <ShoppingCart className="h-3.5 w-3.5 text-green-600" />
+                </div>
+                Add Daily Product
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                Add a product to the customer&apos;s daily delivery plan
+              </DialogDescription>
+            </DialogHeader>
+            <div className={`space-y-4 ${isMobile ? 'flex-1 overflow-y-auto px-4 py-4' : 'py-4'}`}>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">
+                  Product <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={productForm.itemId}
+                  onValueChange={(v) => setProductForm({ ...productForm, itemId: v })}
+                >
+                  <SelectTrigger className="rounded-lg border-gray-200 w-full min-h-[44px]">
+                    <SelectValue placeholder="Select a product..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableProducts.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full ${CATEGORY_COLORS[item.category] || 'bg-gray-400'}`} />
+                          {item.name} — {formatPKR(item.pricePerUnit)}/{item.unit}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {availableProducts.length === 0 && (
+                  <p className="text-[11px] text-gray-400">All available products have been added already</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">
+                  Daily Quantity <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="number"
+                  min={0.5}
+                  step={0.5}
+                  value={productForm.dailyQty}
+                  onChange={(e) => setProductForm({ ...productForm, dailyQty: parseFloat(e.target.value) || 0 })}
+                  className="rounded-lg border-gray-200 min-h-[44px]"
+                />
+              </div>
+              {productForm.itemId && (
+                <div className="rounded-lg bg-gray-50 p-3">
+                  <p className="text-[11px] text-gray-400">Daily Cost</p>
+                  <p className="text-sm font-bold text-gray-900">
+                    {formatPKR(
+                      productForm.dailyQty *
+                        (inventoryItems.find((i) => i.id === productForm.itemId)?.pricePerUnit || 0)
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className={`flex items-center gap-3 ${isMobile ? 'shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 bg-white' : 'pt-2'}`}>
+              <Button
+                variant="outline"
+                onClick={() => setProductFormOpen(false)}
+                className="rounded-xl min-h-[44px] flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddProduct}
+                disabled={productLoading || !productForm.itemId}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl min-h-[44px] flex-1 sm:flex-none"
+              >
+                {productLoading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+                Add Product
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit Product Quantity Dialog ──────────────────────────────── */}
+      <Dialog open={editProductOpen} onOpenChange={setEditProductOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PencilLine className="h-4 w-4 text-gray-500" />
+              Edit Quantity
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              {editingProduct ? `Update daily quantity for ${editingProduct.item.name}` : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Daily Quantity</Label>
+              <Input
+                type="number"
+                min={0.5}
+                step={0.5}
+                value={editProductQty}
+                onChange={(e) => setEditProductQty(e.target.value)}
+                className="rounded-lg border-gray-200 min-h-[44px]"
+              />
+            </div>
+            {editingProduct && (
+              <div className="rounded-lg bg-gray-50 p-3">
+                <p className="text-[11px] text-gray-400">New Daily Cost</p>
+                <p className="text-sm font-bold text-gray-900">
+                  {formatPKR((parseFloat(editProductQty) || 0) * editingProduct.item.pricePerUnit)}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setEditProductOpen(false)}
+              className="rounded-xl min-h-[44px] flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditProduct}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl min-h-[44px] flex-1 sm:flex-none"
+            >
+              Update
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -1667,7 +2222,6 @@ export default function CustomersPage() {
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
-              {/* Name */}
               <div className="space-y-1.5">
                 <Label htmlFor="name" className="text-sm font-medium">
                   Name <span className="text-red-500">*</span>
@@ -1681,7 +2235,6 @@ export default function CustomersPage() {
                 />
               </div>
 
-              {/* Phone + Area */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="phone" className="text-sm font-medium">
@@ -1717,7 +2270,6 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              {/* Address */}
               <div className="space-y-1.5">
                 <Label htmlFor="address" className="text-sm font-medium">
                   Address
@@ -1731,7 +2283,6 @@ export default function CustomersPage() {
                 />
               </div>
 
-              {/* Daily Qty + Milk Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="dailyQty" className="text-sm font-medium">
@@ -1776,7 +2327,6 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              {/* Price + Delivery Time */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="pricePerLiter" className="text-sm font-medium">
@@ -1813,7 +2363,6 @@ export default function CustomersPage() {
                 </div>
               </div>
 
-              {/* Monthly Bill Preview */}
               <div className="rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 p-3 flex items-center justify-between">
                 <p className="text-sm text-green-700 font-medium">Estimated Monthly Bill</p>
                 <p className="text-lg font-bold text-green-800">
@@ -1821,7 +2370,6 @@ export default function CustomersPage() {
                 </p>
               </div>
 
-              {/* Notes */}
               <div className="space-y-1.5">
                 <Label htmlFor="notes" className="text-sm font-medium">
                   Notes
@@ -1865,7 +2413,7 @@ export default function CustomersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Customer</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this customer and all their delivery and payment records. This action cannot be undone.
+              This will permanently delete this customer and all their delivery, payment, product, and vacation records. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

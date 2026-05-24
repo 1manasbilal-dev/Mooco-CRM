@@ -40,20 +40,27 @@ model Customer {
   updatedAt     DateTime @updatedAt
   deliveries    Delivery[]
   payments      Payment[]
+  products      CustomerProduct[]
+  vacations     Vacation[]
+  sales         Sale[]
   lead          Lead?
 }
 
 model Delivery {
-  id          String   @id @default(cuid())
-  customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  date        String   // YYYY-MM-DD
+  id           String   @id @default(cuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id])
+  date         String   // YYYY-MM-DD
   quantity     Float
-  status      String   @default("Pending") // Pending, Delivered, Missed, Cancelled
-  notes       String   @default("")
-  route       String   @default("Route A")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status       String   @default("Pending") // Pending, Delivered, Missed, Cancelled
+  notes        String   @default("")
+  route        String   @default("Route A")
+  itemId       String?  // null = milk (customer's plan), otherwise reference to InventoryItem
+  isExtra      Boolean  @default(false) // ad-hoc extra delivery not in plan
+  pricePerUnit Float    @default(0) // snapshot price at time of delivery
+  productName  String   @default("Milk") // denormalized product name for quick display
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Payment {
@@ -81,17 +88,52 @@ model InventoryItem {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   sales        Sale[]
+  customerProducts CustomerProduct[]
 }
 
 model Sale {
   id         String        @id @default(cuid())
   itemId     String
   item       InventoryItem @relation(fields: [itemId], references: [id])
+  customerId String?       // optional link to customer
   quantity   Float
   date       String        // YYYY-MM-DD
   notes      String        @default("")
+  amount     Float         @default(0) // total amount = quantity * pricePerUnit
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+  customer   Customer?     @relation(fields: [customerId], references: [id])
+}
+
+model CustomerProduct {
+  id         String        @id @default(cuid())
+  customerId String
+  customer   Customer      @relation(fields: [customerId], references: [id])
+  itemId     String
+  item       InventoryItem @relation(fields: [itemId], references: [id])
+  dailyQty   Float         @default(1)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@unique([customerId, itemId]) // one product per customer
+}
+
+model Vacation {
+  id        String   @id @default(cuid())
+  customerId String
+  customer  Customer @relation(fields: [customerId], references: [id])
+  startDate String   // YYYY-MM-DD
+  endDate   String   // YYYY-MM-DD
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ShopSetting {

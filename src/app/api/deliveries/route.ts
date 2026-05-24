@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const deliveries = await db.delivery.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      include: { customer: { select: { name: true, area: true, phone: true } } },
+      include: { customer: { select: { name: true, area: true, phone: true, milkType: true } } },
     })
 
     return NextResponse.json(deliveries)
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { customerId, date, quantity, status, notes, route } = body
+    const { customerId, date, quantity, status, notes, route, itemId, isExtra, pricePerUnit, productName } = body
 
     if (!customerId || !date || quantity === undefined) {
       return NextResponse.json({ error: 'customerId, date, and quantity are required' }, { status: 400 })
@@ -45,8 +45,12 @@ export async function POST(request: NextRequest) {
         status: status || 'Pending',
         notes: notes || '',
         route: route || 'Route A',
+        itemId: itemId ?? null,
+        isExtra: isExtra ?? false,
+        pricePerUnit: pricePerUnit ?? 0,
+        productName: productName || 'Milk',
       },
-      include: { customer: { select: { name: true } } },
+      include: { customer: { select: { name: true, area: true, phone: true, milkType: true } } },
     })
 
     return NextResponse.json(delivery, { status: 201 })

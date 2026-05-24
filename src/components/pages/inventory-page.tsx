@@ -48,8 +48,13 @@ import {
   Power,
   PowerOff,
   History,
+  Settings2,
+  Check,
+  UserCircle,
+  Info,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface InventoryItem {
   id: string
@@ -73,6 +78,20 @@ interface SaleRecord {
   createdAt: string
 }
 
+interface Category {
+  id: string
+  name: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface ActiveCustomer {
+  id: string
+  name: string
+  phone: string
+  area: string
+}
+
 const formatPKR = (amount: number) => `₨${amount.toLocaleString()}`
 
 const categoryConfig: Record<string, { color: string; bg: string; dot: string }> = {
@@ -85,10 +104,12 @@ const categoryConfig: Record<string, { color: string; bg: string; dot: string }>
   Other: { color: 'text-gray-700', bg: 'bg-gray-50 border-gray-200', dot: 'bg-gray-500' },
 }
 
-const categories = ['all', 'Milk', 'Yogurt', 'Butter', 'Cream', 'Eggs', 'Paneer', 'Other']
+const getCategoryStyle = (catName: string) => categoryConfig[catName] || categoryConfig.Other
+
 const statusFilters = ['all', 'Active', 'Inactive'] as const
 
 export default function InventoryPage() {
+  const isMobile = useIsMobile()
   const [items, setItems] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -107,9 +128,20 @@ export default function InventoryPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
+  // Dynamic categories
+  const [apiCategories, setApiCategories] = useState<Category[]>([])
+  const [showManageCategories, setShowManageCategories] = useState(false)
+  const [newCatName, setNewCatName] = useState('')
+  const [editingCatId, setEditingCatId] = useState<string | null>(null)
+  const [editingCatName, setEditingCatName] = useState('')
+  const [catSaving, setCatSaving] = useState(false)
+
+  // Active customers for sale dialog
+  const [activeCustomers, setActiveCustomers] = useState<ActiveCustomer[]>([])
+
   // Add item form
   const [itemName, setItemName] = useState('')
-  const [itemCategory, setItemCategory] = useState('Milk')
+  const [itemCategory, setItemCategory] = useState('')
   const [itemUnit, setItemUnit] = useState('liters')
   const [itemPrice, setItemPrice] = useState('')
 
@@ -117,6 +149,9 @@ export default function InventoryPage() {
   const [saleQty, setSaleQty] = useState('')
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0])
   const [saleNotes, setSaleNotes] = useState('')
+  const [saleCustomerId, setSaleCustomerId] = useState('')
+
+  // ── Fetch Functions ──────────────────────────────────────────
 
   const fetchItems = useCallback(async () => {
     try {
@@ -133,9 +168,108 @@ export default function InventoryPage() {
     }
   }, [])
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories')
+      if (res.ok) {
+        const data = await res.json()
+        setApiCategories(data)
+      }
+    } catch {
+      toast.error('Failed to load categories')
+    }
+  }, [])
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/customers?status=Active')
+      if (res.ok) {
+        const data = await res.json()
+        setActiveCustomers(Array.isArray(data) ? data : data.customers || [])
+      }
+    } catch {
+      // Silent fail — customers are optional in sale dialog
+    }
+  }, [])
+
   useEffect(() => {
     fetchItems()
-  }, [fetchItems])
+    fetchCategories()
+    fetchCustomers()
+  }, [fetchItems, fetchCategories, fetchCustomers])
+
+  // ── Category CRUD ────────────────────────────────────────────
+
+  const handleAddCategory = async () => {
+    if (!newCatName.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+    try {
+      setCatSaving(true)
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCatName.trim() }),
+      })
+      if (res.ok) {
+        toast.success(`Category "${newCatName.trim()}" added`)
+        setNewCatName('')
+        fetchCategories()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to add category')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setCatSaving(false)
+    }
+  }
+
+  const handleUpdateCategory = async (id: string) => {
+    if (!editingCatName.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+    try {
+      setCatSaving(true)
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editingCatName.trim() }),
+      })
+      if (res.ok) {
+        toast.success('Category updated')
+        setEditingCatId(null)
+        setEditingCatName('')
+        fetchCategories()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Failed to update category')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    } finally {
+      setCatSaving(false)
+    }
+  }
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success(`Category "${name}" deleted`)
+        fetchCategories()
+      } else {
+        toast.error('Failed to delete category')
+      }
+    } catch {
+      toast.error('Something went wrong')
+    }
+  }
+
+  // ── Item CRUD ────────────────────────────────────────────────
 
   const handleAddItem = async () => {
     if (!itemName || !itemPrice) {
@@ -214,6 +348,8 @@ export default function InventoryPage() {
     }
   }
 
+  // ── Record Sale ──────────────────────────────────────────────
+
   const handleRecordSale = async () => {
     if (!selectedItem || !saleQty || !saleDate) {
       toast.error('Quantity and date are required')
@@ -221,18 +357,33 @@ export default function InventoryPage() {
     }
     try {
       setSaving(true)
+      const body: Record<string, unknown> = {
+        itemId: selectedItem.id,
+        quantity: parseFloat(saleQty),
+        date: saleDate,
+        notes: saleNotes,
+      }
+      if (saleCustomerId) {
+        body.customerId = saleCustomerId
+      }
       const res = await fetch('/api/sales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          itemId: selectedItem.id,
-          quantity: parseFloat(saleQty),
-          date: saleDate,
-          notes: saleNotes,
-        }),
+        body: JSON.stringify(body),
       })
       if (res.ok) {
-        toast.success(`Sale recorded: ${saleQty} ${selectedItem.unit} of ${selectedItem.name}`)
+        const saleRes = await res.json()
+        const customerName = saleCustomerId
+          ? activeCustomers.find(c => c.id === saleCustomerId)?.name
+          : null
+        let msg = `Sale recorded: ${saleQty} ${selectedItem.unit} of ${selectedItem.name}`
+        if (customerName) {
+          msg += ` → ${customerName}`
+        }
+        toast.success(msg)
+        if (saleCustomerId) {
+          toast.info('Delivery & ledger entry created for customer')
+        }
         setShowRecordSaleDialog(false)
         resetSaleForm()
         fetchItems()
@@ -286,9 +437,11 @@ export default function InventoryPage() {
     }
   }
 
+  // ── Form Helpers ─────────────────────────────────────────────
+
   const resetItemForm = () => {
     setItemName('')
-    setItemCategory('Milk')
+    setItemCategory(apiCategories.length > 0 ? apiCategories[0].name : 'Milk')
     setItemUnit('liters')
     setItemPrice('')
   }
@@ -297,6 +450,7 @@ export default function InventoryPage() {
     setSaleQty('')
     setSaleDate(new Date().toISOString().split('T')[0])
     setSaleNotes('')
+    setSaleCustomerId('')
   }
 
   const openEditItem = (item: InventoryItem) => {
@@ -354,6 +508,11 @@ export default function InventoryPage() {
     setSelectedIds(new Set())
   }
 
+  // ── Computed Values ──────────────────────────────────────────
+
+  // Build category tabs from API data
+  const categoryTabNames = ['all', ...apiCategories.map(c => c.name)]
+
   // Summary calculations
   const totalItems = items.length
   const totalSoldToday = items.reduce((sum, i) => sum + i.todaySold, 0)
@@ -378,6 +537,13 @@ export default function InventoryPage() {
   const allFilteredSelected = filteredItems.length > 0 && filteredItems.every(i => selectedIds.has(i.id))
   const someFilteredSelected = filteredItems.some(i => selectedIds.has(i.id)) && !allFilteredSelected
 
+  // ── Category Select Items (shared between Add & Edit dialogs) ──
+  const categorySelectItems = apiCategories.map(cat => (
+    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+  ))
+
+  // ── Render ───────────────────────────────────────────────────
+
   return (
     <div className="space-y-4 sm:space-y-6 pb-28 sm:pb-24">
       {/* ── Header ────────────────────────────────────────── */}
@@ -391,13 +557,24 @@ export default function InventoryPage() {
             <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Manage dairy products & daily sales</p>
           </div>
         </div>
-        <Button
-          onClick={() => { resetItemForm(); setShowAddItemDialog(true) }}
-          className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-10 sm:h-9 px-3 sm:px-4 shrink-0"
-        >
-          <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Add Product</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => setShowManageCategories(true)}
+            className="rounded-lg h-10 sm:h-9 px-2.5 sm:px-3 border-gray-200"
+            title="Manage Categories"
+          >
+            <Settings2 className="h-4 w-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Categories</span>
+          </Button>
+          <Button
+            onClick={() => { resetItemForm(); setShowAddItemDialog(true) }}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-10 sm:h-9 px-3 sm:px-4 shrink-0"
+          >
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Product</span>
+          </Button>
+        </div>
       </div>
 
       {/* ── Summary Cards ─────────────────────────────────── */}
@@ -520,7 +697,7 @@ export default function InventoryPage() {
 
       {/* ── Category Tabs ─────────────────────────────────── */}
       <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
-        {categories.map((cat) => (
+        {categoryTabNames.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategoryFilter(cat)}
@@ -567,7 +744,7 @@ export default function InventoryPage() {
           {/* Mobile: Compact list layout */}
           <div className="flex flex-col gap-2 sm:hidden">
             {filteredItems.map((item) => {
-              const catStyle = categoryConfig[item.category] || categoryConfig.Other
+              const catStyle = getCategoryStyle(item.category)
               const isSelected = selectedIds.has(item.id)
               const isInactive = item.status === 'Inactive'
               return (
@@ -667,7 +844,7 @@ export default function InventoryPage() {
           {/* Desktop: Card grid layout */}
           <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredItems.map((item) => {
-              const catStyle = categoryConfig[item.category] || categoryConfig.Other
+              const catStyle = getCategoryStyle(item.category)
               const isSelected = selectedIds.has(item.id)
               const isInactive = item.status === 'Inactive'
               return (
@@ -909,16 +1086,10 @@ export default function InventoryPage() {
                 <Label className="text-sm font-medium">Category</Label>
                 <Select value={itemCategory} onValueChange={setItemCategory}>
                   <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5">
-                    <SelectValue />
+                    <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Milk">Milk</SelectItem>
-                    <SelectItem value="Yogurt">Yogurt</SelectItem>
-                    <SelectItem value="Butter">Butter</SelectItem>
-                    <SelectItem value="Cream">Cream</SelectItem>
-                    <SelectItem value="Eggs">Eggs</SelectItem>
-                    <SelectItem value="Paneer">Paneer</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    {categorySelectItems}
                   </SelectContent>
                 </Select>
               </div>
@@ -984,15 +1155,9 @@ export default function InventoryPage() {
               <div>
                 <Label className="text-sm font-medium">Category</Label>
                 <Select value={itemCategory} onValueChange={setItemCategory}>
-                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Milk">Milk</SelectItem>
-                    <SelectItem value="Yogurt">Yogurt</SelectItem>
-                    <SelectItem value="Butter">Butter</SelectItem>
-                    <SelectItem value="Cream">Cream</SelectItem>
-                    <SelectItem value="Eggs">Eggs</SelectItem>
-                    <SelectItem value="Paneer">Paneer</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    {categorySelectItems}
                   </SelectContent>
                 </Select>
               </div>
@@ -1024,9 +1189,9 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Record Sale Dialog (Full-screen on mobile) ────── */}
+      {/* ── Record Sale Dialog ────────────────────────────── */}
       <Dialog open={showRecordSaleDialog} onOpenChange={setShowRecordSaleDialog}>
-        <DialogContent className="sm:max-w-md rounded-xl sm:rounded-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className={`sm:max-w-md rounded-xl max-h-[90vh] overflow-y-auto ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0' : ''}`}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
@@ -1047,6 +1212,34 @@ export default function InventoryPage() {
                 <span className="font-medium">₨{selectedItem?.pricePerUnit} / {selectedItem?.unit}</span>
               </div>
             </div>
+
+            {/* Customer Selection */}
+            <div>
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <UserCircle className="h-3.5 w-3.5 text-gray-400" />
+                Customer
+                <span className="text-amber-600 text-xs font-normal">(recommended)</span>
+              </Label>
+              <Select value={saleCustomerId} onValueChange={setSaleCustomerId}>
+                <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5">
+                  <SelectValue placeholder="Select a customer..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeCustomers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}{customer.phone ? ` · ${customer.phone}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex items-start gap-1.5 mt-2 px-0.5">
+                <Info className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-[11px] sm:text-xs text-amber-700 leading-snug">
+                  Select a customer to automatically add this sale to their delivery & ledger
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-sm font-medium">Quantity ({selectedItem?.unit}) *</Label>
@@ -1141,6 +1334,143 @@ export default function InventoryPage() {
               </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Manage Categories Dialog ──────────────────────── */}
+      <Dialog open={showManageCategories} onOpenChange={(open) => {
+        setShowManageCategories(open)
+        if (!open) {
+          setNewCatName('')
+          setEditingCatId(null)
+          setEditingCatName('')
+        }
+      }}>
+        <DialogContent className={`sm:max-w-md rounded-xl max-h-[90vh] overflow-y-auto ${isMobile ? 'w-[100vw] max-w-[100vw] h-[100dvh] max-h-[100dvh] rounded-none border-0' : ''}`}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
+                <Settings2 className="h-4 w-4 text-green-600" />
+              </div>
+              Manage Categories
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Add new category */}
+          <div className="flex items-center gap-2 pt-1">
+            <Input
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              placeholder="New category name..."
+              className="rounded-lg h-11 sm:h-9 flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleAddCategory()
+                }
+              }}
+            />
+            <Button
+              onClick={handleAddCategory}
+              disabled={catSaving || !newCatName.trim()}
+              className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 px-4 shrink-0"
+            >
+              {catSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              <span className="sm:ml-1.5 hidden sm:inline">Add</span>
+            </Button>
+          </div>
+
+          {/* Category list */}
+          <div className="space-y-1.5 max-h-[50vh] overflow-y-auto mt-2">
+            {apiCategories.length === 0 ? (
+              <div className="flex flex-col items-center py-6">
+                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                  <Settings2 className="h-4 w-4 text-gray-300" />
+                </div>
+                <p className="text-gray-400 text-sm">No categories yet</p>
+              </div>
+            ) : (
+              apiCategories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2.5 min-h-[44px] sm:min-h-0 sm:py-2"
+                >
+                  {editingCatId === cat.id ? (
+                    <>
+                      <Input
+                        value={editingCatName}
+                        onChange={(e) => setEditingCatName(e.target.value)}
+                        className="rounded-lg h-9 flex-1 text-sm"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleUpdateCategory(cat.id)
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingCatId(null)
+                            setEditingCatName('')
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleUpdateCategory(cat.id)}
+                        disabled={catSaving}
+                        className="h-8 w-8 shrink-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        title="Save"
+                      >
+                        {catSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => { setEditingCatId(null); setEditingCatName('') }}
+                        className="h-8 w-8 shrink-0 text-gray-500 hover:text-gray-700"
+                        title="Cancel"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${getCategoryStyle(cat.name).dot}`} />
+                      <span className="flex-1 text-sm font-medium text-gray-800 truncate">{cat.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => { setEditingCatId(cat.id); setEditingCatName(cat.name) }}
+                        className="h-8 w-8 shrink-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                        title="Edit"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                        className="h-8 w-8 shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowManageCategories(false)}
+              className="rounded-lg h-11 sm:h-9 w-full sm:w-auto"
+            >
+              Done
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

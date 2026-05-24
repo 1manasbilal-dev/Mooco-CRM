@@ -458,3 +458,363 @@ Stage Summary:
 - Desktop uses: stats cards → filters → Kanban board with improved cards
 - Lead detail sheet has: avatar header, info grid, move-to-stage buttons, quick advance button, edit/convert/lost/delete actions
 - All existing CRUD and drag-drop functionality preserved for desktop
+
+---
+Task ID: 3
+Agent: Subagent (category-api-builder)
+Task: Create Category CRUD API with auto-seeding
+
+Work Log:
+- Read worklog.md to understand previous agent work
+- Read Prisma schema — Category model already exists with id, name (@unique), createdAt, updatedAt
+- Read existing API patterns from /api/areas for consistency
+- Created `/api/categories/route.ts` — GET (with auto-seed) and POST
+  - GET: checks if categories count is 0, auto-creates 7 defaults (Milk, Yogurt, Butter, Cream, Eggs, Paneer, Other), returns categories ordered by name
+  - POST: validates name is provided and unique, returns 400 for empty name, 409 for duplicate, 201 on success
+- Created `/api/categories/[id]/route.ts` — PUT and DELETE
+  - PUT: validates name, checks for duplicate (excluding current category), updates name, returns 400/409/500 on errors
+  - DELETE: removes category by id, returns { success: true }
+- Ran `bun run db:push` to sync Category model to database and regenerate Prisma client
+- Hit Prisma client stale cache issue (globalForPrisma singleton holding old client without category model)
+- Cleaned .next directory and restarted dev server to resolve stale client
+- Fixed `skipDuplicates` error — not supported by Prisma SQLite provider; removed it (unnecessary since we check count === 0 before seeding)
+- Verified all endpoints:
+  - GET /api/categories → 200 with 7 seeded categories ordered by name
+  - POST /api/categories with "Cheese" → 201 created
+  - POST /api/categories with "Cheese" again → 409 "Category already exists"
+  - POST /api/categories with "" → 400 "Category name is required"
+  - PUT /api/categories/[id] with "Ghee" → 200 updated
+  - PUT /api/categories/[id] with "Milk" (duplicate) → 409 "Category name already exists"
+  - PUT /api/categories/[id] with "" → 400 "Category name is required"
+  - DELETE /api/categories/[id] → 200 { success: true }
+- Lint passes clean
+
+Stage Summary:
+- 2 API route files created: /api/categories/route.ts and /api/categories/[id]/route.ts
+- Full CRUD: GET (list + auto-seed), POST (create with validation), PUT (update with duplicate check), DELETE (remove)
+- Auto-seeding: 7 default categories created on first GET if table is empty
+- Proper error handling: 400 (validation), 409 (duplicate), 500 (server error)
+- Consistent with existing API patterns (Areas, MilkTypes, DeliveryTimes)
+
+---
+Task ID: 6
+Agent: Subagent (backend-developer)
+Task: Update Sales API to support customerId and calculate amount automatically
+
+Work Log:
+- Read existing `/api/sales/route.ts` and Prisma schema to understand current state
+- Schema already had `customerId`, `amount`, and `customer` relation on Sale model
+- Updated GET handler:
+  - Added `customerId` filter support via searchParams
+  - Included `customer` relation (select name, phone) in response when customerId filter is provided
+  - Preserved all existing filters (date, itemId, startDate, endDate)
+  - Updated default filter condition to also check for customerId absence
+- Updated POST handler:
+  - Accept `customerId` as optional field in request body
+  - Fetch inventory item to get `pricePerUnit` for automatic amount calculation
+  - Calculate `amount = quantity * item.pricePerUnit`
+  - Validate inventory item exists (return 404 if not found)
+  - If customerId is provided, fetch customer to determine route from their `area` field
+  - Validate customer exists (return 404 if not found)
+  - After creating sale, if customerId is provided, also create a Delivery record with:
+    - customerId, date, quantity, itemId from the sale
+    - isExtra = true (ad-hoc sale not in regular plan)
+    - pricePerUnit = item.pricePerUnit
+    - productName = item.name
+    - status = "Delivered" (sale means it was delivered)
+    - route = customer's area (or "Route A" as fallback)
+  - Include customer relation in sale response (select name, phone)
+- Ran `bun run db:push` to ensure database schema is synced
+- Ran `bun run lint` — passes clean
+- Tested all endpoints manually:
+  - GET /api/sales — returns today's sales (200)
+  - GET /api/sales?customerId=... — returns sales for customer with customer info (200)
+  - POST /api/sales with customerId — creates sale with calculated amount and auto-creates Delivery record (201)
+  - POST /api/sales without customerId — creates sale with calculated amount, no Delivery record (201)
+  - Verified amount calculation: 2.5 * 60 = 150 ✓
+  - Verified Delivery record: isExtra=true, status="Delivered", route=customer's area ✓
+
+Stage Summary:
+- Sales API now supports customerId filter in GET
+- Sales API now calculates amount automatically (quantity × pricePerUnit)
+- Sales with customerId automatically create a Delivery record
+- Delivery route determined from customer's area
+- All existing functionality preserved
+- Error handling for missing inventory items and customers
+- Lint passes clean
+
+---
+Task ID: 4
+Agent: Subagent (backend-developer)
+Task: Create Vacation CRUD API
+
+Work Log:
+- Read worklog.md to understand previous agent work and project context
+- Confirmed Vacation model already exists in Prisma schema with id, customerId, startDate, endDate, notes, createdAt, updatedAt
+- Read existing API patterns from /api/deliveries for consistency
+- Created `/api/vacations/route.ts` — GET and POST
+  - GET: requires `customerId` query param (returns 400 if missing); optional `date` query param filters vacations where startDate <= date <= endDate; includes customer relation (select name); ordered by startDate desc
+  - POST: requires customerId, startDate, endDate; validates startDate <= endDate (returns 400 if invalid); creates vacation with optional notes (defaults to ""); includes customer relation in response; returns 201 on success
+- Created `/api/vacations/[id]/route.ts` — PUT and DELETE
+  - PUT: updates vacation fields (startDate, endDate, notes) selectively; validates startDate <= endDate if both provided; returns 404 for non-existent vacation (Prisma P2025 error code); includes customer relation in response
+  - DELETE: removes vacation by id; returns 404 for non-existent vacation (Prisma P2025 error code); returns deleted vacation with customer relation
+- Ran `bun run db:push` — database already in sync (Vacation table already existed)
+- Hit Prisma client stale cache issue (globalForPrisma singleton holding old client without vacation model)
+- Deleted .next cache directory and restarted dev server to force fresh Prisma client
+- Verified all endpoints with curl tests:
+  - GET /api/vacations (no customerId) → 400 "customerId query parameter is required"
+  - GET /api/vacations?customerId=xxx → 200 []
+  - GET /api/vacations?customerId=xxx&date=2025-06-10 → 200 (filtered by date range)
+  - POST /api/vacations (missing fields) → 400 "customerId, startDate, and endDate are required"
+  - POST /api/vacations (startDate > endDate) → 400 "startDate must be on or before endDate"
+  - POST /api/vacations (valid) → 201 with customer name included
+  - PUT /api/vacations/:id (valid) → 200 updated with customer name
+  - PUT /api/vacations/:id (non-existent) → 404 "Vacation not found"
+  - DELETE /api/vacations/:id (valid) → 200 deleted record
+  - DELETE /api/vacations/:id (non-existent) → 404 "Vacation not found"
+- Lint passes clean
+
+Stage Summary:
+- 2 API route files created: /api/vacations/route.ts and /api/vacations/[id]/route.ts
+- Full CRUD: GET (list + date filter), POST (create with validation), PUT (update with validation), DELETE (remove)
+- Date filter: startDate <= date <= endDate for checking if customer is on vacation on a specific date
+- Proper error handling: 400 (validation), 404 (not found), 500 (server error)
+- Consistent with existing API patterns (deliveries, areas, etc.)
+- Customer relation included in all responses (select name)
+
+---
+Task ID: 5
+Agent: Subagent (backend-developer)
+Task: Create CustomerProduct CRUD API and Auto-Delivery Generation API
+
+Work Log:
+- Read worklog.md to understand previous agent work and existing API patterns
+- Read Prisma schema — CustomerProduct, Delivery, Vacation, Customer, InventoryItem, Area models already exist
+- Read existing API routes (/api/areas, /api/customers, /api/deliveries) for consistency patterns
+- Ran `bun run db:push` to ensure Prisma client is up to date with all schema models
+- Cleaned .next directory and restarted dev server to resolve stale Prisma client cache
+
+1. Created `/api/customer-products/route.ts` — GET and POST
+   - GET: Requires `customerId` query param, returns 400 if missing; returns all products for that customer with item details (id, name, category, unit, pricePerUnit, status)
+   - POST: Creates a customer product with customerId, itemId, dailyQty (defaults to 1); validates customer exists (404), item exists (404), unique constraint (409)
+
+2. Created `/api/customer-products/[id]/route.ts` — PUT and DELETE
+   - PUT: Updates dailyQty only; validates dailyQty is a non-negative number (400); checks customer product exists (404)
+   - DELETE: Removes customer product by id; checks existence first (404); returns success message
+
+3. Created `/api/deliveries/generate/route.ts` — POST endpoint
+   - Accepts `date` (YYYY-MM-DD) in request body; validates format with regex (400)
+   - Finds all Active customers with their products (includes item details)
+   - Fetches all areas and builds route mapping (area name → Route A/B/C/...)
+   - Checks Vacation model for customers on vacation (startDate <= date <= endDate), skips them
+   - Checks existing deliveries for the date to avoid duplicates (customerId::itemId key set)
+   - For each active, non-vacation customer:
+     - Creates milk delivery: quantity=customer.dailyQty, pricePerUnit=customer.pricePerLiter, productName="Milk", itemId=null
+     - Creates product deliveries for each CustomerProduct: quantity=cp.dailyQty, pricePerUnit=cp.item.pricePerUnit, productName=cp.item.name, itemId=cp.itemId
+   - Returns: message, created count, skippedVacation count, and list of new deliveries
+
+Verified all endpoints:
+- GET /api/customer-products?customerId=X → 200 with item details
+- POST /api/customer-products (valid) → 201 created with item details
+- POST /api/customer-products (duplicate) → 409 "This product is already assigned to this customer"
+- POST /api/customer-products (missing fields) → 400 "customerId and itemId are required"
+- GET /api/customer-products (no customerId) → 400 "customerId query parameter is required"
+- PUT /api/customer-products/[id] (valid) → 200 updated with item details
+- DELETE /api/customer-products/[id] (valid) → 200 "Customer product removed successfully"
+- DELETE /api/customer-products/[id] (nonexistent) → 404 "Customer product not found"
+- POST /api/deliveries/generate (valid date) → 200 with created count (19 deliveries for 18 active customers + 1 with customer product)
+- POST /api/deliveries/generate (duplicate date) → 200 created:0 (duplicates prevented)
+- POST /api/deliveries/generate (invalid date) → 400 "A valid date (YYYY-MM-DD) is required"
+
+Lint passes clean
+
+Stage Summary:
+- 3 API route files created: /api/customer-products/route.ts, /api/customer-products/[id]/route.ts, /api/deliveries/generate/route.ts
+- Full CustomerProduct CRUD: GET (list with item details), POST (create with validation), PUT (update dailyQty), DELETE (remove)
+- Auto-Delivery Generation: creates milk + product deliveries for active, non-vacation customers; prevents duplicates; area-based route assignment
+- Proper error handling: 400 (validation), 404 (not found), 409 (unique constraint), 500 (server error)
+- Consistent with existing API patterns
+
+---
+Task ID: 9
+Agent: Subagent (inventory-updater)
+Task: Update Inventory page with dynamic categories, category CRUD dialog, and customer selection in Record Sale
+
+Work Log:
+- Read existing inventory-page.tsx (1169 lines) and worklog.md for context
+- Read existing API routes: /api/categories/route.ts (GET+POST), /api/categories/[id]/route.ts (PUT+DELETE), /api/sales/route.ts (GET+POST with customerId support)
+- Read useIsMobile hook and existing UI components
+
+Changes implemented:
+
+1. Category Management (CRUD):
+   - Replaced hardcoded `categories` array with dynamic `apiCategories` state fetched from `GET /api/categories`
+   - Added "Categories" button (Settings2 icon) in page header alongside Add Product button
+   - Added Manage Categories dialog with:
+     - Add new category input at top with Enter key support and Add button
+     - Scrollable list of all categories with colored dot, name, edit button, delete button
+     - Inline edit mode: clicking Edit shows input with Save (Check) and Cancel (X) buttons, Enter to save, Escape to cancel
+     - Delete: direct delete with toast confirmation
+   - Category tabs now built dynamically from API: `['all', ...apiCategories.map(c => c.name)]`
+   - Added `getCategoryStyle()` helper function that falls back to `categoryConfig.Other` for custom categories not in static config
+
+2. Record Sale — Customer Selection:
+   - Added `activeCustomers` state fetched from `GET /api/customers?status=Active`
+   - Added `saleCustomerId` state
+   - Added Customer dropdown in Record Sale dialog BEFORE the quantity field:
+     - Label shows "Customer" with UserCircle icon and "(recommended)" amber hint
+     - Select dropdown shows all active customers with name and phone
+     - Placeholder: "Select a customer..."
+     - Info notice below: "Select a customer to automatically add this sale to their delivery & ledger" with amber Info icon
+   - Updated `handleRecordSale` to include `customerId` in POST body when selected
+   - Success toast shows customer name when linked, plus info toast about delivery/ledger creation
+
+3. Dynamic Categories in Add/Edit Item Dialogs:
+   - Replaced hardcoded SelectItem list (Milk/Yogurt/Butter/Cream/Eggs/Paneer/Other) with dynamic `categorySelectItems` rendered from `apiCategories`
+   - Both Add and Edit dialogs share the same `categorySelectItems` variable
+   - Added placeholder "Select..." for cases where category might not be set
+
+4. Additional improvements:
+   - Added `useIsMobile()` hook import for responsive detection
+   - Added new icon imports: Settings2, Check, UserCircle, Info
+   - Added Category and ActiveCustomer TypeScript interfaces
+   - Record Sale dialog: full-screen on mobile (w-[100vw] h-[100dvh] rounded-none border-0)
+   - Manage Categories dialog: full-screen on mobile with same pattern
+   - Category list items: min-h-[44px] on mobile for touch targets
+   - All existing functionality preserved: CRUD, bulk actions, sales recording, search, status filters
+
+- Lint passes clean (zero errors, zero warnings)
+- Dev server running fine
+
+Stage Summary:
+- Dynamic categories from API with full CRUD (add/edit/delete via Manage Categories dialog)
+- Category tabs populated from API instead of hardcoded list
+- Record Sale dialog includes optional customer dropdown with visual hint
+- Sale linked to customer automatically creates delivery record (backend already supports this)
+- Add/Edit item dialogs use dynamic category list from API
+- Mobile-first responsive design with full-screen dialogs on mobile
+- All touch targets ≥ 44px on mobile
+
+---
+Task ID: 7
+Agent: Subagent (full-stack-developer)
+Task: Rebuild Deliveries page with auto-generate, multi-product, vacation awareness, and extra delivery features
+
+Work Log:
+- Read existing deliveries-page.tsx (938 lines) and analyzed all components, state, and API calls
+- Read Prisma schema to confirm Delivery model has itemId, isExtra, pricePerUnit, productName fields
+- Read /api/deliveries/route.ts, /api/deliveries/generate/route.ts, /api/deliveries/[id]/route.ts, /api/inventory/route.ts, /api/customers/route.ts
+- Updated /api/deliveries/route.ts:
+  - GET: Added milkType to customer select in include
+  - POST: Added support for itemId, isExtra, pricePerUnit, productName fields; added milkType to customer include
+- Completely rewrote deliveries-page.tsx with major new features:
+
+1. Auto-Generate Daily Deliveries:
+   - On page load (and date change), automatically calls POST /api/deliveries/generate with selected date in silent mode
+   - After generation completes, fetches deliveries for that date
+   - "Generate" button with Sparkles icon for manual re-generation
+   - Toast shows created count and skipped-vacation count from generate API response
+   - Generation result stored in state for vacation banner display
+
+2. Multi-Product Deliveries:
+   - Updated Delivery interface with itemId, isExtra, pricePerUnit, productName fields
+   - PRODUCT_COLORS constant maps product names to color schemes (Milk=green, Yogurt=blue, Butter=amber, etc.)
+   - getProductColor() helper with fuzzy name matching (e.g., "dahi" → Yogurt colors)
+   - Each delivery item shows colored dot + product name + quantity badge (color-coded) + price
+   - Extra deliveries (isExtra=true) show amber "Extra" badge
+   - Deliveries grouped by customer within each route group
+
+3. Vacation Awareness:
+   - Dismissible amber banner shown when generationResult.skippedVacation > 0
+   - Banner shows count of customers skipped due to vacation with AlertTriangle icon
+   - vacationBannerDismissed state to track user dismissal
+
+4. Add Extra Delivery Dialog:
+   - Updated "Add Delivery" dialog with product selector dropdown
+   - Product dropdown includes "Milk (Customer Plan)" and all active inventory items with colored dots and prices
+   - Extra delivery toggle button (Yes - Extra / No - Regular)
+   - When product selected, auto-fills price from inventory item
+   - Uses Drawer (bottom sheet) on mobile, Dialog on desktop
+
+5. Record Extra Sale from Delivery:
+   - "Record Extra" button on each customer's delivery section header
+   - Opens dedicated dialog/drawer to add extra product delivery for that specific customer
+   - Shows customer name card, product selector, quantity input, total amount preview
+   - Creates delivery with isExtra=true, auto-determines route from customer's area
+   - Separate state and form handler from regular Add Delivery
+
+6. Customer-Grouped Delivery Layout:
+   - Within each route collapsible, deliveries are now grouped by customer
+   - Customer header shows avatar initial, name, area+phone, Record Extra button
+   - Each product delivery shown as a sub-card with colored dot, product name, quantity, price
+   - Action buttons: Delivered, Missed, Retry, Cancel per delivery item
+   - Inline notes editing preserved
+
+7. Enhanced Summary Stats:
+   - 5 stat cards: Total, Delivered, Pending, Missed, Total Milk (2-col mobile, 5-col desktop)
+   - Revenue bar showing total delivered revenue in PKR format
+   - Extra delivery count badge when extras exist
+   - Route headers show pending count badge
+
+8. PKR Currency Format:
+   - formatPKR() helper: ₨${amount.toLocaleString()}
+   - Used for price display on each delivery and total revenue
+
+- Lint passes clean (0 errors, 0 warnings)
+
+Stage Summary:
+- Deliveries page completely rebuilt with auto-generate, multi-product, vacation awareness, extra delivery features
+- Auto-generate runs silently on page load; manual generate button with Sparkles icon
+- Multi-product support with color-coded products (8 categories) and "Extra" badges
+- Vacation banner alerts when customers skipped during generation
+- Record Extra dialog per customer for quick ad-hoc extra deliveries
+- Customer-grouped delivery layout within route collapsibles
+- Revenue display, extra count, PKR formatting throughout
+- All existing features preserved: status updates, notes editing, mark all delivered, route filtering
+- Lint passes clean
+
+---
+Task ID: 8
+Agent: Main Agent
+Task: Add Vacation Management, Daily Products Management, and update Customer Detail Dialog tabs and Ledger
+
+Work Log:
+- Read existing customers-page.tsx (1885 lines), customer API route, and Prisma schema
+- Updated /api/customers/[id]/route.ts - expanded GET include to add products (with item relation), vacations (ordered by startDate desc), and sales (with item details, ordered by createdAt desc, take 50); also updated DELETE to clean up CustomerProduct, Vacation, and Sale records
+- Created /api/vacations/route.ts - GET (with customerId filter, required), POST (validates required fields, date range, overlapping vacation check)
+- Created /api/vacations/[id]/route.ts - DELETE (with existence check, returns 404 if not found)
+- Created /api/customer-products/route.ts - GET (with customerId filter, includes item relation), POST (validates required fields, checks for duplicate customerId+itemId, verifies item exists)
+- Created /api/customer-products/[id]/route.ts - PUT (updates dailyQty), DELETE (with existence check)
+- Completely rewrote customers-page.tsx with:
+  - New interfaces: Vacation, CustomerProduct, CustomerProductItem, Sale, SaleItem, and updated Delivery (added itemId, isExtra, pricePerUnit, productName) and CustomerDetail (added products, vacations, sales)
+  - Updated LedgerEntry type to include 'sale' type
+  - Updated buildLedger to include ALL deliveries with productName and pricePerUnit from delivery record, and Sales linked to customer
+  - Each delivery debit shows product name (e.g., "Milk Delivery — 2L × ₨60/L" or "Yogurt Delivery — 1kg × ₨200/unit")
+  - Sale entries show in ledger with "Sale" badge in desktop table view
+  - New tab structure: Overview, Products, Vacations, Ledger (replaced old Overview, Ledger, Deliveries, Payments tabs)
+  - Overview tab: profile info, milk plan, active vacation banner (amber gradient), current month stats, quick stats, notes
+  - Products tab: primary milk plan card (green gradient with daily qty/price/monthly), other daily products list with category colored dots, edit/delete per product, add product dialog
+  - Vacations tab: list with active (amber), upcoming (blue), and past states, date range formatting, notes, delete button, add vacation dialog with date pickers and notes, info banner about auto-generation
+  - Ledger tab: enriched to include all deliveries (milk + other products + extras) and sales, sale badge in desktop table, mobile card layout preserved
+  - Vacation form dialog: full-screen on mobile, date inputs, notes textarea, amber gradient submit button
+  - Product form dialog: full-screen on mobile, dropdown of available inventory items (excluding already-added, active only), daily quantity input, daily cost preview
+  - Edit product quantity dialog: quantity input, new daily cost preview
+  - Horizontal scrollable tabs on mobile (min-w-[400px] with overflow-x-auto)
+  - useIsMobile() hook used for responsive dialog layouts
+  - All touch targets >= 44px on mobile
+  - PKR format with locale string
+  - Vacation date ranges clearly visible with formatted dates
+  - Products show item category with colored dots (CATEGORY_COLORS map)
+  - Fetches inventory items on mount for product dropdown
+  - availableProducts computed to filter out already-added and inactive items
+  - Lint passes clean
+
+Stage Summary:
+- Customer detail API now includes products, vacations, and sales in response
+- 4 new API route files created: /api/vacations, /api/vacations/[id], /api/customer-products, /api/customer-products/[id]
+- Customer detail dialog restructured with 4 tabs: Overview, Products, Vacations, Ledger
+- Vacation management: add/delete vacations, active/upcoming/past visual states, overlap detection
+- Products management: view milk plan, add/edit/delete other daily products, category colored dots
+- Ledger enriched: includes all delivery types (milk, other products, extras) and customer sales
+- Mobile-first responsive design with horizontal scrollable tabs, full-screen dialogs, 44px touch targets
+- Lint passes clean
