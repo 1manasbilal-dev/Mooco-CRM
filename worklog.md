@@ -945,3 +945,29 @@ Stage Summary:
 - Vacation indicators shown inline in delivery route groups
 - Payments can now be edited and deleted
 - All previously requested features confirmed working: auto-generate deliveries, vacation mode, multi-product subscriptions, customer-required sales, customer ledger
+
+---
+Task ID: dark-theme
+Agent: Main Agent
+Task: Add dark theme option to DairyFlow app
+
+Work Log:
+- Added `.dark` CSS variables in globals.css with oklch color values for all semantic tokens
+- Added dark scrollbar styles
+- Added comprehensive dark mode global CSS overrides using `.dark` nesting to handle hardcoded Tailwind classes
+- Overrides cover: bg-white → gray-900, bg-gray-50 → gray-900/50, borders, text colors, inputs, and all accent colors (green, amber, red, sky, purple, emerald, violet, blue, teal, orange, yellow)
+- Added ThemeProvider from next-themes in layout.tsx with attribute="class", defaultTheme="light", enableSystem, disableTransitionOnChange
+- Added theme toggle button in desktop header (Moon/Sun icon)
+- Added theme toggle button in mobile header (Moon/Sun icon)
+- Added theme toggle in sidebar (Dark Mode / Light Mode text + icon)
+- Added bottom nav dark mode classes
+- Added More sheet dark mode classes
+- Created ThemeToggle sub-component in Settings page with 3 options: Light, Dark, System
+- Added "Appearance" card in Settings → General tab with violet accent
+- All lint checks pass clean
+
+Stage Summary:
+- Dark theme fully functional with 3 modes: Light, Dark, System (follows device preference)
+- Toggle available in: Desktop header, Mobile header, Desktop sidebar, Settings page
+- Global CSS overrides ensure all page components automatically adapt to dark mode
+- No individual component changes needed - CSS handles color remapping

@@ -54,7 +54,11 @@ import {
   ChevronRight,
   Package,
   UserPlus,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -135,6 +139,44 @@ const SETTINGS_TABS: TabDef[] = [
   { id: 'notifications', label: 'Notifications', mobileLabel: 'Alerts', icon: Bell, color: 'text-orange-600', bgLight: 'bg-orange-100', description: 'Alert preferences' },
   { id: 'data', label: 'Data & Backup', mobileLabel: 'Data', icon: Database, color: 'text-cyan-600', bgLight: 'bg-cyan-100', description: 'Export, backup & reset' },
 ]
+
+// ── Theme Toggle Sub-Component ────────────────────────────────────────────
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, []) // eslint-disable-line react-hooks/set-state-in-effect
+
+  if (!mounted) return <div className="h-16" />
+
+  const options = [
+    { value: 'light', label: 'Light', icon: Sun, desc: 'Classic light theme' },
+    { value: 'dark', label: 'Dark', icon: Moon, desc: 'Easy on the eyes' },
+    { value: 'system', label: 'System', icon: Monitor, desc: 'Match your device' },
+  ]
+
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      {options.map((opt) => {
+        const Icon = opt.icon
+        const isActive = theme === opt.value
+        return (
+          <button
+            key={opt.value}
+            onClick={() => setTheme(opt.value)}
+            className={"flex flex-col items-center gap-2 rounded-xl p-3 md:p-4 border-2 transition-all duration-200 cursor-pointer " + (isActive ? "border-violet-400 bg-violet-50 dark:bg-violet-950/30 shadow-sm" : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600")}
+          >
+            <div className={"flex h-10 w-10 items-center justify-center rounded-xl transition-all " + (isActive ? "bg-violet-100 dark:bg-violet-900" : "bg-gray-100 dark:bg-gray-800")}>
+              <Icon className={"h-5 w-5 " + (isActive ? "text-violet-600 dark:text-violet-400" : "text-gray-400 dark:text-gray-500")} />
+            </div>
+            <span className={"text-sm font-semibold " + (isActive ? "text-violet-700 dark:text-violet-300" : "text-gray-700 dark:text-gray-300")}>{opt.label}</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500 text-center leading-tight hidden sm:block">{opt.desc}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -623,6 +665,24 @@ export default function SettingsPage() {
             <Label htmlFor="shopEmail" className="text-xs md:text-sm font-medium text-gray-700">Email</Label>
             <Input id="shopEmail" type="email" placeholder="shop@example.com" value={settings.shopEmail} onChange={(e) => updateField('shopEmail', e.target.value)} className="rounded-lg border-gray-200 h-10 md:h-auto" />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Appearance / Theme */}
+      <Card className="rounded-xl border-gray-200/80 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 shadow-sm">
+              <Sun className="h-4 w-4 text-violet-600" />
+            </div>
+            <div>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900">Appearance</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500">Choose light or dark theme</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+          <ThemeToggle />
         </CardContent>
       </Card>
 

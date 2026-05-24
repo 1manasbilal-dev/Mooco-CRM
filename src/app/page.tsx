@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { useTheme } from 'next-themes'
 import {
   LayoutDashboard,
   UserPlus,
@@ -34,6 +35,8 @@ import {
   Droplets,
   MoreHorizontal,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import DashboardPage from '@/components/pages/dashboard-page'
 import LeadsPage from '@/components/pages/leads-page'
@@ -79,6 +82,10 @@ const pageComponents: Record<string, React.ComponentType> = {
 
 export default function DairyFlowApp() {
   const { activePage, setActivePage, sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery } = useAppStore()
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, []) // eslint-disable-line react-hooks/set-state-in-effect
   const isMobileState = useState(false)
   const isMobile = isMobileState[0]
   const setIsMobile = isMobileState[1]
@@ -119,17 +126,17 @@ export default function DairyFlowApp() {
   const currentPageLabel = navItems.find(n => n.id === activePage)?.label || 'Dashboard'
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50/80">
+    <div className="flex h-screen overflow-hidden bg-gray-50/80 dark:bg-gray-950">
       {!isMobile && (
-        <aside className={"hidden md:flex flex-col bg-white border-r border-gray-200/80 transition-all duration-300 ease-in-out shrink-0 " + (sidebarOpen ? "w-64" : "w-18")}>
-          <div className="flex items-center gap-3 px-4 h-16 border-b border-gray-100">
+        <aside className={"hidden md:flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200/80 dark:border-gray-800 transition-all duration-300 ease-in-out shrink-0 " + (sidebarOpen ? "w-64" : "w-18")}>
+          <div className="flex items-center gap-3 px-4 h-16 border-b border-gray-100 dark:border-gray-800">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-sm">
               <Droplets className="h-5 w-5 text-white" />
             </div>
             {sidebarOpen && (
               <div className="overflow-hidden">
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">DairyFlow</h1>
-                <p className="text-xs text-gray-400 leading-tight">Fresh Milk. Smart Delivery.</p>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">DairyFlow</h1>
+                <p className="text-xs text-gray-400 dark:text-gray-500 leading-tight">Fresh Milk. Smart Delivery.</p>
               </div>
             )}
           </div>
@@ -138,32 +145,49 @@ export default function DairyFlowApp() {
               const isActive = activePage === item.id
               const Icon = item.icon
               return (
-                <button key={item.id} onClick={() => handleNavClick(item.id)} className={"group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer " + (isActive ? "bg-green-50 text-green-700 shadow-sm" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700")} title={!sidebarOpen ? item.label : undefined}>
-                  <Icon className={"h-5 w-5 shrink-0 " + (isActive ? "text-green-600" : "text-gray-400 group-hover:text-gray-600")} />
+                <button key={item.id} onClick={() => handleNavClick(item.id)} className={"group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer " + (isActive ? "bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400 shadow-sm" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300")} title={!sidebarOpen ? item.label : undefined}>
+                  <Icon className={"h-5 w-5 shrink-0 " + (isActive ? "text-green-600 dark:text-green-400" : "text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300")} />
                   {sidebarOpen && <span>{item.label}</span>}
                 </button>
               )
             })}
           </nav>
-          <div className="border-t border-gray-100 px-4 py-3">
-            {sidebarOpen ? <p className="text-xs text-gray-300">v1.0</p> : <p className="text-center text-xs text-gray-300">v1</p>}
+          <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3">
+            {sidebarOpen ? <p className="text-xs text-gray-300 dark:text-gray-600">v1.0</p> : <p className="text-center text-xs text-gray-300 dark:text-gray-600">v1</p>}
           </div>
+          {/* Theme toggle in sidebar */}
+          {sidebarOpen && mounted && (
+            <div className="px-4 pb-4">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 cursor-pointer"
+              >
+                {theme === 'dark' ? <Sun className="h-5 w-5 shrink-0 text-amber-400" /> : <Moon className="h-5 w-5 shrink-0" />}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </div>
+          )}
         </aside>
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         {!isMobile && (
-          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-gray-200/80 bg-white/80 backdrop-blur-sm px-6">
+          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-gray-200/80 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-6">
             <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              <Menu className="h-5 w-5 text-gray-500" />
+              <Menu className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </Button>
-            <h2 className="text-base font-semibold text-gray-800 hidden lg:block">{currentPageLabel}</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-gray-200 hidden lg:block">{currentPageLabel}</h2>
             <div className="relative flex-1 max-w-md ml-auto">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input placeholder="Search..." className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-xl text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+              <Input placeholder="Search..." className="pl-9 h-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-gray-200 dark:placeholder:text-gray-500" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
+            {mounted && (
+              <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-gray-500" />}
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9">
-              <Bell className="h-4 w-4 text-gray-500" />
+              <Bell className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -185,25 +209,30 @@ export default function DairyFlowApp() {
         )}
 
         {isMobile && (
-          <header className="flex h-14 shrink-0 items-center gap-3 bg-white border-b border-gray-200/80 px-4">
+          <header className="flex h-14 shrink-0 items-center gap-3 bg-white dark:bg-gray-900 border-b border-gray-200/80 dark:border-gray-800 px-4">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600">
               <Droplets className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-base font-bold text-gray-900 flex-1 truncate">{currentPageLabel}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex-1 truncate">{currentPageLabel}</h2>
+            {mounted && (
+              <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-gray-500" />}
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => setMobileSearchOpen(!mobileSearchOpen)}>
-              {mobileSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4 text-gray-500" />}
+              {mobileSearchOpen ? <X className="h-4 w-4 dark:text-gray-300" /> : <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />}
             </Button>
             <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9">
-              <Bell className="h-4 w-4 text-gray-500" />
+              <Bell className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             </Button>
           </header>
         )}
 
         {isMobile && mobileSearchOpen && (
-          <div className="px-4 py-2 bg-white border-b border-gray-100">
+          <div className="px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input placeholder="Search..." className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-xl text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+              <Input placeholder="Search..." className="pl-9 h-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl text-sm dark:text-gray-200 dark:placeholder:text-gray-500" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
             </div>
           </div>
         )}
@@ -216,17 +245,17 @@ export default function DairyFlowApp() {
       </div>
 
       {isMobile && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200/80 shadow-lg">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/80 dark:border-gray-800 shadow-lg">
           <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
             {primaryNavItems.map((item) => {
               const isActive = item.id === 'more' ? ("leads inventory settings".indexOf(activePage) >= 0) : activePage === item.id
               const Icon = item.icon
               return (
-                <button key={item.id} onClick={() => handleNavClick(item.id)} className={"flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all duration-200 min-w-14 cursor-pointer " + (isActive ? "text-green-600" : "text-gray-400")}>
-                  <div className={"flex items-center justify-center rounded-xl transition-all duration-200 h-8 w-8 " + (isActive ? "bg-green-50" : "")}>
-                    <Icon className={"h-5 w-5 " + (isActive ? "text-green-600" : "")} />
+                <button key={item.id} onClick={() => handleNavClick(item.id)} className={"flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all duration-200 min-w-14 cursor-pointer " + (isActive ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500")}>
+                  <div className={"flex items-center justify-center rounded-xl transition-all duration-200 h-8 w-8 " + (isActive ? "bg-green-50 dark:bg-green-950/50" : "")}>
+                    <Icon className={"h-5 w-5 " + (isActive ? "text-green-600 dark:text-green-400" : "")} />
                   </div>
-                  <span className={"text-xs font-medium leading-tight " + (isActive ? "text-green-600" : "text-gray-400")}>{item.label}</span>
+                  <span className={"text-xs font-medium leading-tight " + (isActive ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500")}>{item.label}</span>
                 </button>
               )
             })}
@@ -235,24 +264,24 @@ export default function DairyFlowApp() {
       )}
 
       <Sheet open={moreSheetOpen} onOpenChange={setMoreSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-96">
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-96 dark:bg-gray-900 dark:border-gray-800">
           <SheetHeader className="pb-4">
-            <SheetTitle className="text-lg">More Options</SheetTitle>
+            <SheetTitle className="text-lg dark:text-gray-100">More Options</SheetTitle>
           </SheetHeader>
           <div className="space-y-2 pb-8">
             {moreNavItems.map((item) => {
               const isActive = activePage === item.id
               const Icon = item.icon
               return (
-                <button key={item.id} onClick={() => handleMoreNavClick(item.id)} className={"flex items-center gap-4 w-full rounded-2xl px-4 py-3.5 text-left transition-all duration-200 cursor-pointer " + (isActive ? "bg-green-50 border border-green-200" : "bg-gray-50 hover:bg-gray-100 border border-transparent")}>
-                  <div className={"flex h-11 w-11 items-center justify-center rounded-xl shrink-0 " + (isActive ? "bg-green-100" : "bg-white border border-gray-200")}>
-                    <Icon className={"h-5 w-5 " + (isActive ? "text-green-600" : "text-gray-500")} />
+                <button key={item.id} onClick={() => handleMoreNavClick(item.id)} className={"flex items-center gap-4 w-full rounded-2xl px-4 py-3.5 text-left transition-all duration-200 cursor-pointer " + (isActive ? "bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800" : "bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 border border-transparent")}>
+                  <div className={"flex h-11 w-11 items-center justify-center rounded-xl shrink-0 " + (isActive ? "bg-green-100 dark:bg-green-900" : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600")}>
+                    <Icon className={"h-5 w-5 " + (isActive ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400")} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={"text-sm font-semibold " + (isActive ? "text-green-700" : "text-gray-900")}>{item.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                    <p className={"text-sm font-semibold " + (isActive ? "text-green-700 dark:text-green-300" : "text-gray-900 dark:text-gray-100")}>{item.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
                   </div>
-                  {isActive && <Badge className="bg-green-100 text-green-700 border-0 text-xs shrink-0">Active</Badge>}
+                  {isActive && <Badge className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 border-0 text-xs shrink-0">Active</Badge>}
                 </button>
               )
             })}
