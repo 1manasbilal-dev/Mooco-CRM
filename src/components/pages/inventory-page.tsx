@@ -355,6 +355,10 @@ export default function InventoryPage() {
       toast.error('Quantity and date are required')
       return
     }
+    if (!saleCustomerId) {
+      toast.error('Please select a customer to record a sale')
+      return
+    }
     try {
       setSaving(true)
       const body: Record<string, unknown> = {
@@ -1216,13 +1220,12 @@ export default function InventoryPage() {
             {/* Customer Selection */}
             <div>
               <Label className="text-sm font-medium flex items-center gap-1.5">
-                <UserCircle className="h-3.5 w-3.5 text-gray-400" />
-                Customer
-                <span className="text-amber-600 text-xs font-normal">(recommended)</span>
+                <UserCircle className="h-3.5 w-3.5 text-red-400" />
+                Customer *
               </Label>
               <Select value={saleCustomerId} onValueChange={setSaleCustomerId}>
-                <SelectTrigger className="rounded-lg h-11 sm:h-9 mt-1.5">
-                  <SelectValue placeholder="Select a customer..." />
+                <SelectTrigger className={`rounded-lg h-11 sm:h-9 mt-1.5 ${!saleCustomerId ? 'border-red-200 bg-red-50/30' : ''}`}>
+                  <SelectValue placeholder="Select a customer (required)..." />
                 </SelectTrigger>
                 <SelectContent>
                   {activeCustomers.map((customer) => (
@@ -1233,9 +1236,9 @@ export default function InventoryPage() {
                 </SelectContent>
               </Select>
               <div className="flex items-start gap-1.5 mt-2 px-0.5">
-                <Info className="h-3.5 w-3.5 text-amber-500 mt-0.5 shrink-0" />
-                <p className="text-[11px] sm:text-xs text-amber-700 leading-snug">
-                  Select a customer to automatically add this sale to their delivery & ledger
+                <Info className="h-3.5 w-3.5 text-green-500 mt-0.5 shrink-0" />
+                <p className="text-[11px] sm:text-xs text-green-700 leading-snug">
+                  Sale will be automatically added to customer&apos;s delivery & ledger
                 </p>
               </div>
             </div>
@@ -1285,7 +1288,7 @@ export default function InventoryPage() {
           </div>
           <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button variant="outline" onClick={() => setShowRecordSaleDialog(false)} className="rounded-lg h-11 sm:h-9 w-full sm:w-auto">Cancel</Button>
-            <Button onClick={handleRecordSale} disabled={saving} className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 w-full sm:w-auto">
+            <Button onClick={handleRecordSale} disabled={saving || !saleCustomerId} className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-11 sm:h-9 w-full sm:w-auto">
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Record Sale
             </Button>

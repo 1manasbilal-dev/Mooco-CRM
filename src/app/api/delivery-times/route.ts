@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+const DEFAULT_DELIVERY_TIMES = ['Morning', 'Evening', 'Both']
+
 export async function GET() {
   try {
+    // Auto-seed default delivery times if none exist
+    const count = await db.deliveryTime.count()
+    if (count === 0) {
+      await db.deliveryTime.createMany({
+        data: DEFAULT_DELIVERY_TIMES.map((name) => ({ name })),
+      })
+    }
+
     const deliveryTimes = await db.deliveryTime.findMany({ orderBy: { name: 'asc' } })
     return NextResponse.json(deliveryTimes)
   } catch (error) {

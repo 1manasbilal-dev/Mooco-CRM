@@ -162,9 +162,8 @@ export default function DairyFlowApp() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input placeholder="Search..." className="pl-9 h-9 bg-gray-50 border-gray-200 rounded-xl text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="ghost" size="icon" className="relative shrink-0 h-9 w-9">
+            <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9">
               <Bell className="h-4 w-4 text-gray-500" />
-              <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-green-500 text-white text-xs border-0">3</Badge>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -194,9 +193,8 @@ export default function DairyFlowApp() {
             <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={() => setMobileSearchOpen(!mobileSearchOpen)}>
               {mobileSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4 text-gray-500" />}
             </Button>
-            <Button variant="ghost" size="icon" className="relative shrink-0 h-9 w-9">
+            <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9">
               <Bell className="h-4 w-4 text-gray-500" />
-              <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center bg-green-500 text-white text-xs border-0">3</Badge>
             </Button>
           </header>
         )}

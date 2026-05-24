@@ -77,7 +77,13 @@ export async function POST(request: NextRequest) {
       if (!customer) {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
       }
-      route = customer.area || 'Route A'
+      // Map area to route letter like in generate API
+      const areas = await db.area.findMany({ orderBy: { name: 'asc' } })
+      const areaIndex = areas.findIndex(a => a.name === customer.area)
+      if (areaIndex >= 0) {
+        const routeLetter = String.fromCharCode(65 + (areaIndex % 26))
+        route = `Route ${routeLetter}`
+      }
     }
 
     // Create the sale

@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
             itemId: null, // null = milk
             isExtra: false,
             pricePerUnit: customer.pricePerLiter,
-            productName: 'Milk',
+            productName: customer.milkType || 'Milk',
           },
           include: {
             customer: { select: { name: true } },

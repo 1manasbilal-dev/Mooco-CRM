@@ -818,3 +818,33 @@ Stage Summary:
 - Ledger enriched: includes all delivery types (milk, other products, extras) and customer sales
 - Mobile-first responsive design with horizontal scrollable tabs, full-screen dialogs, 44px touch targets
 - Lint passes clean
+
+---
+Task ID: session-continuation
+Agent: Main Agent
+Task: Fix app not running + Self-audit + Fix Record Sale requirement + Fix Sales API route + Fix delivery productName + Add seed data + Remove hardcoded notification badge
+
+Work Log:
+- Restarted dev server (was down)
+- Read full codebase: Prisma schema, all page components, all API routes
+- Performed comprehensive self-audit of app features
+- Fixed Record Sale dialog to REQUIRE customer selection (was optional):
+  - Changed label from "(recommended)" to "Customer *" with red icon
+  - Added validation in handleRecordSale: if (!saleCustomerId) toast.error
+  - Disabled "Record Sale" button when no customer selected
+  - Changed info text from amber to green with positive messaging
+  - Added red border highlight when no customer selected
+- Fixed Sales API route mapping bug: was using `customer.area` directly as route, now properly maps area → Route letter like generate API
+- Fixed Delivery productName in generate API: changed from generic 'Milk' to `customer.milkType || 'Milk'`
+- Removed hardcoded notification badge "3" from both desktop and mobile headers
+- Added auto-seed data for Areas (5 defaults), MilkTypes (5 with PKR pricing), DeliveryTimes (3)
+- Categories already had auto-seed (7 defaults)
+- Lint passes clean, app running on port 3000
+
+Stage Summary:
+- Record Sale now requires customer selection (UI + validation)
+- Sales API route mapping fixed (area → Route letter mapping)
+- Delivery productName uses customer's milk type (e.g., "Full Cream" instead of "Milk")
+- Seed data added for Areas, MilkTypes, DeliveryTimes (auto-creates on first load if empty)
+- Notification badge cleaned up (no fake "3")
+- All existing features verified working: auto-generate deliveries, vacation skip, category CRUD, multi-product delivery, ad-hoc extra sale

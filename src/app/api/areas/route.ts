@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+const DEFAULT_AREAS = ['Main Market', 'Colony Area', 'Defence', 'Gulshan', 'Sadar']
+
 export async function GET() {
   try {
+    // Auto-seed default areas if none exist
+    const count = await db.area.count()
+    if (count === 0) {
+      await db.area.createMany({
+        data: DEFAULT_AREAS.map((name) => ({ name })),
+      })
+    }
+
     const areas = await db.area.findMany({ orderBy: { name: 'asc' } })
     return NextResponse.json(areas)
   } catch (error) {

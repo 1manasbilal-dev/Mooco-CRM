@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
+const DEFAULT_MILK_TYPES = [
+  { name: 'Full Cream', pricePerLiter: 60 },
+  { name: 'Toned', pricePerLiter: 50 },
+  { name: 'Double Toned', pricePerLiter: 45 },
+  { name: 'Skimmed', pricePerLiter: 40 },
+  { name: 'Buffalo', pricePerLiter: 80 },
+]
+
 export async function GET() {
   try {
+    // Auto-seed default milk types if none exist
+    const count = await db.milkType.count()
+    if (count === 0) {
+      await db.milkType.createMany({
+        data: DEFAULT_MILK_TYPES,
+      })
+    }
+
     const milkTypes = await db.milkType.findMany({ orderBy: { name: 'asc' } })
     return NextResponse.json(milkTypes)
   } catch (error) {
