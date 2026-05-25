@@ -888,7 +888,7 @@ export default function LeadsPage() {
 
           {/* Expanded filters */}
           {showFilters && (
-            <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
+            <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
               <CardContent className="p-3 space-y-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-gray-500 dark:text-gray-400">Area</Label>
@@ -956,7 +956,7 @@ export default function LeadsPage() {
               { icon: Droplets, label: 'Daily Qty', value: `${stats.totalQty}L`, color: 'emerald', bg: 'bg-emerald-100 dark:bg-emerald-900', text: 'text-emerald-700 dark:text-emerald-300' },
               { icon: CheckCircle2, label: 'Converted', value: stats.converted, color: 'green', bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-700 dark:text-green-300' },
             ].map((stat) => (
-              <Card key={stat.label} className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={stat.label} className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
                 <CardContent className="p-3.5">
                   <div className="flex items-center gap-2 mb-1.5">
                     <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${stat.bg}`}>
@@ -971,7 +971,7 @@ export default function LeadsPage() {
           </div>
 
           {/* Desktop Filters */}
-          <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
+          <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
                 <div className="relative flex-1 max-w-[280px]">
@@ -1035,7 +1035,7 @@ export default function LeadsPage() {
               </DragOverlay>
             </DndContext>
           ) : (
-            <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
+            <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
               <CardContent className="flex h-64 flex-col items-center justify-center gap-3 p-6">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-800/50">
                   <UserPlus className="h-7 w-7 text-gray-400 dark:text-gray-500" />

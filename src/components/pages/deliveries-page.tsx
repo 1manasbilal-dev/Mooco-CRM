@@ -1102,7 +1102,7 @@ export default function DeliveriesPage() {
 
       {/* 3. Summary Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-gray-400 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 border-l-4 border-l-gray-400 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-gray-100 dark:bg-gray-800">
               <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-400" />
@@ -1113,7 +1113,7 @@ export default function DeliveriesPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-green-500 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 border-l-4 border-l-green-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-green-50 dark:bg-green-950/50">
               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
@@ -1124,7 +1124,7 @@ export default function DeliveriesPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-amber-500 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 border-l-4 border-l-amber-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-amber-50 dark:bg-amber-950/50">
               <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
@@ -1135,7 +1135,7 @@ export default function DeliveriesPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-red-500 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 border-l-4 border-l-red-500 shadow-sm">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-red-50 dark:bg-red-950/50">
               <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
@@ -1146,7 +1146,7 @@ export default function DeliveriesPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 border-l-4 border-l-emerald-500 shadow-sm col-span-2 lg:col-span-1">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 border-l-4 border-l-emerald-500 shadow-sm col-span-2 lg:col-span-1">
           <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-md sm:rounded-lg bg-emerald-50 dark:bg-emerald-950/50">
               <Milk className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
@@ -1215,7 +1215,7 @@ export default function DeliveriesPage() {
 
       {/* 5. Route-Grouped Delivery List */}
       {loading ? (
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
+        <Card className="rounded-lg sm:rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-green-500" />
@@ -1224,7 +1224,7 @@ export default function DeliveriesPage() {
           </CardContent>
         </Card>
       ) : deliveries.length === 0 ? (
-        <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
+        <Card className="rounded-lg sm:rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardContent className="flex h-40 sm:h-48 items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
@@ -1284,7 +1284,7 @@ export default function DeliveriesPage() {
                 open={collapsedRoutes[group.route] !== false}
                 onOpenChange={() => toggleRoute(group.route)}
               >
-                <Card className="rounded-lg sm:rounded-xl border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <Card className="rounded-lg sm:rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
                   {/* Route header */}
                   <CollapsibleTrigger asChild>
                     <button className="w-full bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3 sm:py-3 flex items-center justify-between hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors active:bg-gray-100 dark:active:bg-gray-700">

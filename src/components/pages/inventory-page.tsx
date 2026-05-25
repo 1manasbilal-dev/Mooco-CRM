@@ -583,7 +583,7 @@ export default function InventoryPage() {
 
       {/* ── Summary Cards ─────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm bg-gradient-to-br from-white to-green-50/30 dark:from-gray-900 dark:to-green-950/30">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] bg-gradient-to-br from-white to-green-50/30 dark:from-gray-900 dark:to-green-950/30">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center shrink-0">
@@ -596,7 +596,7 @@ export default function InventoryPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
@@ -609,7 +609,7 @@ export default function InventoryPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm bg-gradient-to-br from-white to-amber-50/30 dark:from-gray-900 dark:to-amber-950/30">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] bg-gradient-to-br from-white to-amber-50/30 dark:from-gray-900 dark:to-amber-950/30">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
@@ -622,7 +622,7 @@ export default function InventoryPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-900 dark:to-purple-950/30">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-900 dark:to-purple-950/30">
           <CardContent className="p-3 sm:p-5">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center shrink-0">
@@ -638,7 +638,7 @@ export default function InventoryPage() {
       </div>
 
       {/* ── Filter & Search Bar ───────────────────────────── */}
-      <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col gap-3">
             {/* Top row: Select All + Search + Count */}
@@ -727,7 +727,7 @@ export default function InventoryPage() {
           <Loader2 className="h-8 w-8 text-green-500 animate-spin" />
         </div>
       ) : filteredItems.length === 0 ? (
-        <Card className="rounded-xl border-gray-200 dark:border-gray-700 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
               <Milk className="h-8 w-8 text-gray-300 dark:text-gray-600" />
@@ -755,7 +755,7 @@ export default function InventoryPage() {
                 <Card
                   key={item.id}
                   className={`
-                    rounded-xl border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-200 relative
+                    rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 relative
                     ${isInactive ? 'opacity-60' : ''}
                     ${isSelected ? 'ring-2 ring-green-500 ring-offset-1 bg-green-50/30 dark:bg-green-950/30' : 'bg-white dark:bg-gray-900'}
                   `}
@@ -855,7 +855,7 @@ export default function InventoryPage() {
                 <Card
                   key={item.id}
                   className={`
-                    rounded-xl border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 relative
+                    rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 relative
                     ${isInactive ? 'opacity-60' : ''}
                     ${isSelected ? 'ring-2 ring-green-500 ring-offset-1' : ''}
                   `}

@@ -801,7 +801,7 @@ export default function CustomersPage() {
 
       {/* ── Summary Stats ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
@@ -815,7 +815,7 @@ export default function CustomersPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400 to-emerald-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
@@ -829,7 +829,7 @@ export default function CustomersPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
@@ -843,7 +843,7 @@ export default function CustomersPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden relative">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden relative">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2.5 sm:gap-3">
@@ -862,7 +862,7 @@ export default function CustomersPage() {
       </div>
 
       {/* ── Filter Bar ──────────────────────────────────────────────── */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <CardContent className="p-3 sm:p-4">
           {/* Mobile Layout */}
           <div className="flex flex-col gap-3 sm:hidden">
@@ -978,7 +978,7 @@ export default function CustomersPage() {
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         </div>
       ) : customers.length === 0 ? (
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardContent className="flex h-64 flex-col items-center justify-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
               <Users className="h-7 w-7 text-gray-400 dark:text-gray-500" />
@@ -1066,7 +1066,7 @@ export default function CustomersPage() {
               return (
                 <Card
                   key={customer.id}
-                  className={`rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm hover:shadow-md transition-all py-0 relative overflow-hidden ${
+                  className={`rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-all py-0 relative overflow-hidden ${
                     isSelected ? 'ring-2 ring-green-500/40 border-green-300 dark:border-green-700 bg-green-50/30 dark:bg-green-950/30' : ''
                   }`}
                 >

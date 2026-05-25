@@ -634,7 +634,7 @@ export default function SettingsPage() {
   const renderGeneralTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Shop Info */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-950/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/50 shadow-sm">
@@ -669,7 +669,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Appearance / Theme */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/50 shadow-sm">
@@ -688,7 +688,7 @@ export default function SettingsPage() {
 
       {/* Business Hours & Pricing */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
           <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50 shadow-sm">
@@ -709,7 +709,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
           <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-950/30">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/50 shadow-sm">
@@ -738,7 +738,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Account */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-800/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 shadow-sm">
@@ -773,7 +773,7 @@ export default function SettingsPage() {
   const renderDeliveryTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Delivery Settings */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50 shadow-sm">
@@ -811,7 +811,7 @@ export default function SettingsPage() {
       {/* Areas & Delivery Times side by side on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Areas */}
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
           <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-rose-50/50 to-transparent dark:from-rose-950/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -864,7 +864,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Delivery Times */}
-        <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+        <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
           <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-teal-50/50 to-transparent dark:from-teal-950/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -922,7 +922,7 @@ export default function SettingsPage() {
   const renderProductsTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Milk Types - Full Width */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-sky-50/50 to-transparent dark:from-sky-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -990,7 +990,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Categories - Full Width */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -1061,7 +1061,7 @@ export default function SettingsPage() {
 
   const renderStaffTab = () => (
     <div className="space-y-4 md:space-y-6">
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-purple-50/50 to-transparent dark:from-purple-950/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -1118,7 +1118,7 @@ export default function SettingsPage() {
 
   const renderNotificationsTab = () => (
     <div className="space-y-4 md:space-y-6">
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/50 shadow-sm">
@@ -1161,7 +1161,7 @@ export default function SettingsPage() {
   const renderDataTab = () => (
     <div className="space-y-4 md:space-y-6">
       {/* Export/Backup/Restore */}
-      <Card className="rounded-xl border-gray-200/80 dark:border-gray-700 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-cyan-50/50 to-transparent dark:from-cyan-950/30">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-900/50 shadow-sm">
@@ -1207,7 +1207,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="rounded-xl border-red-200/60 shadow-sm overflow-hidden">
+      <Card className="rounded-2xl border-red-100 dark:border-red-900 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-red-50/40 to-transparent">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-red-100 shadow-sm">
