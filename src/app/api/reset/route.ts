@@ -25,8 +25,16 @@ const DEFAULT_MILK_TYPES = [
 
 const DEFAULT_DELIVERY_TIMES = ['Morning', 'Evening', 'Both']
 
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../auth/[...nextauth]/route'
+
 export async function POST() {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
+    }
+
     // Delete all data in correct order (respecting foreign keys)
     await db.sale.deleteMany()
     await db.delivery.deleteMany()

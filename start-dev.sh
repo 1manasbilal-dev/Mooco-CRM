@@ -13,7 +13,7 @@ if [ -f "$PIDFILE" ]; then
 fi
 
 # Start the server
-exec npx next dev -p 3000 > "$LOG" 2>&1 &
+exec npx next dev -p 4000 > "$LOG" 2>&1 &
 SERVER_PID=$!
 echo "$SERVER_PID" > "$PIDFILE"
 

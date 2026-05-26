@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 import { useAppStore } from '@/lib/store'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -83,12 +84,18 @@ const pageComponents: Record<string, React.ComponentType> = {
 }
 
 export default function DairyFlowApp() {
+  const { data: session } = useSession()
   const { activePage, setActivePage, sidebarOpen, setSidebarOpen, searchQuery, setSearchQuery } = useAppStore()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [moreSheetOpen, setMoreSheetOpen] = useState(false)
+
+  const getInitials = (name?: string | null) => {
+    if (!name) return 'U'
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  }
 
   useEffect(() => { setMounted(true) }, []) // eslint-disable-line react-hooks/set-state-in-effect
 
@@ -233,9 +240,31 @@ export default function DairyFlowApp() {
                 <DropdownMenuItem onClick={() => setActivePage('payments')}><Wallet className="mr-2 h-4 w-4" />Record Payment</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Avatar className="h-9 w-9 shrink-0 cursor-pointer ring-2 ring-gray-100 dark:ring-gray-800">
-              <AvatarFallback className="bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 text-green-700 dark:text-green-400 text-xs font-bold">AK</AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-9 w-9 shrink-0 cursor-pointer ring-2 ring-gray-100 dark:ring-gray-800">
+                  <AvatarFallback className="bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 text-green-700 dark:text-green-400 text-xs font-bold">
+                    {getInitials(session?.user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl">
+                <div className="flex flex-col gap-1 p-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Logged in as</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{session?.user?.name || "User"}</p>
+                  <p className="text-xs text-gray-400 truncate">{session?.user?.email}</p>
+                  <div className="mt-1">
+                    <Badge variant="outline" className="text-[10px] font-bold border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/5">
+                      {(session?.user as any)?.role || "USER"}
+                    </Badge>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()} className="text-red-500 focus:text-red-500 cursor-pointer">
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </header>
         )}
 

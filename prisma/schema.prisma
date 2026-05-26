@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Lead {
@@ -171,6 +172,16 @@ model MilkType {
 model DeliveryTime {
   id        String   @id @default(cuid())
   name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("USER") // ADMIN, USER
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -61,6 +61,7 @@ import {
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useSession } from 'next-auth/react'
 
 // ── Types ───────────────────────────────────────────────────────────────
 interface SettingsMap {
@@ -118,7 +119,7 @@ const SAMPLE_STAFF = [
 ]
 
 // ── Tab Definitions ─────────────────────────────────────────────────────
-type SettingsTab = 'general' | 'delivery' | 'products' | 'staff' | 'notifications' | 'data'
+type SettingsTab = 'general' | 'delivery' | 'products' | 'staff' | 'notifications' | 'data' | 'users'
 
 interface TabDef {
   id: SettingsTab
@@ -180,7 +181,9 @@ function ThemeToggle() {
 
 // ── Component ───────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const { data: session } = useSession()
   const isMobile = useIsMobile()
+  const isSuperAdmin = (session?.user as any)?.role === 'SUPER_ADMIN'
 
   // ── Active Tab ────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<SettingsTab>('general')
@@ -235,6 +238,22 @@ export default function SettingsPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryName, setCategoryName] = useState('')
   const [categorySubmitting, setCategorySubmitting] = useState(false)
+
+  // ── User Management State ─────────────────────────────────────────
+  interface DbUser {
+    id: string
+    name: string | null
+    email: string
+    role: string
+    createdAt: string
+  }
+
+  const [usersList, setUsersList] = useState<DbUser[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+  const [userDialogOpen, setUserDialogOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<DbUser | null>(null)
+  const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'USER' })
+  const [userSubmitting, setUserSubmitting] = useState(false)
 
   // ── Dirty check ─────────────────────────────────────────────────────
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings)
@@ -321,13 +340,30 @@ export default function SettingsPage() {
     }
   }, [])
 
+  // ── Fetch Users ───────────────────────────────────────────────────
+  const fetchUsers = useCallback(async () => {
+    if (!isSuperAdmin) return
+    setUsersLoading(true)
+    try {
+      const res = await fetch('/api/users')
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setUsersList(Array.isArray(data) ? data : [])
+    } catch {
+      toast.error('Failed to load users')
+    } finally {
+      setUsersLoading(false)
+    }
+  }, [isSuperAdmin])
+
   useEffect(() => {
     fetchSettings()
     fetchAreas()
     fetchMilkTypes()
     fetchDeliveryTimes()
     fetchCategories()
-  }, [fetchSettings, fetchAreas, fetchMilkTypes, fetchDeliveryTimes])
+    if (isSuperAdmin) fetchUsers()
+  }, [fetchSettings, fetchAreas, fetchMilkTypes, fetchDeliveryTimes, fetchCategories, fetchUsers, isSuperAdmin])
 
   // ── Area CRUD ────────────────────────────────────────────────────
   const openAddArea = () => {
@@ -566,6 +602,71 @@ export default function SettingsPage() {
       fetchCategories()
     } catch {
       toast.error('Failed to delete category')
+    }
+  }
+
+  // ── User Management CRUD ───────────────────────────────────────────
+  const openAddUser = () => {
+    setEditingUser(null)
+    setUserForm({ name: '', email: '', password: '', role: 'USER' })
+    setUserDialogOpen(true)
+  }
+
+  const openEditUser = (user: DbUser) => {
+    setEditingUser(user)
+    setUserForm({ name: user.name || '', email: user.email, password: '', role: user.role })
+    setUserDialogOpen(true)
+  }
+
+  const handleUserSubmit = async () => {
+    if (!userForm.name.trim() || !userForm.email.trim() || !userForm.role) {
+      toast.error('Name, Email, and Role are required')
+      return
+    }
+    if (!editingUser && !userForm.password.trim()) {
+      toast.error('Password is required for new users')
+      return
+    }
+
+    setUserSubmitting(true)
+    try {
+      if (editingUser) {
+        const res = await fetch(`/api/users/${editingUser.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userForm),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to update user')
+        toast.success('User updated successfully')
+      } else {
+        const res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userForm),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to add user')
+        toast.success('User added successfully')
+      }
+      setUserDialogOpen(false)
+      fetchUsers()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit user')
+    } finally {
+      setUserSubmitting(false)
+    }
+  }
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to delete user')
+      toast.success('User deleted successfully')
+      fetchUsers()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete user')
     }
   }
 
@@ -1232,6 +1333,116 @@ export default function SettingsPage() {
     </div>
   )
 
+  const renderUsersTab = () => (
+    <div className="space-y-4 md:space-y-6">
+      {/* Users Card */}
+      <Card className="rounded-2xl border-gray-100 dark:border-gray-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+        <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6 bg-gradient-to-r from-rose-50/50 to-transparent dark:from-rose-950/30 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-900/50 shadow-sm">
+              <UserPlus className="h-4 w-4 text-rose-600" />
+            </div>
+            <div>
+              <CardTitle className="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">User Management</CardTitle>
+              <CardDescription className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400">Create and manage CRM user accounts</CardDescription>
+            </div>
+          </div>
+          <Button onClick={openAddUser} size="sm" className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg h-9">
+            <Plus className="h-4 w-4 mr-1" />
+            Add User
+          </Button>
+        </CardHeader>
+        <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
+          {usersLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-rose-600" />
+            </div>
+          ) : usersList.length === 0 ? (
+            <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">No users found.</div>
+          ) : (
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              {usersList.map((usr) => (
+                <div key={usr.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-bold text-sm shrink-0">
+                      {usr.name ? usr.name.slice(0, 2).toUpperCase() : 'US'}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{usr.name || 'No Name'}</p>
+                        <Badge className={
+                          usr.role === 'SUPER_ADMIN' 
+                            ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 border-0 text-[10px] font-bold'
+                            : usr.role === 'ADMIN'
+                            ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 border-0 text-[10px] font-bold'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-0 text-[10px] font-bold'
+                        }>
+                          {usr.role}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{usr.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => openEditUser(usr)} className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    {usr.role !== 'SUPER_ADMIN' && usr.email !== 'anasbilal' && (
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(usr.id)} className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 dark:text-gray-500">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* User Creation Dialog */}
+      <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl dark:bg-gray-900 dark:border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-gray-50">{editingUser ? 'Edit User' : 'Create User'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="userNameInput" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Full Name</Label>
+              <Input id="userNameInput" value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} placeholder="John Doe" className="rounded-lg border-gray-200" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="userEmailInput" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Email/Username</Label>
+              <Input id="userEmailInput" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} placeholder="john@example.com or username" className="rounded-lg border-gray-200" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="userPasswordInput" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Password {editingUser && '(Leave blank to keep current)'}</Label>
+              <Input id="userPasswordInput" type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} placeholder="••••••••" className="rounded-lg border-gray-200" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="userRoleInput" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Role</Label>
+              <select 
+                id="userRoleInput" 
+                value={userForm.role} 
+                onChange={(e) => setUserForm({ ...userForm, role: e.target.value })} 
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:border-rose-500/50 focus:outline-none transition dark:text-gray-200"
+              >
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setUserDialogOpen(false)} disabled={userSubmitting}>Cancel</Button>
+            <Button onClick={handleUserSubmit} disabled={userSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white min-w-[100px]">
+              {userSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+
   const tabContentMap: Record<SettingsTab, () => React.ReactElement> = {
     general: renderGeneralTab,
     delivery: renderDeliveryTab,
@@ -1239,7 +1450,23 @@ export default function SettingsPage() {
     staff: renderStaffTab,
     notifications: renderNotificationsTab,
     data: renderDataTab,
+    users: renderUsersTab,
   }
+
+  const visibleTabs = isSuperAdmin
+    ? [
+        ...SETTINGS_TABS,
+        {
+          id: 'users' as const,
+          label: 'User Management',
+          mobileLabel: 'Users',
+          icon: UserPlus,
+          color: 'text-rose-600',
+          bgLight: 'bg-rose-100 dark:bg-rose-900/50',
+          description: 'Create & manage team roles',
+        },
+      ]
+    : SETTINGS_TABS;
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
@@ -1277,7 +1504,7 @@ export default function SettingsPage() {
       {/* Mobile: Horizontal scrollable tabs */}
       {isMobile ? (
         <div className="flex gap-1.5 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
-          {SETTINGS_TABS.map((tab) => {
+          {visibleTabs.map((tab) => {
             const isActive = activeTab === tab.id
             const Icon = tab.icon
             return (
@@ -1304,7 +1531,7 @@ export default function SettingsPage() {
           {/* Desktop sidebar nav */}
           <div className="w-56 shrink-0">
             <nav className="space-y-1 sticky top-0">
-              {SETTINGS_TABS.map((tab) => {
+              {visibleTabs.map((tab) => {
                 const isActive = activeTab === tab.id
                 const Icon = tab.icon
                 return (

@@ -20,8 +20,16 @@ export async function GET() {
   }
 }
 
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../auth/[...nextauth]/route'
+
 export async function PUT(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 })
+    }
+
     const body = await request.json()
     // body is expected to be { key1: value1, key2: value2, ... }
 
