@@ -86,6 +86,12 @@ export default function LoginPage() {
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 Password
               </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold transition"
+              >
+                Forgot Password?
+              </Link>
             </div>
             <div className="relative">
               <span className="absolute inset-y-0 left-3 flex items-center text-slate-500">
