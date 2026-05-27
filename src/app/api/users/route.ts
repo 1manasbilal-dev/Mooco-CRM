@@ -17,6 +17,7 @@ export async function GET() {
         email: true,
         name: true,
         role: true,
+        permissions: true,
         createdAt: true
       },
       orderBy: { createdAt: "desc" }
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden: Super Admin access required" }, { status: 403 });
     }
 
-    const { name, email, password, role } = await request.json();
+    const { name, email, password, role, permissions } = await request.json();
 
     if (!email || !password || !name || !role) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -48,20 +49,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "A user with this email already exists" }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Save password in plain text directly as requested
     const user = await db.user.create({
       data: {
         name,
         email,
-        password: hashedPassword,
-        role // "ADMIN" or "USER" (or "SUPER_ADMIN")
+        password, // Save plain text password
+        role, // "ADMIN" or "USER" (or "SUPER_ADMIN")
+        permissions: permissions || ["dashboard"]
       },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        permissions: true,
         createdAt: true
       }
     });

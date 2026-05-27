@@ -182,6 +182,7 @@ model User {
   name             String?
   password         String
   role             String    @default("USER") // ADMIN, USER
+  permissions      String[]  @default(["dashboard"])
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())

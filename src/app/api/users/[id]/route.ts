@@ -15,7 +15,7 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { name, email, password, role } = await request.json();
+    const { name, email, password, role, permissions } = await request.json();
 
     if (!email || !name || !role) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -34,9 +34,13 @@ export async function PUT(
 
     const updateData: any = { name, email, role };
     
-    // If password is provided, hash and update it
+    if (permissions) {
+      updateData.permissions = permissions;
+    }
+    
+    // If password is provided, update it in plain text directly
     if (password && password.trim() !== "") {
-      updateData.password = await bcrypt.hash(password, 10);
+      updateData.password = password;
     }
 
     const user = await db.user.update({
@@ -47,6 +51,7 @@ export async function PUT(
         email: true,
         name: true,
         role: true,
+        permissions: true,
         createdAt: true
       }
     });

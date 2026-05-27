@@ -245,6 +245,7 @@ export default function SettingsPage() {
     name: string | null
     email: string
     role: string
+    permissions?: string[]
     createdAt: string
   }
 
@@ -252,7 +253,13 @@ export default function SettingsPage() {
   const [usersLoading, setUsersLoading] = useState(false)
   const [userDialogOpen, setUserDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<DbUser | null>(null)
-  const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'USER' })
+  const [userForm, setUserForm] = useState<{
+    name: string
+    email: string
+    password: string
+    role: string
+    permissions: string[]
+  }>({ name: '', email: '', password: '', role: 'USER', permissions: ['dashboard'] })
   const [userSubmitting, setUserSubmitting] = useState(false)
 
   // ── Dirty check ─────────────────────────────────────────────────────
