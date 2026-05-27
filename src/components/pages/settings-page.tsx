@@ -615,13 +615,19 @@ export default function SettingsPage() {
   // ── User Management CRUD ───────────────────────────────────────────
   const openAddUser = () => {
     setEditingUser(null)
-    setUserForm({ name: '', email: '', password: '', role: 'USER' })
+    setUserForm({ name: '', email: '', password: '', role: 'USER', permissions: ['dashboard'] })
     setUserDialogOpen(true)
   }
 
   const openEditUser = (user: DbUser) => {
     setEditingUser(user)
-    setUserForm({ name: user.name || '', email: user.email, password: '', role: user.role })
+    setUserForm({
+      name: user.name || '',
+      email: user.email,
+      password: '',
+      role: user.role,
+      permissions: user.permissions || ['dashboard']
+    })
     setUserDialogOpen(true)
   }
 
@@ -1437,6 +1443,44 @@ export default function SettingsPage() {
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
               </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Access Permissions</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1 p-3 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-gray-100 dark:border-gray-800">
+                {[
+                  { id: 'dashboard', label: 'Dashboard' },
+                  { id: 'leads', label: 'Leads' },
+                  { id: 'customers', label: 'Customers' },
+                  { id: 'deliveries', label: 'Deliveries' },
+                  { id: 'payments', label: 'Payments' },
+                  { id: 'inventory', label: 'Inventory' },
+                  { id: 'settings', label: 'Settings' },
+                ].map((item) => {
+                  const isChecked = userForm.permissions.includes(item.id);
+                  const isDashboard = item.id === 'dashboard';
+                  return (
+                    <label key={item.id} className="flex items-center gap-2 text-xs md:text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        disabled={isDashboard}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          let updatedPerms = [...userForm.permissions];
+                          if (checked) {
+                            if (!updatedPerms.includes(item.id)) updatedPerms.push(item.id);
+                          } else {
+                            updatedPerms = updatedPerms.filter(p => p !== item.id);
+                          }
+                          setUserForm({ ...userForm, permissions: updatedPerms });
+                        }}
+                        className="rounded border-gray-300 text-rose-600 focus:ring-rose-500 h-4 w-4"
+                      />
+                      <span>{item.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">

@@ -92,6 +92,49 @@ export default function DairyFlowApp() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [moreSheetOpen, setMoreSheetOpen] = useState(false)
 
+  const userRole = (session?.user as any)?.role || 'USER';
+  const userPermissions = (session?.user as any)?.permissions || ['dashboard'];
+
+  const allowedNavItems = navItems.filter(item => {
+    if (userRole === 'SUPER_ADMIN') return true;
+    return userPermissions.includes(item.id);
+  });
+
+  const showMoreMobile = allowedNavItems.length > 5;
+  const mobilePrimaryNavItems = showMoreMobile
+    ? [
+        ...allowedNavItems.slice(0, 4),
+        { id: 'more', label: 'More', icon: MoreHorizontal }
+      ]
+    : allowedNavItems;
+
+  const mobileMoreNavItems = showMoreMobile
+    ? allowedNavItems.slice(4)
+    : [];
+
+  const getTabDescription = (id: string) => {
+    switch (id) {
+      case 'leads': return 'Sales pipeline & lead tracking';
+      case 'inventory': return 'Products & daily sales';
+      case 'settings': return 'Shop configuration';
+      case 'customers': return 'Manage customers list';
+      case 'deliveries': return 'Track deliveries';
+      case 'payments': return 'Manage billing & history';
+      default: return '';
+    }
+  };
+
+  // Redirect to dashboard if no permission for active page
+  useEffect(() => {
+    if (mounted && session?.user) {
+      const role = (session.user as any).role || 'USER';
+      const permissions = (session.user as any).permissions || ['dashboard'];
+      if (role !== 'SUPER_ADMIN' && !permissions.includes(activePage)) {
+        setActivePage('dashboard');
+      }
+    }
+  }, [activePage, session, mounted, setActivePage]);
+
   const getInitials = (name?: string | null) => {
     if (!name) return 'U'
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -148,7 +191,7 @@ export default function DairyFlowApp() {
 
           {/* Nav Items */}
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-            {navItems.map((item) => {
+            {allowedNavItems.map((item) => {
               const isActive = activePage === item.id
               const Icon = item.icon
               return (
@@ -312,8 +355,10 @@ export default function DairyFlowApp() {
       {isMobile && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/80 dark:border-gray-800">
           <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-1">
-            {primaryNavItems.map((item) => {
-              const isActive = item.id === 'more' ? ['leads', 'inventory', 'settings'].includes(activePage) : activePage === item.id
+            {mobilePrimaryNavItems.map((item) => {
+              const isActive = item.id === 'more' 
+                ? !mobilePrimaryNavItems.some(nav => nav.id === activePage)
+                : activePage === item.id;
               const Icon = item.icon
               return (
                 <button
@@ -339,9 +384,10 @@ export default function DairyFlowApp() {
             <SheetTitle className="text-lg dark:text-gray-50">More Options</SheetTitle>
           </SheetHeader>
           <div className="space-y-2 pb-6">
-            {moreNavItems.map((item) => {
+            {mobileMoreNavItems.map((item) => {
               const isActive = activePage === item.id
               const Icon = item.icon
+              const desc = getTabDescription(item.id)
               return (
                 <button
                   key={item.id}
@@ -353,7 +399,7 @@ export default function DairyFlowApp() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={"text-sm font-semibold " + (isActive ? "text-green-700 dark:text-green-300" : "text-gray-900 dark:text-gray-100")}>{item.label}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{item.desc}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{desc}</p>
                   </div>
                   {isActive && <Badge className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 border-0 text-xs shrink-0">Active</Badge>}
                 </button>
