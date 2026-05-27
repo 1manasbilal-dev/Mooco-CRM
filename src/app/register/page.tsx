@@ -82,15 +82,15 @@ export default function RegisterPage() {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Email Address
+              User ID / Username
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-3 flex items-center text-slate-500">
-                <Mail size={18} />
+                <User size={18} />
               </span>
               <input
-                type="email"
-                placeholder="you@example.com"
+                type="text"
+                placeholder="Enter your User ID"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl focus:border-emerald-500/50 focus:outline-none transition text-sm text-slate-200"

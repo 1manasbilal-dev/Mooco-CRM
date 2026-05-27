@@ -8,22 +8,30 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username/User ID", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) return null;
         
         const user = await db.user.findFirst({
           where: {
             OR: [
-              { email: credentials.email },
-              { name: credentials.email }
+              { email: credentials.username },
+              { name: credentials.username }
             ]
           }
         });
         
-        if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+        if (!user) return null;
+
+        // Check if stored password is encrypted with bcrypt
+        const isBcrypt = user.password.startsWith("$2a$") || user.password.startsWith("$2b$");
+        const isPasswordCorrect = isBcrypt
+          ? await bcrypt.compare(credentials.password, user.password)
+          : credentials.password === user.password;
+
+        if (!isPasswordCorrect) {
           return null;
         }
         

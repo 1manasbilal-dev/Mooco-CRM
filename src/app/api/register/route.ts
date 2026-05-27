@@ -25,10 +25,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // If this is the first user in the database, make them ADMIN, otherwise USER
+    // Save password in plain text directly as requested
     const usersCount = await db.user.count();
     const role = usersCount === 0 ? "ADMIN" : "USER";
 
@@ -36,7 +33,7 @@ export async function POST(request: Request) {
       data: {
         name,
         email,
-        password: hashedPassword,
+        password, // Save plain text password
         role
       }
     });

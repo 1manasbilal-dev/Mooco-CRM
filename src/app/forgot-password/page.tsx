@@ -3,17 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Mail, ArrowLeft, ShieldQuestion, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ShieldQuestion, CheckCircle2, User } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      toast.error("Please enter your email address");
+    if (!username) {
+      toast.error("Please enter your User ID / Username");
       return;
     }
 
@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: username }), // Sent as email parameter to match backend lookup
       });
 
       const data = await res.json();
@@ -30,10 +30,10 @@ export default function ForgotPasswordPage() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      toast.success("Reset link request processed");
+      toast.success("Recovery request processed");
       setSubmitted(true);
     } catch (err: any) {
-      toast.error(err.message || "Failed to request password reset");
+      toast.error(err.message || "Failed to process recovery");
     } finally {
       setLoading(false);
     }
@@ -52,12 +52,12 @@ export default function ForgotPasswordPage() {
             <ShieldQuestion size={28} />
           </div>
           <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-            Forgot Password
+            Recover Password
           </h1>
           <p className="text-sm text-slate-400">
             {submitted 
               ? "We have processed your request."
-              : "Enter your email to receive a password reset link."}
+              : "Enter your User ID to retrieve your password."}
           </p>
         </div>
 
@@ -65,17 +65,17 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Email Address
+                User ID / Username
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-3 flex items-center text-slate-500">
-                  <Mail size={18} />
+                  <User size={18} />
                 </span>
                 <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  placeholder="Enter your User ID"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-950/50 border border-slate-800 rounded-xl focus:border-emerald-500/50 focus:outline-none transition text-sm text-slate-200"
                   required
                 />
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="w-full mt-2 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-400 hover:to-blue-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 text-sm"
             >
-              {loading ? "Processing..." : "Send Reset Link"}
+              {loading ? "Processing..." : "Retrieve Password"}
             </button>
           </form>
         ) : (
@@ -96,10 +96,10 @@ export default function ForgotPasswordPage() {
               <CheckCircle2 size={48} />
             </div>
             <p className="text-sm text-slate-300">
-              If the email <strong>{email}</strong> matches our records, a password reset link has been logged to the server console. 
+              Your plain-text password for <strong>{username}</strong> has been printed to the server logs.
             </p>
             <p className="text-xs text-slate-500 bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
-              Check your terminal/console where the Mooco CRM server is running to find the clickable reset link.
+              Check the console/terminal running the Mooco CRM server to view the password.
             </p>
           </div>
         )}
